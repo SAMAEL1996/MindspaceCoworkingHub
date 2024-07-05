@@ -25,10 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::USER_MENU_BEFORE,
-            fn (): string => 'Logged In As:  '. filament()->auth()->user()->name,
-        );
+        // FilamentView::registerRenderHook(
+        //     PanelsRenderHook::USER_MENU_BEFORE,
+        //     fn (): string => 'Logged In As:  '. filament()->auth()->user()->name,
+        // );
 
         Filament::registerNavigationGroups([
             'SALES',
