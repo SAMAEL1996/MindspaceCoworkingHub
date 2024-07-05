@@ -1,0 +1,540 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\DailySaleResource\Pages;
+use App\Filament\Resources\DailySaleResource\RelationManagers;
+use App\Models\DailySale;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Tables\Columns as TableColumns;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Notifications\Notification;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components as InfolistComponents;
+use Filament\Tables\Grouping\Group;
+use Filament\Forms\Components as FormComponents;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Alignment;
+use Filament\Tables\Filters;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\DatePicker;
+
+class DailySaleResource extends Resource
+{
+    protected static ?string $model = DailySale::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationLabel = 'Daily Users';
+    protected static ?string $navigationGroup = 'SALES';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return DailySale::query()->orderBy('created_at', 'desc');
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema(DailySale::getForm());
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            // ->modifyQueryUsing(function (Builder $query) { 
+            //     return $query->where('status', false); 
+            // })
+            ->defaultGroup(
+                Group::make('date')
+                    ->date()
+                    ->collapsible()
+                    ->titlePrefixedWithLabel(false)
+                    ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy('date', 'DESC'))
+            )
+            ->columns([
+                TableColumns\TextColumn::make('card_id')
+                    ->label('Guest')
+                    ->formatStateUsing(function($state, $record) {
+                        return $record->card->code;
+                    })
+                    ->description(function($state, $record) {
+                        return $record->name;
+                    }),
+                TableColumns\TextColumn::make('time_in')
+                    ->label('Time In')
+                    ->formatStateUsing(function($state, $record) {
+                        return $record->time_in_carbon->format(config('app.time_format'));
+                    })
+                    ->description(function($state, $record) {
+                        return $record->time_in_carbon->format(config('app.date_format'));
+                    }),
+                TableColumns\TextColumn::make('time_in_staff_id')
+                    ->label('Staff In')
+                    ->formatStateUsing(function($state, $record) {
+                        return $record->staffIn->user->name;
+                    }),
+                TableColumns\TextColumn::make('time_out')
+                    ->label('Time Out')
+                    ->formatStateUsing(function($state, $record) {
+                        return $record->time_out_carbon->format(config('app.time_format'));
+                    })
+                    ->description(function($state, $record) {
+                        return $record->time_out_carbon->format(config('app.date_format'));
+                    })
+                    ->extraAttributes(function($record) {
+                        if($record->time_out) {
+                            return ['class' => 'block'];
+                        } else {
+                            return ['class' => 'hidden'];
+                        }
+                    }),
+                TableColumns\TextColumn::make('time_out_staff_id')
+                    ->label('Staff Out')
+                    ->formatStateUsing(function($state, $record) {
+                        return $record->staffOut->user->name;
+                    }),
+                TableColumns\TextColumn::make('created_at')
+                    ->label('Total Hours')
+                    ->formatStateUsing(function($state, $record) {
+                        if($record->total_time) {
+                            return $record->total_time . ' Hour/s';
+                        } else {
+                            return \Carbon\Carbon::parse($record->time_in)->diffForHumans();
+                        }
+                    }),
+                TableColumns\TextColumn::make('discount')
+                    ->label('Discount')
+                    ->badge()
+                    ->color(function($state, $record) {
+                        return $state == 0 ? 'gray' : 'success';
+                    })
+                    ->formatStateUsing(function($state, $record) {
+                        return $state == 0 ? 'No' : $state . '%';
+                    }),
+                TableColumns\TextColumn::make('mode_of_payment')
+                    ->label('M.O.P.'),
+                TableColumns\TextColumn::make('amount_paid')
+                    ->label('Amount')
+                    ->money('PHP'),
+            ])
+            ->filters([
+                Filters\Filter::make('created_at')
+                    ->form([
+                        Fieldset::make('Check In')
+                            ->schema([
+                                DatePicker::make('from'),
+                                DatePicker::make('to'),
+                            ])
+                            ->columns(1),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_in', '>=', $date),
+                            )
+                            ->when(
+                                $data['to'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_in', '<=', $date),
+                            );
+                    }),
+                Filters\SelectFilter::make('mode_of_payment')
+                    ->options([
+                        'Cash' => 'Cash',
+                        'GCash' => 'GCash',
+                        'Bank Transfer' => 'Bank Transfer'
+                    ])
+            ])
+            ->actions([
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('End Time')
+                        ->form([
+                            FormComponents\Grid::make(2)
+                                ->schema([
+                                    FormComponents\TextInput::make('amount_to_paid')
+                                        ->label('Amount to Paid')
+                                        ->formatStateUsing(function($record, $get) {
+                                            $computeShowTime = $record->computeShowTime();
+                                            return $computeShowTime['amount_to_paid'];
+                                        })
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->columnSpan(1),
+                                    FormComponents\TextInput::make('total_hours_accumulated')
+                                        ->label('Total Hours')
+                                        ->formatStateUsing(function($record) {
+                                            $computeShowTime = $record->computeShowTime();
+                                            return $computeShowTime['total_hours_accumulated'];
+                                        })
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->columnSpan(1),
+                                ]),
+                            FormComponents\Grid::make(1)
+                                ->schema([
+                                    FormComponents\Toggle::make('apply_discount')
+                                        ->label('Apply Discount')
+                                        ->live()
+                                        ->default(function($record) {
+                                            return $record->apply_discount == 1 ? true : false;
+                                        })
+                                        ->afterStateUpdated(function ($set, $state, $record, $get) {
+                                            $computeShowTime = $record->computeShowTime();
+                                            $amount = $computeShowTime['amount_to_paid'];
+
+                                            if($state) {
+                                                $computeShowTime = $record->computeShowTime(true);
+                                                $percent = $get('discount') / 100;
+                                                $discount = (double)$computeShowTime['amount_to_paid'] * $percent;
+    
+                                                $amount = (double)$computeShowTime['amount_to_paid'] - (double)$discount;
+                                            } else {
+                                                $computeShowTime = $record->computeShowTime(true);
+                                                $amount = $computeShowTime['amount_to_paid'];
+                                            }
+
+                                            $set('amount_to_paid', $amount);
+                                        }),
+                                    FormComponents\TextInput::make('discount')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->live()
+                                        ->placeholder('Discount percentage')
+                                        ->visible(function($get) {
+                                            return $get('apply_discount') ? true : false;
+                                        })
+                                        ->required(function($get) {
+                                            return $get('apply_discount') ? true : false;
+                                        })
+                                        ->default(function($record) {
+                                            return $record->discount == 0 ? 20 : $record->discount;
+                                        })
+                                        ->afterStateUpdated(function ($set, $state, $record, $get) {
+                                            $computeShowTime = $record->computeShowTime();
+                                            $amount = $computeShowTime['amount_to_paid'];
+                                            
+                                            if($state != null) {
+                                                $percent = $get('discount') / 100;
+                                                $discount = (double)$computeShowTime['amount_to_paid'] * $percent;
+    
+                                                $amount = (double)$computeShowTime['amount_to_paid'] - (double)$discount;
+                                            }
+
+                                            $set('amount_to_paid', $amount);
+                                        })
+                                        ->helperText('20% for Student Discount.'),
+                                ])
+                                ->visible(function($record) {
+                                    if($record->is_flexi || $record->is_monthly) {
+                                        return false;
+                                    }
+
+                                    return true;
+                                }),
+                            FormComponents\Select::make('mode_of_payment')
+                                ->options([
+                                    'Cash' => 'Cash',
+                                    'GCash' => 'GCash',
+                                    'Bank Transfer' => 'Bank Transfer'
+                                ])
+                                ->live()
+                                ->required()
+                                ->native(false)
+                                ->default(function($state, $record) {
+                                    return $record->is_flexi || $record->is_monthly ? $record->mode_of_payment : '';
+                                })
+                                ->disabled(function($state, $record) {
+                                    return $record->is_flexi || $record->is_monthly ? true : false;
+                                }),
+                        ])
+                        ->action(function($data, $record) {
+                            if($record->is_flexi || $record->is_monthly) {
+                                $applyDisc = true;
+                                $disc = 100;
+                            } else {
+                                $applyDisc = $data['apply_discount'];
+                                $disc = $data['apply_discount'] ? $data['discount'] : 0;
+                            }
+                            $record->time_out = \Carbon\Carbon::now();
+                            $record->time_out_staff_id = auth()->user()->staff ? auth()->user()->staff->id : null;
+                            $record->status = false;
+                            $record->total_time = $data['total_hours_accumulated'];
+                            $record->amount_paid = $data['amount_to_paid'];
+                            $record->apply_discount = $applyDisc;
+                            $record->discount = $disc;
+                            if(!$record->is_flexi && !$record->is_monthly) {
+                                $record->mode_of_payment = $data['mode_of_payment'];
+                            }
+                            $record->save();
+
+                            if($record->is_monthly) {
+                                $monthly = \App\Models\MonthlyUser::where('card_id', $record->card_id)->where('is_expired', false)->latest()->first();
+                                
+                                $monthly->is_active = false;
+                                $monthly->save();
+                            }
+
+                            if($record->is_flexi) {
+                                $flexi = \App\Models\FlexiUser::where('card_id', $record->card_id)->where('is_active', true)->latest()->first();
+
+                                $flexi->recalculateTimeRemaining($record->id);
+
+                                $flexi->checkRemainingTime();
+
+                                $flexi->is_active = false;
+                                $flexi->card_id = null;
+                                $flexi->save();
+                            }
+
+                            // $record->computeAmount();
+
+                            $staff = $record->staffIn;
+                            if($staff) {
+                                $staff->createReport($record->id);
+                            }
+
+                            if($record->time_in_staff_id != $record->time_out_staff_id) {
+                                $staffOut = $record->staffOut;
+                                if($staffOut) {
+                                    $staffOut->createReport($record->id);
+                                }
+                            }
+
+                            if(!$record->is_flexi && !$record->is_monthly) {
+                                $record->addPaymenToMonthlySalesReport();
+                            }
+
+                            Notification::make()
+                                ->title('Daily user time ends.')
+                                ->success()
+                                ->send();
+
+                            return redirect()->to(DailySaleResource::getUrl('view', ['record' => $record]));
+                        })
+                        ->modalWidth(MaxWidth::Medium),
+                    Tables\Actions\Action::make('change_pass')
+                        ->label('Change Pass')
+                        ->form([
+                            FormComponents\Select::make('pass_type')
+                                ->options([
+                                    'flexi' => 'Flexi Pass',
+                                    'monthly' => 'Monthly Pass',
+                                ])
+                                ->required()
+                                ->live()
+                                ->native(false),
+                            FormComponents\Select::make('card_id')
+                                ->options(function() {
+                                    $options = [];
+                                    $monthlyIds = \App\Models\MonthlyUser::where('is_expired', false)->pluck('card_id')->toArray();
+                                    $availabelGuests = \App\Models\Card::whereNotIn('id', $monthlyIds)->where('type', 'Monthly')->get();
+                                    foreach($availabelGuests as $guest) {
+                                        $options[$guest->id] = $guest->code;
+                                    }
+        
+                                    return $options;
+                                })
+                                ->preload()
+                                ->searchable('code')
+                                ->required(function($get) {
+                                    return $get('pass_type') == 'monthly' ? true : false;
+                                })
+                                ->visible(function($get) {
+                                    return $get('pass_type') == 'monthly' ? true : false;
+                                })
+                                ->native(false),
+                            FormComponents\Grid::make(2)
+                                ->schema([
+                                    FormComponents\TextInput::make('contact_no')
+                                        ->label('Contact No.')
+                                        ->required()
+                                        ->columnSpan(2),
+                                    FormComponents\TextInput::make('amount')
+                                        ->label('Amount Paid')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->maxValue(3500)
+                                        ->required()
+                                        ->default(0)
+                                        ->helperText(function($get) {
+                                            return $get('pass_type') == 'flexi' ?
+                                                'Flexi Pass Rate: PHP 1,500.00' :
+                                                'Monthly Pass Rate: PHP 3,500.00';
+                                        })
+                                        ->columnSpan(1),
+                                    FormComponents\Select::make('mode_of_payment')
+                                        ->label('Mode of Payment')
+                                        ->options([
+                                            'Cash' => 'Cash',
+                                            'GCash' => 'GCash',
+                                            'Bank Transfer' => 'Bank Transfer'
+                                        ])
+                                        ->required()
+                                        ->native(false)
+                                        ->columnSpan(1)
+                                ])
+                                ->visible(function($get) {
+                                    return $get('pass_type') ? true : false;
+                                }),
+                        ])
+                        ->action(function($data, $record) {
+                            $time_in = $record->time_in_carbon;
+
+                            if($data['pass_type'] == 'flexi') {
+                                $flexi = \App\Models\FlexiUser::create([
+                                    'card_id' => $record->card_id,
+                                    'name' => $record->name,
+                                    'contact_no' => $data['contact_no'],
+                                    'start_at' => $time_in->copy(),
+                                    'end_at' => $time_in->copy()->addHours(50),
+                                    'is_active' => true,
+                                    'status' => true,
+                                    'paid' => $data['amount'] >= 1500 ? true : false,
+                                    'amount' => $data['amount']
+                                ]);
+
+                                $record->is_flexi = true;
+                                $record->discount = 100;
+                                $record->amount_paid = $flexi->amount;
+                                $record->mode_of_payment = $data['mode_of_payment'];
+                                $record->save();
+                            }
+
+                            if($data['pass_type'] == 'monthly') {
+                                $monthly = \App\Models\MonthlyUser::create([
+                                    'card_id' => $data['card_id'],
+                                    'name' => $record->name,
+                                    'contact_no' => $data['contact_no'],
+                                    'date_start' => $time_in->copy(),
+                                    'date_finish' => $time_in->copy()->addMonth()->subDay(),
+                                    'is_active' => true,
+                                    'is_expired' => false,
+                                    'paid' => $data['amount'] >= 3500 ? true : false,
+                                    'amount' => $data['amount']
+                                ]);
+
+                                $record->card_id = $data['card_id'];
+                                $record->is_monthly = true;
+                                $record->discount = 100;
+                                $record->amount_paid = $monthly->amount;
+                                $record->mode_of_payment = $data['mode_of_payment'];
+                                $record->save();
+                            }
+
+                            Notification::make()
+                                ->title('Daily user successfully changed Pass.')
+                                ->success()
+                                ->send();
+
+                            return $data;
+                        })
+                        ->modalWidth(MaxWidth::Large)
+                        ->visible(function($record) {
+                            return !$record->is_flexi && !$record->is_monthly ? true : false;
+                        })
+
+                ])
+                ->visible(function($record) {
+                    if(!$record->status) {
+                        return false;
+                    }
+
+                    $user = auth()->user();
+    
+                    if($user->hasRole('Super Administrator')) {
+                        return true;
+                    }
+
+                    return $user->checkLatestCashLogs();
+                })
+                ->icon('heroicon-o-ellipsis-horizontal'),
+            ])
+            ->bulkActions([])
+            ->defaultPaginationPageOption(25);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistComponents\Section::make('Information')
+                    ->schema([
+                        InfolistComponents\TextEntry::make('name')
+                            ->label('Guest'),
+                        InfolistComponents\TextEntry::make('card_id')
+                            ->label('Card ID')
+                            ->formatStateUsing(function($record) {
+                                return $record->card->code;
+                            }),
+                        InfolistComponents\TextEntry::make('time_in_staff_id')
+                            ->label('Staff In')
+                            ->formatStateUsing(function($record) {
+                                return $record->staffIn->user->name . ' (<em>' . $record->staffIn->card->code.'</em>)';
+                            })
+                            ->html(),
+                        InfolistComponents\TextEntry::make('time_out_staff_id')
+                            ->label('Staff Out')
+                            ->formatStateUsing(function($record) {
+                                return $record->staffOut->user->name . ' (<em>' . $record->staffOut->card->code.'</em>)';
+                            })
+                            ->html(),
+                        InfolistComponents\TextEntry::make('time_in')
+                            ->formatStateUsing(function($state, $record) {
+                                return $record->time_in_carbon->format(config('app.date_time_format'));
+                            }),
+                        InfolistComponents\TextEntry::make('time_out')
+                            ->formatStateUsing(function($state, $record) {
+                                return $record->time_out_carbon->format(config('app.date_time_format'));
+                            }),
+                        InfolistComponents\TextEntry::make('amount_paid')
+                            ->money('PHP'),
+                        InfolistComponents\TextEntry::make('total_time')
+                            ->formatStateUsing(function($state, $record) {
+                                return $state . ' hour/s';
+                            }),
+                        InfolistComponents\TextEntry::make('discount')
+                            ->formatStateUsing(function($state, $record) {
+                                return $state . ' %';
+                            }),
+                        InfolistComponents\TextEntry::make('description')
+                            ->default('-'),
+                        InfolistComponents\TextEntry::make('created_at')
+                            ->since()
+                            ->visible(function($record) {
+                                return $record->time_out ? false : true;
+                            }),
+                    ])
+                    ->columns(4)
+                    ->columnSpan('full')
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListDailySales::route('/'),
+            // 'test' => Pages\IndexDailySales::route('/index'),
+            'create' => Pages\CreateDailySale::route('/create'),
+            'view' => Pages\ViewDailySale::route('/{record}'),
+            'edit' => Pages\EditDailySale::route('/{record}/edit'),
+        ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('view daily-sales');
+    }
+}

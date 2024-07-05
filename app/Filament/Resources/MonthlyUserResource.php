@@ -1,0 +1,115 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\MonthlyUserResource\Pages;
+use App\Filament\Resources\MonthlyUserResource\RelationManagers;
+use App\Models\MonthlyUser;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Tables\Columns as TableColumns;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Notifications\Notification;
+
+class MonthlyUserResource extends Resource
+{
+    protected static ?string $model = MonthlyUser::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationGroup = 'SALES';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema(MonthlyUser::getForm());
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TableColumns\TextColumn::make('card.code')
+                    ->label('Card'),
+                TableColumns\TextColumn::make('name'),
+                TableColumns\TextColumn::make('contact_no')
+                    ->label('Contact'),
+                TableColumns\TextColumn::make('date_start')
+                    ->label('Date Start')
+                    ->date(),
+                TableColumns\TextColumn::make('created_at')
+                    ->label('Expiry')
+                    ->formatStateUsing(function($record) {
+                        return \Carbon\Carbon::parse($record->date_finish)->format(config('app.date_format'));
+                    }),
+                TableColumns\TextColumn::make('is_active')
+                    ->label('Active')
+                    ->badge()
+                    ->color(function($state) {
+                        return $state ? 'success' : 'gray';
+                    })
+                    ->formatStateUsing(function($state) {
+                        return $state ? 'Yes' : 'No';
+                    }),
+                TableColumns\TextColumn::make('date_finish')
+                    ->label('Expired In')
+                    ->formatStateUsing(function($state, $record) {
+                        return \Carbon\Carbon::parse($record->date_finish)->addDay()->diffForHumans();
+                    })
+            ])
+            ->filters([
+
+            ])
+            ->actions([
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('Set as Expired')
+                        ->requiresConfirmation()
+                        ->action(function($record) {
+                            $record->is_expired = true;
+                            $record->card_id = null;
+                            $record->save();
+
+                            Notification::make()
+                                ->title('Monthly user successfully set to expired.')
+                                ->success()
+                                ->send();
+
+                            return redirect()->to(MonthlyUserResource::getUrl('index'));
+                        })
+                        ->visible(function($record) {
+                            return $record->is_expired ? false : true;
+                        })
+                ])
+                ->icon('heroicon-o-ellipsis-horizontal')
+            ])
+            ->bulkActions([
+
+            ])
+            ->recordUrl(null);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListMonthlyUsers::route('/'),
+            'create' => Pages\CreateMonthlyUser::route('/create'),
+            'view' => Pages\ViewMonthlyUser::route('/{record}'),
+            'edit' => Pages\EditMonthlyUser::route('/{record}/edit'),
+        ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('view monthly-users');
+    }
+}
