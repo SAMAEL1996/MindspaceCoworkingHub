@@ -28,7 +28,7 @@ class ForTestingPurposeCommand extends Command
     public function handle()
     {
         $now = \Carbon\Carbon::now();
-
-        \Log::info('Logging test command at: '.$now->copy()->format(config('app.date_time_format')));
+        $user = \App\Models\User::find(1);
+        $user->addMeta('test', $now->format(config('app.date_time_format')));
     }
 }

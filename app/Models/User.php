@@ -8,10 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Traits\HasUid;
 use Spatie\Permission\Traits\HasRoles;
+use Appstract\Meta\Metable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasUid, HasRoles;
+    use HasFactory, Notifiable, HasUid, HasRoles, Metable;
 
     /**
      * The attributes that are mass assignable.
