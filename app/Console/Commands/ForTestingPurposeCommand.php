@@ -29,6 +29,6 @@ class ForTestingPurposeCommand extends Command
     {
         $now = \Carbon\Carbon::now();
 
-        \Log::info('Logging test command at: '.$now->copy()->format('M d, Y H:i:s'));
+        \Log::info('Logging test command at: '.$now->copy()->format(config('app.date_time_format')));
     }
 }
