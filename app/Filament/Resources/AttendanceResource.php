@@ -19,6 +19,7 @@ use Filament\Notifications\Notification;
 use Rap2hpoutre\FastExcel\FastExcel;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column;
 use Filament\Tables\Filters;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Enums\FiltersLayout;
@@ -78,7 +79,7 @@ class AttendanceResource extends Resource
                         return $record->check_in_carbon->format(config('app.date_format'));
                     }),
                 TableColumns\TextColumn::make('check_out')
-                    ->label('Check Out')
+                    ->label('Check In')
                     ->formatStateUsing(function($state, $record) {
                         return $record->check_out ? $record->check_out_carbon->format(config('app.time_format')) : null;
                     })
@@ -145,7 +146,43 @@ class AttendanceResource extends Resource
                 ExportAction::make()
                     ->exports([
                         ExcelExport::make()
-                            ->fromTable()
+                            ->withColumns([
+                                Column::make('staff_id')
+                                    ->heading('Staff')
+                                    ->formatStateUsing(function($record) {
+                                        return $record->staff->user->name;
+                                    }),
+                                Column::make('check_in')
+                                    ->heading('Check In')
+                                    ->formatStateUsing(function($record) {
+                                        return $record->check_in_carbon->format(config('app.date_time_format'));
+                                    }),
+                                Column::make('check_out')
+                                    ->heading('Check Out')
+                                    ->formatStateUsing(function($record) {
+                                        return $record->check_out_carbon->format(config('app.date_time_format'));
+                                    }),
+                                Column::make('created_at')
+                                    ->heading('Total Time')
+                                    ->formatStateUsing(function($record) {
+                                        return Carbon::parse($record->check_in)->diff(Carbon::parse($record->check_out))->format('%H:%I:%S');
+                                    }),
+                                Column::make('approve_overtime')
+                                    ->heading('Approve OT')
+                                    ->formatStateUsing(function($record) {
+                                        return $record->approve_overtime ? 'Yes' : 'No';
+                                    }),
+                                Column::make('total_overtime_hours')
+                                    ->heading('Total OT')
+                                    ->formatStateUsing(function($record) {
+                                        return $record->total_overtime_hours . ' hour/s';
+                                    }),
+                                Column::make('restday_overtime')
+                                    ->heading('Rest-day OT')
+                                    ->formatStateUsing(function($record) {
+                                        return $record->restday_overtime ? 'Yes' : 'No';
+                                    }),
+                            ])
                             ->withFilename('attendances-'.date('Y-m-d'))
                             ->withWriterType(\Maatwebsite\Excel\Excel::CSV)
                     ])

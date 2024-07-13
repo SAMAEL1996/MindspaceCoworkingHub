@@ -68,19 +68,26 @@ class DailySale extends Model
         return Carbon::parse($this->time_out);
     }
 
-    public function addCheckInToMonthlySalesReport()
+    public function addCheckInToSalesReport()
     {
         $month = $this->time_in_carbon->format('F');
         $year = $this->time_in_carbon->format('Y');
+        $day = $this->time_in_carbon->day;
 
         if(!$this->is_flexi && !$this->is_monthly) {
-            $sale = \App\Models\Sale::where('month', $month)->where('year', $year)->first();
-            if(!$sale) {
-                $sale = \App\Models\Sale::create(['month' => $month, 'year' => $year]);
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
             }
+            $monthlySale->total_daily_users = (int)$monthlySale->total_daily_users + 1;
+            $monthlySale->save();
 
-            $sale->total_daily_users += 1;
-            $sale->save();
+            $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
+            if(!$dailySale) {
+                $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
+            }
+            $dailySale->total_daily_users = (int)$dailySale->total_daily_users + 1;
+            $dailySale->save();
         }
     }
 
@@ -88,15 +95,45 @@ class DailySale extends Model
     {
         $month = $this->time_in_carbon->format('F');
         $year = $this->time_in_carbon->format('Y');
+        $day = $this->time_in_carbon->day;
 
         if(!$this->is_flexi && !$this->is_monthly) {
-            $sale = \App\Models\Sale::where('month', $month)->where('year', $year)->first();
-            if(!$sale) {
-                $sale = \App\Models\Sale::create(['month' => $month, 'year' => $year]);
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
             }
+            $monthlySale->total_sales = (double)$monthlySale->total_sales + (double)$this->amount_paid;
+            $monthlySale->save();
 
-            $sale->total_sales += (double)$this->amount_paid;
-            $sale->save();
+            $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
+            if(!$dailySale) {
+                $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
+            }
+            $dailySale->total_sales = (double)$dailySale->total_sales + (double)$this->amount_paid;
+            $dailySale->save();
+        }
+    }
+
+    public function removeSalesReport()
+    {
+        $month = $this->time_in_carbon->format('F');
+        $year = $this->time_in_carbon->format('Y');
+        $day = $this->time_in_carbon->day;
+
+        if(!$this->is_flexi && !$this->is_monthly) {
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
+            }
+            $monthlySale->total_daily_users -= 1;
+            $monthlySale->save();
+
+            $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
+            if(!$dailySale) {
+                $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
+            }
+            $dailySale->total_daily_users -= 1;
+            $dailySale->save();
         }
     }
 
@@ -204,8 +241,7 @@ class DailySale extends Model
 
     public static function getAvarageSalesPerMonth()
     {
-        $sales = self::with('card')
-                    ->whereMonth('time_in', Carbon::now()->month)
+        $sales = self::whereMonth('time_in', Carbon::now()->month)
                     ->whereYear('time_in', Carbon::now()->year)
                     ->where('is_flexi', false)
                     ->where('is_monthly', false)

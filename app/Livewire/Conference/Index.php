@@ -45,7 +45,6 @@ class Index extends Component implements HasForms, HasTable, HasActions
     protected function getTableQuery()
     {
         $query = Conference::query();
-        $now = \Carbon\Carbon::now()->toDateTimeString();
 
         if ($this->activeTab === 'upcoming') {
             $query->where('status', 'approve',);
@@ -73,9 +72,9 @@ class Index extends Component implements HasForms, HasTable, HasActions
                     ->visible(auth()->user()->can('create conferences'))
             ])
             ->columns([
-                // TableColumns\TextColumn::make('event'),
+                TableColumns\TextColumn::make('event'),
                 TableColumns\TextColumn::make('host')
-                    ->label('P.O.C.'),
+                    ->label('P.O.C'),
                 TableColumns\TextColumn::make('members')
                     ->label('Total Guests'),
                 TableColumns\TextColumn::make('start_at')

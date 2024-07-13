@@ -17,15 +17,23 @@ class MonthlyUser extends Model
         static::created(function ($monthly) {
             $month = $monthly->date_start_carbon->format('F');
             $year = $monthly->date_start_carbon->format('Y');
+            $day = $monthly->date_start_carbon->day;
 
-            $sale = \App\Models\Sale::where('month', $month)->where('year', $year)->first();
-            if(!$sale) {
-                $sale = \App\Models\Sale::create(['month' => $month, 'year' => $year]);
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
             }
+            $monthlySale->total_monthly_users = (int)$monthlySale->total_monthly_users + 1;
+            $monthlySale->total_sales = (double)$monthlySale->total_sales + (double)$monthly->amount_paid;
+            $monthlySale->save();
 
-            $sale->total_monthly_users += 1;
-            $sale->total_sales += (double)$monthly->amount;
-            $sale->save();
+            $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
+            if(!$dailySale) {
+                $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
+            }
+            $dailySale->total_monthly_users = (int)$dailySale->total_monthly_users + 1;
+            $dailySale->total_sales = (double)$dailySale->total_sales + (double)$monthly->amount_paid;
+            $dailySale->save();
         });
     }
 

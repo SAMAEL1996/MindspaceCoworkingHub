@@ -10,6 +10,8 @@ class Sale extends Model
     use HasFactory;
 
     protected $fillable = [
+        'type',
+        'day',
         'month',
         'year',
         'total_daily_users',

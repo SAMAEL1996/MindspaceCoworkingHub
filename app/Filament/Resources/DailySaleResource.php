@@ -155,103 +155,238 @@ class DailySaleResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('End Time')
                         ->form([
-                            FormComponents\Grid::make(2)
+                            FormComponents\Grid::make(1)
                                 ->schema([
-                                    FormComponents\TextInput::make('amount_to_paid')
+                                    FormComponents\Grid::make(2)
+                                        ->schema([
+                                            FormComponents\TextInput::make('amount_to_paid')
+                                                ->label('Amount to Paid')
+                                                ->formatStateUsing(function($record, $get) {
+                                                    $computeShowTime = $record->computeShowTime();
+                                                    return $computeShowTime['amount_to_paid'];
+                                                })
+                                                ->disabled()
+                                                ->dehydrated()
+                                                ->columnSpan(1),
+                                            FormComponents\TextInput::make('total_hours_accumulated')
+                                                ->label('Total Hours')
+                                                ->formatStateUsing(function($record) {
+                                                    $computeShowTime = $record->computeShowTime();
+                                                    return $computeShowTime['total_hours_accumulated'];
+                                                })
+                                                ->disabled()
+                                                ->dehydrated()
+                                                ->columnSpan(1),
+                                        ]),
+                                    FormComponents\Grid::make(1)
+                                        ->schema([
+                                            FormComponents\Toggle::make('apply_discount')
+                                                ->label('Apply Discount')
+                                                ->live()
+                                                ->default(function($record) {
+                                                    return $record->apply_discount == 1 ? true : false;
+                                                })
+                                                ->afterStateUpdated(function ($set, $state, $record, $get) {
+                                                    $computeShowTime = $record->computeShowTime();
+                                                    $amount = $computeShowTime['amount_to_paid'];
+
+                                                    if($state) {
+                                                        $computeShowTime = $record->computeShowTime(true);
+                                                        $percent = $get('discount') / 100;
+                                                        $discount = (double)$computeShowTime['amount_to_paid'] * $percent;
+            
+                                                        $amount = (double)$computeShowTime['amount_to_paid'] - (double)$discount;
+                                                    } else {
+                                                        $computeShowTime = $record->computeShowTime(true);
+                                                        $amount = $computeShowTime['amount_to_paid'];
+                                                    }
+
+                                                    $set('amount_to_paid', $amount);
+                                                }),
+                                            FormComponents\TextInput::make('discount')
+                                                ->numeric()
+                                                ->minValue(1)
+                                                ->live()
+                                                ->placeholder('Discount percentage')
+                                                ->visible(function($get) {
+                                                    return $get('apply_discount') ? true : false;
+                                                })
+                                                ->required(function($get) {
+                                                    return $get('apply_discount') ? true : false;
+                                                })
+                                                ->default(function($record) {
+                                                    return $record->discount == 0 ? 20 : $record->discount;
+                                                })
+                                                ->afterStateUpdated(function ($set, $state, $record, $get) {
+                                                    $computeShowTime = $record->computeShowTime();
+                                                    $amount = $computeShowTime['amount_to_paid'];
+                                                    
+                                                    if($state != null) {
+                                                        $percent = $get('discount') / 100;
+                                                        $discount = (double)$computeShowTime['amount_to_paid'] * $percent;
+            
+                                                        $amount = (double)$computeShowTime['amount_to_paid'] - (double)$discount;
+                                                    }
+
+                                                    $set('amount_to_paid', $amount);
+                                                })
+                                                ->helperText('20% for Student Discount.'),
+                                        ])
+                                        ->visible(function($record) {
+                                            if($record->is_flexi || $record->is_monthly) {
+                                                return false;
+                                            }
+
+                                            return true;
+                                        }),
+                                    FormComponents\Select::make('mode_of_payment')
+                                        ->label('Mode of Payment')
+                                        ->options([
+                                            'Cash' => 'Cash',
+                                            'GCash' => 'GCash',
+                                            'Bank Transfer' => 'Bank Transfer'
+                                        ])
+                                        ->required()
+                                        ->native(false)
+                                        ->default(function($state, $record, $get) {
+                                            if($get('renew_flexi')) {
+                                                return '';
+                                            }
+
+                                            return $record->is_flexi || $record->is_monthly ? $record->mode_of_payment : '';
+                                        })
+                                        ->disabled(function($state, $record, $get) {
+                                            return $record->is_flexi || $record->is_monthly ? true : false;
+                                        }),
+                                ])
+                                ->visible(function($get) {
+                                    return $get('renew_flexi') ? false : true;
+                                }),
+                            FormComponents\Grid::make(1)
+                                ->schema([
+                                    FormComponents\TextInput::make('flexi_amount_to_paid')
                                         ->label('Amount to Paid')
+                                        ->default(1500)
+                                        ->disabled()
+                                        ->dehydrated(),
+                                    FormComponents\Select::make('flexi_mode_of_payment')
+                                        ->label('Mode of Payment')
+                                        ->options([
+                                            'Cash' => 'Cash',
+                                            'GCash' => 'GCash',
+                                            'Bank Transfer' => 'Bank Transfer'
+                                        ])
+                                        ->required()
+                                        ->native(false),
+                                    FormComponents\Hidden::make('amount_to_paid')
                                         ->formatStateUsing(function($record, $get) {
                                             $computeShowTime = $record->computeShowTime();
                                             return $computeShowTime['amount_to_paid'];
-                                        })
-                                        ->disabled()
-                                        ->dehydrated()
-                                        ->columnSpan(1),
-                                    FormComponents\TextInput::make('total_hours_accumulated')
-                                        ->label('Total Hours')
+                                        }),
+                                    FormComponents\Hidden::make('total_hours_accumulated')
                                         ->formatStateUsing(function($record) {
                                             $computeShowTime = $record->computeShowTime();
                                             return $computeShowTime['total_hours_accumulated'];
+                                        }),
+                                ])
+                                ->visible(function($get) {
+                                    return $get('renew_flexi');
+                                }),
+                            FormComponents\Fieldset::make('Additional Charge')
+                                ->schema([
+                                    FormComponents\TextInput::make('additional_charge')
+                                        ->default(function($state, $record) {
+                                            if(!$record->is_flexi) {
+                                                return 0.00;
+                                            }
+                                            
+                                            $flexi = \App\Models\FlexiUser::where('card_id', $record->card_id)->where('is_active', true)->latest()->first();
+
+                                            return $flexi->calculateAdditionalCharge($record->id);
                                         })
+                                        ->numeric()
                                         ->disabled()
                                         ->dehydrated()
-                                        ->columnSpan(1),
-                                ]),
-                            FormComponents\Grid::make(1)
-                                ->schema([
-                                    FormComponents\Toggle::make('apply_discount')
+                                        ->columnSpan('full'),
+                                    FormComponents\Toggle::make('flexi_apply_discount')
                                         ->label('Apply Discount')
                                         ->live()
-                                        ->default(function($record) {
-                                            return $record->apply_discount == 1 ? true : false;
-                                        })
                                         ->afterStateUpdated(function ($set, $state, $record, $get) {
-                                            $computeShowTime = $record->computeShowTime();
-                                            $amount = $computeShowTime['amount_to_paid'];
+                                            $flexi = \App\Models\FlexiUser::where('card_id', $record->card_id)->where('is_active', true)->latest()->first();
+
+                                            $additionalCharge = $flexi->calculateAdditionalCharge($record->id);
 
                                             if($state) {
-                                                $computeShowTime = $record->computeShowTime(true);
-                                                $percent = $get('discount') / 100;
-                                                $discount = (double)$computeShowTime['amount_to_paid'] * $percent;
+                                                $percent = $get('flexi_discount') / 100;
+                                                $discount = (double)$additionalCharge * $percent;
     
-                                                $amount = (double)$computeShowTime['amount_to_paid'] - (double)$discount;
+                                                $amount = (double)$additionalCharge - (double)$discount;
                                             } else {
-                                                $computeShowTime = $record->computeShowTime(true);
-                                                $amount = $computeShowTime['amount_to_paid'];
+                                                $amount = $additionalCharge;
                                             }
 
-                                            $set('amount_to_paid', $amount);
-                                        }),
-                                    FormComponents\TextInput::make('discount')
+                                            $set('additional_charge', $amount);
+                                        })
+                                        ->columnSpan('full'),
+                                    FormComponents\TextInput::make('flexi_discount')
+                                        ->label('Discount')
                                         ->numeric()
                                         ->minValue(1)
                                         ->live()
                                         ->placeholder('Discount percentage')
                                         ->visible(function($get) {
-                                            return $get('apply_discount') ? true : false;
+                                            return $get('flexi_apply_discount') ? true : false;
                                         })
                                         ->required(function($get) {
-                                            return $get('apply_discount') ? true : false;
+                                            return $get('flexi_apply_discount') ? true : false;
                                         })
                                         ->default(function($record) {
-                                            return $record->discount == 0 ? 20 : $record->discount;
+                                            return 20;
                                         })
                                         ->afterStateUpdated(function ($set, $state, $record, $get) {
-                                            $computeShowTime = $record->computeShowTime();
-                                            $amount = $computeShowTime['amount_to_paid'];
+                                            $flexi = \App\Models\FlexiUser::where('card_id', $record->card_id)->where('is_active', true)->latest()->first();
+
+                                            $additionalCharge = $flexi->calculateAdditionalCharge($record->id);
                                             
                                             if($state != null) {
-                                                $percent = $get('discount') / 100;
-                                                $discount = (double)$computeShowTime['amount_to_paid'] * $percent;
+                                                $percent = $state / 100;
+                                                $discount = (double)$additionalCharge * $percent;
     
-                                                $amount = (double)$computeShowTime['amount_to_paid'] - (double)$discount;
+                                                $amount = (double)$additionalCharge - (double)$discount;
+                                            } else {
+                                                $amount = $additionalCharge;
                                             }
 
-                                            $set('amount_to_paid', $amount);
+                                            $set('additional_charge', $amount);
                                         })
-                                        ->helperText('20% for Student Discount.'),
+                                        ->helperText('20% for Student Discount.')
+                                        ->columnSpan('full'),
                                 ])
-                                ->visible(function($record) {
-                                    if($record->is_flexi || $record->is_monthly) {
-                                        return false;
+                                ->visible(function($state, $record, $get) {
+                                    if($record->is_flexi) {
+                                        if($get('renew_flexi')) {
+                                            return false;
+                                        }
+
+                                        $flexi = \App\Models\FlexiUser::where('card_id', $record->card_id)->where('is_active', true)->latest()->first();
+
+                                        return $flexi->checkPassIsExpired($record->id);
                                     }
 
-                                    return true;
+                                    return false;
                                 }),
-                            FormComponents\Select::make('mode_of_payment')
-                                ->options([
-                                    'Cash' => 'Cash',
-                                    'GCash' => 'GCash',
-                                    'Bank Transfer' => 'Bank Transfer'
-                                ])
+                            FormComponents\Toggle::make('renew_flexi')
+                                ->label('Re-new Flexi Pass')
                                 ->live()
-                                ->required()
-                                ->native(false)
-                                ->default(function($state, $record) {
-                                    return $record->is_flexi || $record->is_monthly ? $record->mode_of_payment : '';
+                                ->visible(function($state, $record) {
+                                    if($record->is_flexi) {
+                                        $flexi = \App\Models\FlexiUser::where('card_id', $record->card_id)->where('is_active', true)->latest()->first();
+
+                                        return $flexi->checkPassIsExpired($record->id);
+                                    }
+
+                                    return false;
                                 })
-                                ->disabled(function($state, $record) {
-                                    return $record->is_flexi || $record->is_monthly ? true : false;
-                                }),
                         ])
                         ->action(function($data, $record) {
                             if($record->is_flexi || $record->is_monthly) {
@@ -283,13 +418,56 @@ class DailySaleResource extends Resource
                             if($record->is_flexi) {
                                 $flexi = \App\Models\FlexiUser::where('card_id', $record->card_id)->where('is_active', true)->latest()->first();
 
-                                $flexi->recalculateTimeRemaining($record->id);
+                                if($flexi->checkPassIsExpired($record->id)) {
+                                    if($data['renew_flexi']) {
+                                        // create new flexi
+                                        $newFlexi = $flexi->replicate();
 
-                                $flexi->checkRemainingTime();
+                                        $newFlexi->start_at = \Carbon\Carbon::now();
+                                        $newFlexi->end_at = \Carbon\carbon::now()->addHours(50)->subMinutes($flexi->calculateAdditionalCharge($record->id, 'minutes'));
+                                        $newFlexi->card_id = null;
+                                        $newFlexi->status = true;
+                                        $newFlexi->is_active = false;
+                                        $newFlexi->save();
+                                    } else {
+                                        $newRecord = $record->replicate();
 
-                                $flexi->is_active = false;
-                                $flexi->card_id = null;
-                                $flexi->save();
+                                        $newRecord->time_in = \Carbon\Carbon::now()->subMinutes($flexi->calculateAdditionalCharge($record->id, 'minutes'));
+                                        $newRecord->time_out = \Carbon\Carbon::now();
+                                        $newRecord->total_time = $flexi->calculateAdditionalCharge($record->id, 'hours');
+                                        $newRecord->description = 'Flexi additional charge';
+                                        $newRecord->amount_paid = $data['additional_charge'];
+                                        $newRecord->apply_discount = $data['flexi_apply_discount'];
+                                        $newRecord->discount = $data['flexi_apply_discount'] ? $data['flexi_discount'] : 0;
+                                        $newRecord->is_flexi = false;
+                                        $newRecord->status = false;
+                                        $newRecord->save();
+
+                                        $newRecord->addPaymenToMonthlySalesReport();
+                                    }
+
+                                    $flexi->end_at = $flexi->start_at_carbon;
+                                    $flexi->status = false;
+                                    $flexi->is_active = false;
+                                    $flexi->card_id = null;
+                                    $flexi->save();
+                                } else {
+                                    $flexi->recalculateTimeRemaining($record->id);
+    
+                                    $flexi->checkRemainingTime();
+    
+                                    $flexi->is_active = false;
+                                    $flexi->card_id = null;
+                                    $flexi->save();
+                                }
+
+
+                                if($flexi->start_at_carbon->diffInHours($flexi->end_at_carbon) <= 10) {
+                                    Notification::make()
+                                        ->title($flexi->name . ' total time is ' . $flexi->remaining_time . ' only.')
+                                        ->warning()
+                                        ->send();
+                                }
                             }
 
                             // $record->computeAmount();
@@ -426,6 +604,8 @@ class DailySaleResource extends Resource
                                 $record->mode_of_payment = $data['mode_of_payment'];
                                 $record->save();
                             }
+
+                            $record->removeSalesReport();
 
                             Notification::make()
                                 ->title('Daily user successfully changed Pass.')

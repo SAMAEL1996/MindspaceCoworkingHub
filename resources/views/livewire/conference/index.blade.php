@@ -14,8 +14,8 @@
     @if($viewList)
         <div class="fi-tabs flex max-w-full gap-x-1 overflow-x-auto mx-auto py-5 shadow-sm" role="tablist">
             <x-filament::tabs label="Content tabs">
-
-                <x-filament::tabs.item
+                
+            <x-filament::tabs.item
                     :active="$activeTab === 'upcoming'"
                     wire:click="setActiveTab('upcoming')"
                 >

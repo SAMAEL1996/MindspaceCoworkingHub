@@ -5,11 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
-use Appstract\Meta\Metable;
 
 class FlexiUser extends Model
 {
-    use HasFactory, HasUid, Metable;
+    use HasFactory, HasUid;
 
     public static function boot() {
         parent::boot();
@@ -17,15 +16,23 @@ class FlexiUser extends Model
         static::created(function ($flexi) {
             $month = $flexi->start_at_carbon->format('F');
             $year = $flexi->start_at_carbon->format('Y');
+            $day = $flexi->start_at_carbon->day;
 
-            $sale = \App\Models\Sale::where('month', $month)->where('year', $year)->first();
-            if(!$sale) {
-                $sale = \App\Models\Sale::create(['month' => $month, 'year' => $year]);
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
             }
+            $monthlySale->total_flexi_users = (int)$monthlySale->total_flexi_users + 1;
+            $monthlySale->total_sales = (double)$monthlySale->total_sales + (double)$flexi->amount_paid;
+            $monthlySale->save();
 
-            $sale->total_flexi_users += 1;
-            $sale->total_sales += (double)$flexi->amount;
-            $sale->save();
+            $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
+            if(!$dailySale) {
+                $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
+            }
+            $dailySale->total_flexi_users = (int)$dailySale->total_flexi_users + 1;
+            $dailySale->total_sales = (double)$dailySale->total_sales + (double)$flexi->amount_paid;
+            $dailySale->save();
         });
     }
 
@@ -96,5 +103,80 @@ class FlexiUser extends Model
             $this->status = false;
             $this->save();
         }
+    }
+
+    public function checkPassIsExpired($daily_sale_id)
+    {
+        $dailySale = \App\Models\DailySale::find($daily_sale_id);
+        $timeInCarbon = $dailySale->time_in_carbon;
+        $timeOutCarbon = \Carbon\Carbon::now();
+
+        $consumed = $timeInCarbon->diffInMinutes($timeOutCarbon);
+        $timeNow = $this->end_at_carbon->subMinutes($consumed);
+
+        if($timeNow->lt($this->start_at_carbon)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function calculateAdditionalCharge($daily_sale_id, $filter = null)
+    {
+        if(!$this->checkPassIsExpired($daily_sale_id)) {
+            return 0.00;
+        }
+        
+        $dailySale = \App\Models\DailySale::find($daily_sale_id);
+        $timeInCarbon = $dailySale->time_in_carbon;
+        $timeOutCarbon = \Carbon\Carbon::now();
+
+        $dailyTotalTime = $timeInCarbon->diffInMinutes($timeOutCarbon);
+
+        $startAtCarbon = $this->start_at_carbon;
+        $endAtCarbon = $this->end_at_carbon;
+
+        $flexiTotalTime = $startAtCarbon->diffInMinutes($endAtCarbon);
+
+        $totalTime = $dailyTotalTime - $flexiTotalTime;
+
+        $now = \Carbon\Carbon::now();
+        $end = $now->copy()->addMinutes($totalTime);
+
+        if($filter == 'minutes') {
+            return $now->diffInMinutes($end);
+        }
+
+        $hours = $now->diffInHours($end);
+        if($hours < round($hours)) {
+            $totalHours = round($hours);
+        } else {
+            $totalHours = round($hours) + 1;
+        }
+
+        if($filter == 'hours') {
+            return $totalHours;
+        }
+
+        $amount = 0;
+        if($totalHours < 4) {
+            $amount = $totalHours * 65;
+        } elseif($totalHours == 5 || $totalHours == 4) {
+            $amount = 250;
+        } elseif($totalHours > 5 && $totalHours < 7) {
+            $excess = $totalHours - 5;
+            $additional = $excess * 65;
+            $amount = 250 + $additional;
+        } elseif($totalHours == 7 || $totalHours == 8) {
+            $amount = 350;
+        } elseif($totalHours > 8 && $totalHours < 11) {
+            $excess = $totalHours - 8;
+            $additional = $excess * 65;
+            $amount = 350 + $additional;
+        } else {
+            $amount = 500;
+        }
+
+        return $amount;
     }
 }

@@ -19,7 +19,7 @@ class CalendarWidget extends FullCalendarWidget
                 ->map(
                     fn (Conference $conference) => [
                         'id' => $conference->uid,
-                        'title' => $conference->event,
+                        'title' => $conference->event . ' - ' . $conference->host,
                         'color' => $conference->status == 'approve' ? '#239B56' : '#EB984E',
                         'start' => \Carbon\Carbon::parse($conference->start_at),
                         'end' => \Carbon\Carbon::parse($conference->start_at)->addHours($conference->duration),

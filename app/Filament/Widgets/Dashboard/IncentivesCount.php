@@ -50,7 +50,7 @@ class IncentivesCount extends BaseWidget
                     'Completed Meeting Room Booking',
                     Conference::whereMonth('start_at', Carbon::now()->month)
                                 ->whereYear('start_at', Carbon::now()->year)
-                                ->where('status', 'approve')
+                                ->where('status', 'finished')
                                 ->count()
                 )
                 ->icon('heroicon-o-clipboard-document-check')

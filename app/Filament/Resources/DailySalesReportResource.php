@@ -21,8 +21,7 @@ class DailySalesReportResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-                ->where('type', 'daily');
+        return parent::getEloquentQuery()->where('type', 'daily');
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -76,7 +75,11 @@ class DailySalesReportResource extends Resource
             ->bulkActions([
                 //
             ])
-            ->defaultSort(fn ($query) => $query->orderBy('month', 'asc')->orderBy('day', 'desc')->orderBy('year', 'desc'))
+            ->defaultPaginationPageOption(25)
+            ->defaultSort(function ($query) {
+                return $query->select('*', \DB::raw("STR_TO_DATE(CONCAT(year, '-', LPAD(month, 2, '0'), '-', LPAD(day, 2, '0')), '%Y-%m-%d') as combined_date"))
+                            ->orderBy('combined_date', 'asc');
+            })
             ->recordUrl(null);
     }
 

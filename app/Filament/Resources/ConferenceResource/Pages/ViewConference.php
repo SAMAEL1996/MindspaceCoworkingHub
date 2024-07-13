@@ -227,6 +227,8 @@ class ViewConference extends ViewRecord
                         $record->status = 'finished';
                         $record->save();
 
+                        $record->addCheckInToSalesReport();
+
                         Notification::make()
                             ->title('Conference booking successfully finished.')
                             ->success()

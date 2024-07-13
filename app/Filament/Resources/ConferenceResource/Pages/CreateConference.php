@@ -21,6 +21,14 @@ class CreateConference extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         $timeOfArrival = Carbon::parse($data['date'] . ' ' . $data['time']);
+        if($timeOfArrival->copy()->subHour()->isPast()) {
+            Notification::make()
+                ->title('Date is already past.')
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
         $timeOfLeave = $timeOfArrival->copy()->addHours((int)$data['duration']);
         $checkStart = $timeOfArrival->copy()->subHour();
         $checkEnd = $timeOfLeave->copy()->addHour();

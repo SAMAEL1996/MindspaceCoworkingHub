@@ -94,6 +94,30 @@ class Conference extends Model
         return $exceed * $package['succeeding_hours'];
     }
 
+    public function addCheckInToSalesReport()
+    {
+        $now = \Carbon\Carbon::now();
+        $month = $now->copy()->format('F');
+        $year = $now->copy()->format('Y');
+        $day = $now->copy()->day;
+
+        $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+        if(!$monthlySale) {
+            $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
+        }
+        $monthlySale->total_conference_users += 1;
+        $monthlySale->total_sales += $this->payment;
+        $monthlySale->save();
+
+        $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
+        if(!$dailySale) {
+            $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
+        }
+        $dailySale->total_conference_users += 1;
+        $dailySale->total_sales += $this->payment;
+        $dailySale->save();
+    }
+
     public static function getForm()
     {
         return [
@@ -148,7 +172,6 @@ class Conference extends Model
                         ->required()
                         ->displayFormat('d F Y')
                         ->timezone('Asia/Manila')
-                        ->minDate(now())
                         ->native(false),
                     FormComponents\Select::make('time')
                         ->label('Time')
@@ -191,9 +214,7 @@ class Conference extends Model
                             return ucfirst($state);
                         })
                         ->color(function($state, $record) {
-                            if($state == 'finished') {
-                                return 'primary';
-                            } elseif($state == 'approve') {
+                            if($state == 'approve') {
                                 return 'success';
                             } elseif($state == 'pending') {
                                 return 'warning';

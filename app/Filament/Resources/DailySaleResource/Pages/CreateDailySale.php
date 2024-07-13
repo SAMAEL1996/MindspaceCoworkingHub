@@ -36,7 +36,7 @@ class CreateDailySale extends CreateRecord
 
         $dailyPass = static::getModel()::create($saleData);
 
-        $dailyPass->addCheckInToMonthlySalesReport();
+        $dailyPass->addCheckInToSalesReport();
 
         return $dailyPass;
     }
