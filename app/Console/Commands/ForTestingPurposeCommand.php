@@ -29,6 +29,6 @@ class ForTestingPurposeCommand extends Command
     {
         $now = \Carbon\Carbon::now();
         $user = \App\Models\User::find(1);
-        $user->addMeta('test', $now->format(config('app.date_time_format')));
+        $user->addOrUpdateMeta('latest-test-run', $now->format(config('app.date_time_format')));
     }
 }
