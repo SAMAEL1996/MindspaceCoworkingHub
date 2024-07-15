@@ -14,6 +14,8 @@ use Filament\Tables\Columns as TableColumns;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Notifications\Notification;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
 
 class MonthlyUserResource extends Resource
 {
@@ -80,6 +82,37 @@ class MonthlyUserResource extends Resource
                             return redirect()->to(MonthlyUserResource::getUrl('index'));
                         })
                         ->visible(function($record) {
+                            return $record->is_expired ? false : true;
+                        }),
+                    Tables\Actions\Action::make('Send Reminder')
+                        ->requiresConfirmation()
+                        ->action(function($record) {
+                            $apikey = config('app.semaphore_key');
+
+                            $expireIn = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($record->date_finish)->addDay());
+                            $content = 'You monthly pass subscription will expire in ' . $expireIn . ' day/s. Please renew your subscription to continue unlimited coworking space access. Thank you!';
+                            $params = [
+                                'apikey' => $apikey,
+                                'number' => $record->contact_no,
+                                'message' => $content,
+                            ];
+
+                            $client = new Client();
+                            $request = new Request('POST', "https://api.semaphore.co/api/v4/messages?" . http_build_query($params));
+                            $res = $client->sendAsync($request)->wait();
+
+                            Notification::make()
+                                ->title('Monthly user successfully send expiry notification.')
+                                ->success()
+                                ->send();
+
+                            return redirect()->to(MonthlyUserResource::getUrl('index'));
+                        })
+                        ->visible(function($record) {
+                            if(!auth()->user()->hasRole('Super Administrator')) {
+                                return false;
+                            }
+
                             return $record->is_expired ? false : true;
                         })
                 ])
