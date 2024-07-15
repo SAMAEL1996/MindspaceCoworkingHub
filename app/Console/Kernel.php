@@ -12,8 +12,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('test:for-testing-purpose')->everyMinute();
-        // $schedule->command('mindspace:send-flexi-reminder')->everyMinute();
+        // test command
+        $schedule->command('test:for-testing-purpose')->twiceDaily(8, 20);
+
+        // monthly user reminder for 3 days before expire
+        $schedule->command('app:monthly-reminder expiring')->dailyAt('07:00');
+
+        // monthly user reminder for expired pass
+        $schedule->command('app:monthly-reminder expired')->dailyAt('23:59');
     }
 
     /**

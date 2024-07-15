@@ -463,6 +463,8 @@ class DailySaleResource extends Resource
 
 
                                 if($flexi->start_at_carbon->diffInHours($flexi->end_at_carbon) <= 10) {
+                                    $flexi->sendSmsReminder();
+
                                     Notification::make()
                                         ->title($flexi->name . ' total time is ' . $flexi->remaining_time . ' only.')
                                         ->warning()

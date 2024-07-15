@@ -179,4 +179,31 @@ class FlexiUser extends Model
 
         return $amount;
     }
+
+    public function sendSmsReminder()
+    {
+        $now = \Carbon\Carbon::now();
+
+        $apikey = config('app.semaphore_key');
+
+        $content = 'You have ' . $this->remaining_time . ' remaining consumable hours on your Flexi Pass. Thank you. ';
+        $params = [
+            'apikey' => $apikey,
+            'number' => $this->contact_no,
+            'message' => $content,
+        ];
+
+        try {
+
+            $client = new Client();
+
+            $request = new Request('POST', "https://api.semaphore.co/api/v4/messages?" . http_build_query($params));
+            $res = $client->sendAsync($request)->wait();
+
+        } catch (\Exception $e) {
+
+            \Log::error($this->name.' send sms error on '.$now->copy()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
+
+        }
+    }
 }
