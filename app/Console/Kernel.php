@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('test:for-testing-purpose')->everyMinute();
+        $schedule->command('test:for-testing-purpose')->cron('* * * * *');;
         // $schedule->command('mindspace:send-flexi-reminder')->everyMinute();
     }
 
