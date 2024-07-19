@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns as TableColumns;
 use Filament\Tables\Grouping\Group;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components as InfolistComponents;
 
 class DailySalesReportResource extends Resource
 {
@@ -79,8 +81,21 @@ class DailySalesReportResource extends Resource
             ->defaultSort(function ($query) {
                 return $query->select('*', \DB::raw("STR_TO_DATE(CONCAT(year, '-', LPAD(month, 2, '0'), '-', LPAD(day, 2, '0')), '%Y-%m-%d') as combined_date"))
                             ->orderBy('combined_date', 'asc');
-            })
-            ->recordUrl(null);
+            });
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistComponents\Section::make('Transactions')
+                    ->schema([
+                        InfolistComponents\ViewEntry::make('id')
+                            ->label('')
+                            ->view('infolists.components.daily-sales-report.transactions'),
+                    ])
+                    ->columnSpan('full')
+            ]);
     }
 
     public static function getRelations(): array
@@ -95,6 +110,7 @@ class DailySalesReportResource extends Resource
         return [
             'index' => Pages\ListDailySalesReports::route('/'),
             'create' => Pages\CreateDailySalesReport::route('/create'),
+            'view' => Pages\ViewDailySalesReport::route('/{record}'),
             'edit' => Pages\EditDailySalesReport::route('/{record}/edit'),
         ];
     }
