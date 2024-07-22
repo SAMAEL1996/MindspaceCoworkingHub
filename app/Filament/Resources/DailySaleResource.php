@@ -162,10 +162,6 @@ class DailySaleResource extends Resource
                                             FormComponents\TextInput::make('amount_to_paid')
                                                 ->label('Amount to Paid')
                                                 ->formatStateUsing(function($record, $get) {
-                                                    if($record->is_flexi || $record->is_monthly) {
-                                                        return $record->amount_paid;
-                                                    }
-                                                    
                                                     $computeShowTime = $record->computeShowTime();
                                                     return $computeShowTime['amount_to_paid'];
                                                 })
