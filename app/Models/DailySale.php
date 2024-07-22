@@ -216,12 +216,11 @@ class DailySale extends Model
             $amount = 500;
         }
 
-        if($this->is_flexi) {
-            $amount = $this->amount_paid;
-        }
-
-        if($this->is_monthly) {
-            $amount = $this->amount_paid;
+        if($this->is_flexi || $this->is_monthly) {
+            return [
+                'total_hours_accumulated' => $totalHours,
+                'amount_to_paid' => $this->amount_paid
+            ];
         }
 
         if($removeDiscount) {
