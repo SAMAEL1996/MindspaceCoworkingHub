@@ -336,6 +336,20 @@ class DailySale extends Model
                         ]),
                     FormComponents\Textarea::make('description')
                         ->rows(5),
+                    FormComponents\Grid::make(2)
+                        ->schema([
+                            FormComponents\TextInput::make('amount_paid')
+                                ->numeric(),
+                            FormComponents\Select::make('mode_of_payment')
+                                ->options([
+                                    'Cash' => 'Cash',
+                                    'GCash' => 'GCash',
+                                    'Bank Transfer' => 'Bank Transfer',
+                                ])
+                                ->native(false)
+                                ->required(),
+                        ])
+                        ->visibleOn('edit')
                 ]),
         ];
     }

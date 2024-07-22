@@ -16,4 +16,11 @@ class EditDailySale extends EditRecord
             
         ];
     }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['staff_name'] = $this->record->staffIn->user->name;
+    
+        return $data;
+    }
 }

@@ -619,8 +619,9 @@ class DailySaleResource extends Resource
                         ->modalWidth(MaxWidth::Large)
                         ->visible(function($record) {
                             return !$record->is_flexi && !$record->is_monthly ? true : false;
-                        })
-
+                        }),
+                    Tables\Actions\EditAction::make()
+                        ->visible(auth()->user()->hasRole('Super Administrator'))
                 ])
                 ->visible(function($record) {
                     if(!$record->status) {
