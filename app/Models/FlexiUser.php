@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
 
 class FlexiUser extends Model
 {
