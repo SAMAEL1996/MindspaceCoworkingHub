@@ -121,6 +121,8 @@ class MonthlyUserResource extends Resource
             ->bulkActions([
 
             ])
+            ->defaultSort('is_active', 'desc')
+            ->defaultPaginationPageOption(25)
             ->recordUrl(null);
     }
 

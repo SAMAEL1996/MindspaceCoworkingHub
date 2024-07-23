@@ -57,6 +57,11 @@ class Index extends Component implements HasForms, HasTable, HasActions
 
     protected function applyDefaultSortingToTableQuery(Builder $query): Builder
     {
+        if($this->activeTab === 'upcoming') {
+            return $query
+                ->orderBy('start_at', 'asc');
+        }
+
         return $query
             ->orderBy('status')
             ->orderBy('start_at', 'desc');
