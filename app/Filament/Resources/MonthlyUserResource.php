@@ -114,7 +114,9 @@ class MonthlyUserResource extends Resource
                             }
 
                             return $record->is_expired ? false : true;
-                        })
+                        }),
+                    Tables\Actions\EditAction::make()
+                        ->visible(auth()->user()->hasRole('Super Administrator'))
                 ])
                 ->icon('heroicon-o-ellipsis-horizontal')
             ])

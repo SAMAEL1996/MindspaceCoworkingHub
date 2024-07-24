@@ -55,6 +55,11 @@ class Staff extends Model
         return $this->hasMany(\App\Models\Attendance::class);
     }
 
+    public function errors()
+    {
+        return $this->hasMany(\App\Models\ErrorLog::class);
+    }
+
     public function profile()
     {
         return $this->hasOne(\App\Models\Profile::class);

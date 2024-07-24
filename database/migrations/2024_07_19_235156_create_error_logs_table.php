@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('subjectable_type')->nullable();
             $table->bigInteger('subjectable_id')->nullable();
             $table->string('reason')->nullable();
-            $table->string('data');
+            $table->text('data');
             $table->timestamps();
         });
     }

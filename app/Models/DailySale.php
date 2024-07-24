@@ -351,6 +351,26 @@ class DailySale extends Model
                         ])
                         ->visibleOn('edit')
                 ]),
+            FormComponents\Fieldset::make('Error Log')
+                ->schema([
+                    FormComponents\Grid::make(2)
+                        ->schema([
+                            FormComponents\Select::make('error_staff_id')
+                                ->options(function() {
+                                    $options = [];
+
+                                    foreach(\App\Models\Staff::where('is_active', true)->get() as $staff) {
+                                        $options[$staff->id] = $staff->user->name;
+                                    }
+
+                                    return $options;
+                                })
+                                ->native(false),
+                            FormComponents\Textarea::make('reason')
+                                ->rows(5),
+                        ])
+                ])
+                ->visibleOn('edit'),
         ];
     }
 }

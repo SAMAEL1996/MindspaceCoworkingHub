@@ -24,9 +24,7 @@ class FlexiUserResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                //
-            ]);
+            ->schema(FlexiUser::getForm());
     }
 
     public static function table(Table $table): Table
@@ -66,7 +64,8 @@ class FlexiUserResource extends Resource
                 //
             ])
             ->actions([
-                //
+                Tables\Actions\EditAction::make()
+                    ->visible(auth()->user()->hasRole('Super Administrator'))
             ])
             ->bulkActions([
                 //
