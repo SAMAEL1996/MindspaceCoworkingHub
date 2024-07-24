@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 
 class CreateSalesRecord extends Command
 {
@@ -33,5 +34,7 @@ class CreateSalesRecord extends Command
 
         \App\Models\Sale::firstOrNew(['type' => 'monthly', 'month' => $month, 'year' => $year]);
         \App\Models\Sale::firstOrNew(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
+
+        Artisan::call('db:seed --class=UpdateSalesTable');
     }
 }
