@@ -52,7 +52,6 @@ class MonthlyUser extends Model
     ];
 
     protected $appends = [
-        'remaining_time',
         'date_start_carbon',
         'date_finish_carbon',
     ];
@@ -95,6 +94,26 @@ class MonthlyUser extends Model
                     FormComponents\TextInput::make('name')
                         ->required(),
                     FormComponents\TextInput::make('contact_no'),
+                    FormComponents\Fieldset::make('Error Log')
+                        ->schema([
+                            FormComponents\Grid::make(2)
+                                ->schema([
+                                    FormComponents\Select::make('error_staff_id')
+                                        ->options(function() {
+                                            $options = [];
+        
+                                            foreach(\App\Models\Staff::where('is_active', true)->get() as $staff) {
+                                                $options[$staff->id] = $staff->user->name;
+                                            }
+        
+                                            return $options;
+                                        })
+                                        ->native(false),
+                                    FormComponents\Textarea::make('reason')
+                                        ->rows(5),
+                                ])
+                        ])
+                        ->visibleOn('edit'),
                 ])
         ];
     }

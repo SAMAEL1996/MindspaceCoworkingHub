@@ -339,7 +339,41 @@ class DailySale extends Model
                         ]),
                     FormComponents\Textarea::make('description')
                         ->rows(5),
+                    FormComponents\Grid::make(2)
+                        ->schema([
+                            FormComponents\TextInput::make('amount_paid')
+                                ->numeric(),
+                            FormComponents\Select::make('mode_of_payment')
+                                ->options([
+                                    'Cash' => 'Cash',
+                                    'GCash' => 'GCash',
+                                    'Bank Transfer' => 'Bank Transfer',
+                                ])
+                                ->native(false)
+                                ->required(),
+                        ])
+                        ->visibleOn('edit')
                 ]),
+            FormComponents\Fieldset::make('Error Log')
+                ->schema([
+                    FormComponents\Grid::make(2)
+                        ->schema([
+                            FormComponents\Select::make('error_staff_id')
+                                ->options(function() {
+                                    $options = [];
+
+                                    foreach(\App\Models\Staff::where('is_active', true)->get() as $staff) {
+                                        $options[$staff->id] = $staff->user->name;
+                                    }
+
+                                    return $options;
+                                })
+                                ->native(false),
+                            FormComponents\Textarea::make('reason')
+                                ->rows(5),
+                        ])
+                ])
+                ->visibleOn('edit'),
         ];
     }
 }

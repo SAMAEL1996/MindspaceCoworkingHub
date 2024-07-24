@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
+use Filament\Forms\Components as FormComponents;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class FlexiUser extends Model
 {
@@ -60,6 +62,11 @@ class FlexiUser extends Model
     public function card()
     {
         return $this->hasOne(\App\Models\Card::class, 'card_id');
+    }
+
+    public function subject(): MorphOne
+    {
+        return $this->morphOne(\App\Models\ErrorLog::class, 'subjectable');
     }
 
     public function getRemainingTimeAttribute()
@@ -207,5 +214,45 @@ class FlexiUser extends Model
             \Log::error($this->name.' send sms error on '.$now->copy()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
 
         }
+    }
+
+    public static function getForm()
+    {
+        return [
+            FormComponents\Grid::make(1)
+                ->schema([
+                    FormComponents\TextInput::make('name')
+                        ->required(),
+                    FormComponents\TextInput::make('contact_no'),
+                    FormComponents\TextInput::make('amount')
+                        ->label('Amount Paid')
+                        ->numeric()
+                        ->minValue(1)
+                        ->maxValue(1500)
+                        ->required()
+                        ->default(1500)
+                        ->helperText('Flexi Pass Rate: PHP 1,500.00'),
+                    FormComponents\Fieldset::make('Error Log')
+                        ->schema([
+                            FormComponents\Grid::make(2)
+                                ->schema([
+                                    FormComponents\Select::make('error_staff_id')
+                                        ->options(function() {
+                                            $options = [];
+        
+                                            foreach(\App\Models\Staff::where('is_active', true)->get() as $staff) {
+                                                $options[$staff->id] = $staff->user->name;
+                                            }
+        
+                                            return $options;
+                                        })
+                                        ->native(false),
+                                    FormComponents\Textarea::make('reason')
+                                        ->rows(5),
+                                ])
+                        ])
+                        ->visibleOn('edit'),
+                ])
+        ];
     }
 }
