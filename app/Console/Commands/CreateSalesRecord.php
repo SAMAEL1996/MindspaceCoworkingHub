@@ -32,8 +32,8 @@ class CreateSalesRecord extends Command
         $year = $now->copy()->format('Y');
         $day = $now->copy()->day;
 
-        \App\Models\Sale::firstOrNew(['type' => 'monthly', 'month' => $month, 'year' => $year]);
-        \App\Models\Sale::firstOrNew(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
+        \App\Models\Sale::firstOrCreate(['type' => 'monthly', 'month' => $month, 'year' => $year]);
+        \App\Models\Sale::firstOrCreate(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
 
         Artisan::call('db:seed --class=UpdateSalesTable');
     }

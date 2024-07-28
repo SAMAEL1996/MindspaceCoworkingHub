@@ -22,7 +22,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:monthly-reminder expired')->dailyAt('00:00');
 
         // create sales record monthly/daily
-        $schedule->command('app:create-sales-record')->dailyAt('00:01');
+        $schedule->command('app:create-sales-record')->dailyAt('00:00');
     }
 
     /**
