@@ -30,8 +30,8 @@ class CreateConference extends CreateRecord
             $this->halt();
         }
         $timeOfLeave = $timeOfArrival->copy()->addHours((int)$data['duration']);
-        $checkStart = $timeOfArrival->copy()->subHour();
-        $checkEnd = $timeOfLeave->copy()->addHour();
+        $checkStart = $timeOfArrival->copy()->subMinutes(30);
+        $checkEnd = $timeOfLeave->copy()->addMinutes(30);
 
         $checkDateTime = Conference::getCheckTimeSchedules($checkStart, $checkEnd);
 

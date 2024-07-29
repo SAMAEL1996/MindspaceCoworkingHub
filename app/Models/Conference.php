@@ -70,7 +70,7 @@ class Conference extends Model
         }
 
         foreach($schedules as $schedule) {
-            if($checkStart->between($schedule->start_at_carbon->subHour(), $schedule->end_at_carbon->addHour()) || $checkEnd->between($schedule->start_at_carbon->subHour(), $schedule->end_at_carbon->addHour())) {
+            if($checkStart->between($schedule->start_at_carbon, $schedule->end_at_carbon) || $checkEnd->between($schedule->start_at_carbon, $schedule->end_at_carbon)) {
                 return true;
             }
         }
