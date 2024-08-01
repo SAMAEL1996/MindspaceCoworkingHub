@@ -66,6 +66,19 @@ class DailySaleResource extends Resource
                     ->description(function($state, $record) {
                         return $record->name;
                     }),
+                TableColumns\TextColumn::make('is_monthly')
+                    ->label('Type')
+                    ->formatStateUsing(function($record) {
+                        if($record->is_flexi) {
+                            return 'Flexi';
+                        }
+
+                        if($record->is_monthly) {
+                            return 'Monthly';
+                        }
+                        
+                        return 'Daily';
+                    }),
                 TableColumns\TextColumn::make('time_in')
                     ->label('Time In')
                     ->formatStateUsing(function($state, $record) {

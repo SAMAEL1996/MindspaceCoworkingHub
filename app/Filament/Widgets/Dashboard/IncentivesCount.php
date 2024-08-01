@@ -37,7 +37,7 @@ class IncentivesCount extends BaseWidget
                                 ->count()
                 )
                 ->icon('heroicon-o-users')
-                ->description(new HtmlString('<b>TARGET</b>: 10 flexi pass.')),
+                ->description(new HtmlString('<b>TARGET</b>: 25 flexi pass.')),
             Card::make(
                     'Add New Monthly Pass',
                     MonthlyUser::whereMonth('date_start', Carbon::now()->month)
@@ -45,7 +45,7 @@ class IncentivesCount extends BaseWidget
                                 ->count()
                 )
                 ->icon('heroicon-o-user-circle')
-                ->description(new HtmlString('<b>TARGET</b>: 10 monthly users.')),
+                ->description(new HtmlString('<b>TARGET</b>: 15 monthly users.')),
             Card::make(
                     'Completed Meeting Room Booking',
                     Conference::whereMonth('start_at', Carbon::now()->month)
