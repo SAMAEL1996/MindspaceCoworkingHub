@@ -30,7 +30,7 @@ class CreateStaff extends CreateRecord
             'name' => $data['name'],
             'email' => $data['email'],
             'contact_no' => $data['contact_no'],
-            'password' => $data['password'],
+            'password' => bcrypt($data['password']),
             'is_staff' => true,
             'status' => true
         ];
