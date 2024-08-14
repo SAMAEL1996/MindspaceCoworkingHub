@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns as TableColumns;
+use Filament\Notifications\Notification;
 
 class FlexiUserResource extends Resource
 {
@@ -64,8 +65,37 @@ class FlexiUserResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->visible(auth()->user()->hasRole('Super Administrator'))
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make()
+                        ->visible(auth()->user()->hasRole('Super Administrator')),
+                    Tables\Actions\Action::make('Renew Pass')
+                        ->requiresConfirmation()
+                        ->action(function($record) {
+                            $newRecord = $record->replicate();
+
+                            $remainingMinutes = $record->start_at_carbon->diffInMinutes($record->end_at_carbon);
+
+                            $record->card_id = null;
+                            $record->end_at = $record->start_at_carbon->toDateTimeString();
+                            $record->status = false;
+                            $record->save();
+
+                            $newRecord->start_at = \Carbon\Carbon::now();
+                            $newRecord->end_at = \Carbon\Carbon::now()->addHours(50)->addMinutes($remainingMinutes);
+                            $newRecord->save();
+
+                            Notification::make()
+                                ->title('Flexi user successfully renew.')
+                                ->success()
+                                ->send();
+
+                            return redirect()->to(FlexiUserResource::getUrl('index'));
+                        })
+                        ->visible(function($record) {
+                            return $record->status ? true : false;
+                        }),
+                ])
+                ->icon('heroicon-o-ellipsis-horizontal')
             ])
             ->bulkActions([
                 //
