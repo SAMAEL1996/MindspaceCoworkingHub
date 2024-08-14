@@ -116,7 +116,38 @@ class MonthlyUserResource extends Resource
                             return $record->is_expired ? false : true;
                         }),
                     Tables\Actions\EditAction::make()
-                        ->visible(auth()->user()->hasRole('Super Administrator'))
+                        ->visible(auth()->user()->hasRole('Super Administrator')),
+                    Tables\Actions\Action::make('Re-new Pass')
+                        ->requiresConfirmation()
+                        ->action(function($record) {
+                            $newRecord = $record->replicate();
+
+                            $record->card_id = null;
+                            $record->is_expired = true;
+                            $record->save();
+
+                            if($newRecord->date_finish_carbon->isPast()) {
+                                $newRecord->date_start = \Carbon\Carbon::now()->format('Y-m-d');
+                                $newRecord->date_finish = \Carbon\Carbon::now()->addMonth()->subDay()->format('Y-m-d');
+                                $newRecord->save();
+                            } else {
+                                $startDate = \Carbon\Carbon::parse($record->date_start)->addMonth();
+
+                                $newRecord->date_start = $startDate->copy()->format('Y-m-d');
+                                $newRecord->date_finish = $startDate->copy()->addMonth()->subDay()->format('Y-m-d');
+                                $newRecord->save();
+                            }
+
+                            Notification::make()
+                                ->title('Monthly user successfully renew.')
+                                ->success()
+                                ->send();
+
+                            return redirect()->to(MonthlyUserResource::getUrl('index'));
+                        })
+                        ->visible(function($record) {
+                            return $record->is_expired ? false : true;
+                        }),
                 ])
                 ->icon('heroicon-o-ellipsis-horizontal')
             ])
