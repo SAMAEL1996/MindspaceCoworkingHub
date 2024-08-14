@@ -36,7 +36,6 @@ class MonthlyReminder extends Command
 
         foreach($monthlyUsers as $monthly) {
             $expireIn = $now->copy()->diffInDays(\Carbon\Carbon::parse($monthly->date_finish)->addDay());
-            dd($monthly, $expireIn);
             
             if($expireIn == 3 && $type == 'expiring'){
                 $content = 'Your monthly pass subscription will expire in ' . $expireIn . ' day/s. Please renew your subscription to continue unlimited coworking space access. Thank you!';
