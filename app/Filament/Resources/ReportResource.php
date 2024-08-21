@@ -103,6 +103,7 @@ class ReportResource extends Resource
 
     public static function canViewAny(): bool
     {
+        return !auth()->user()->is_staff;
         return auth()->user()->can('view reports');
     }
 }

@@ -71,13 +71,17 @@ class ListCashLogs extends ListRecords
                     $user = auth()->user();
 
                     $latestCashHistory = $user->cashLogs()->latest()->first();
+                    $debits = $latestCashHistory->items()->where('in', 0.00)->sum('out');
+                    $credts = $latestCashHistory->items()->where('out', 0.00)->sum('in');
+
+                    $total = (double)$latestCashHistory->cash_in + (double)$credts - (double)$debits;
 
                     Session::put('cashier', false);
                     
                     $cashHistory = $latestCashHistory->update([
                         'cash_out' => $data['amount'],
                         'date_cash_out' => \Carbon\Carbon::now(),
-                        'total_sales' =>  $data['amount'] - $latestCashHistory->cash_in,
+                        'total_sales' =>  $data['amount'] - $total,
                         'status' => false
                     ]);
 

@@ -109,7 +109,9 @@ class Index extends Component implements HasForms, HasTable, HasActions
                             return 'warning';
                         } elseif($state == 'past') {
                             return 'gray';
-                        } 
+                        } elseif($state == 'cancelled') {
+                            return 'danger';
+                        }
                     }),
             ])
             ->filters([

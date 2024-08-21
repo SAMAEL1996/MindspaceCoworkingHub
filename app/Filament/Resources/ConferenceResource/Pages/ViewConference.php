@@ -245,6 +245,29 @@ class ViewConference extends ViewRecord
 
                         return $record->is_paid;
                     }),
+                Actions\Action::make('cancel')
+                    ->label('Mark as Cancel')
+                    ->requiresConfirmation()
+                    ->action(function($record) {
+                        $record->status = 'cancelled';
+                        $record->save();
+
+                        Notification::make()
+                            ->title('Conference booking successfully cancelled.')
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(function($record) {
+                        if(!auth()->user()->can('edit conferences')) {
+                            return false;
+                        }
+
+                        if($record->status == 'cancelled') {
+                            return false;
+                        }
+
+                        return !$record->is_paid;
+                    }),
             ])
             ->label('Action')
             ->button(),

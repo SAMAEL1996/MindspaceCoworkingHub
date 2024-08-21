@@ -65,7 +65,8 @@ class DailySaleResource extends Resource
                     })
                     ->description(function($state, $record) {
                         return $record->name;
-                    }),
+                    })
+                    ->searchable(['name']),
                 TableColumns\TextColumn::make('is_monthly')
                     ->label('Type')
                     ->formatStateUsing(function($record) {
