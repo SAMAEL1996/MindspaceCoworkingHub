@@ -34,14 +34,16 @@ class FlexiUserResource extends Resource
             ->columns([
                 TableColumns\TextColumn::make('card_id')
                     ->label('Card'),
-                TableColumns\TextColumn::make('name'),
+                TableColumns\TextColumn::make('name')
+                    ->searchable(),
                 TableColumns\TextColumn::make('contact_no')
                     ->label('Contact'),
                 TableColumns\TextColumn::make('start_at')
                     ->label('Date Start')
                     ->date(),
                 TableColumns\TextColumn::make('remaining_time')
-                    ->label('Remaining Time'),
+                    ->label('Remaining Time')
+                    ->sortable(),
                 TableColumns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()

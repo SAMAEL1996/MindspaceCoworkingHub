@@ -35,8 +35,10 @@ class MonthlyUserResource extends Resource
         return $table
             ->columns([
                 TableColumns\TextColumn::make('card.code')
-                    ->label('Card'),
-                TableColumns\TextColumn::make('name'),
+                    ->label('Card')
+                    ->searchable(),
+                TableColumns\TextColumn::make('name')
+                    ->searchable(),
                 TableColumns\TextColumn::make('contact_no')
                     ->label('Contact'),
                 TableColumns\TextColumn::make('date_start')
@@ -61,6 +63,7 @@ class MonthlyUserResource extends Resource
                     ->formatStateUsing(function($state, $record) {
                         return \Carbon\Carbon::parse($record->date_finish)->addDay()->diffForHumans();
                     })
+                    ->sortable()
             ])
             ->filters([
 
