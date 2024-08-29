@@ -42,8 +42,7 @@ class FlexiUserResource extends Resource
                     ->label('Date Start')
                     ->date(),
                 TableColumns\TextColumn::make('remaining_time')
-                    ->label('Remaining Time')
-                    ->sortable(),
+                    ->label('Remaining Time'),
                 TableColumns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
