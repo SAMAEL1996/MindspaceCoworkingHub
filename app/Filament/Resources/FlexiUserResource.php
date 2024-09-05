@@ -40,9 +40,14 @@ class FlexiUserResource extends Resource
                     ->label('Contact'),
                 TableColumns\TextColumn::make('start_at')
                     ->label('Date Start')
-                    ->date(),
-                TableColumns\TextColumn::make('remaining_time')
-                    ->label('Remaining Time'),
+                    ->date()
+                    ->sortable(),
+                TableColumns\TextColumn::make('remaining')
+                    ->label('Remaining Time')
+                    ->formatStateUsing(function($record) {
+                        return $record->remaining_time;
+                    })
+                    ->sortable(),
                 TableColumns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
