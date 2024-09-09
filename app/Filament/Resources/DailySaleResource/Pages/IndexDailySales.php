@@ -217,6 +217,7 @@ class IndexDailySales extends Page
                         $data['is_active'] = false;
                         $data['paid'] = $data['amount'] >= 1500 ? true : false;
                         $data['status'] = true;
+                        $data['remaining'] = \Carbon\Carbon::now()->diffInMinutes(\Carbon\Carbon::now()->addHours(50));
     
                         $flexi = \App\Models\FlexiUser::create($data);
 

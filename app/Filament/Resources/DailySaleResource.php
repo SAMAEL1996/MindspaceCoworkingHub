@@ -475,6 +475,8 @@ class DailySaleResource extends Resource
                                     $flexi->save();
                                 }
 
+                                $flexi->remaining = $flexi->start_at_carbon->diffInMinutes($flexi->end_at_carbon);
+                                $flexi->save();
 
                                 if($flexi->start_at_carbon->diffInHours($flexi->end_at_carbon) <= 10) {
                                     $flexi->sendSmsReminder();
