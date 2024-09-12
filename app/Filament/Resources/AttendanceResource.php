@@ -183,6 +183,7 @@ class AttendanceResource extends Resource
                                         return $record->restday_overtime ? 'Yes' : 'No';
                                     }),
                             ])
+                            ->fromTable()
                             ->withFilename('attendances-'.date('Y-m-d'))
                             ->withWriterType(\Maatwebsite\Excel\Excel::CSV)
                     ])
