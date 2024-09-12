@@ -78,6 +78,11 @@ class Transactions extends Component implements HasForms, HasInfolists, HasTable
                         'Bank Transfer' => 'Bank Transfer',
                     ])
             ])
+            ->filtersTriggerAction(
+                fn (TableActions\Action $action) => $action
+                    ->button()
+                    ->label('Filter'),
+            )
             ->actions([
                 //
             ])

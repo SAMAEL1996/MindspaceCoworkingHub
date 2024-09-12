@@ -122,7 +122,14 @@ class CashLogResource extends Resource
                         InfolistComponents\ViewEntry::make('items')
                             ->label('')
                             ->view('infolists.components.cash-log.items')
+                    ]),
+                InfolistComponents\Section::make('Check Outs')
+                    ->schema([
+                        InfolistComponents\ViewEntry::make('cash_out')
+                            ->label('')
+                            ->view('infolists.components.cash-log.check-outs')
                     ])
+                    ->visible(auth()->user()->hasRole('Super Administrator')),
             ]);
     }
 

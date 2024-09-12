@@ -24,6 +24,7 @@ use Filament\Tables\Filters;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Actions as TableActions;
 
 class DailySaleResource extends Resource
 {
@@ -165,6 +166,11 @@ class DailySaleResource extends Resource
                         'Bank Transfer' => 'Bank Transfer'
                     ])
             ])
+            ->filtersTriggerAction(
+                fn (TableActions\Action $action) => $action
+                    ->button()
+                    ->label('Filter'),
+            )
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('End Time')

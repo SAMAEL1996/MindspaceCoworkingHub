@@ -26,6 +26,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components as FormComponents;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions as TableActions;
 
 class AttendanceResource extends Resource
 {
@@ -142,6 +143,11 @@ class AttendanceResource extends Resource
                             );
                     }),
             ])
+            ->filtersTriggerAction(
+                fn (TableActions\Action $action) => $action
+                    ->button()
+                    ->label('Filter'),
+            )
             ->headerActions([
                 ExportAction::make()
                     ->exports([
