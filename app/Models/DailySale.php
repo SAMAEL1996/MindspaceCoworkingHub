@@ -198,6 +198,12 @@ class DailySale extends Model
         }
 
         $amount = 0;
+        $wholeDay = false;
+        if($totalHours > 24) {
+            $wholeDay = true;
+            $totalHours = $totalHours - 24;
+        }
+
         if($totalHours < 4) {
             $amount = $totalHours * 65;
         } elseif($totalHours == 5 || $totalHours == 4) {
@@ -214,6 +220,10 @@ class DailySale extends Model
             $amount = 350 + $additional;
         } else {
             $amount = 500;
+        }
+
+        if($wholeDay) {
+            $amount = $amount + 500;
         }
 
         if($this->is_flexi || $this->is_monthly) {
