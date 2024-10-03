@@ -59,7 +59,7 @@ class DailySaleResource extends Resource
                     ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy('date', 'DESC'))
             )
             ->columns([
-                TableColumns\TextColumn::make('card_id')
+                TableColumns\TextColumn::make('card.code')
                     ->label('Guest')
                     ->formatStateUsing(function($state, $record) {
                         return $record->card->code;
@@ -67,7 +67,7 @@ class DailySaleResource extends Resource
                     ->description(function($state, $record) {
                         return $record->name;
                     })
-                    ->searchable(['name']),
+                    ->searchable(['code', 'name']),
                 TableColumns\TextColumn::make('is_monthly')
                     ->label('Type')
                     ->formatStateUsing(function($record) {
