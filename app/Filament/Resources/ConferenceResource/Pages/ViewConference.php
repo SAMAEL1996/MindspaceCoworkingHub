@@ -130,11 +130,41 @@ class ViewConference extends ViewRecord
                             ->helperText(function($record) {
                                 return '50% of Conference Rate: PHP ' . number_format($record->amount/2, 2);
                             }),
+                        FormComponents\Select::make('mop')
+                            ->label('Mode of Payment')
+                            ->options([
+                                'Cash' => 'Cash',
+                                'GCash' => 'GCash',
+                                'Bank Transfer' => 'Bank Transfer'
+                            ])
+                            ->required()
+                            ->native(false)
+                            ->columnSpan('full')
                     ])
                     ->action(function($data, $record) {
                         $record->payment = $data['amount'];
+                        $record->mop_reservation_fee = $data['mop'];
                         $record->has_reservation_fee = true;
                         $record->save();
+
+                        $sale = \App\Models\DailySale::create([
+                            'date' => \Carbon\Carbon::now()->format('Y-m-d'),
+                            'card_id' => 38,
+                            'name' => $record->host,
+                            'description' => 'Conference',
+                            'time_in' => \Carbon\Carbon::now(),
+                            'time_in_staff_id' => auth()->user()->id,
+                            'time_out' => \Carbon\Carbon::now(),
+                            'time_out_staff_id' => auth()->user()->id,
+                            'default_amount' => true,
+                            'amount_paid' => $data['amount'],
+                            'apply_discount' => false,
+                            'discount' => 0,
+                            'is_flexi' => false,
+                            'is_monthly' => false,
+                            'status' => false,
+                            'mode_of_payment' => $data['mop']
+                        ]);
 
                         Notification::make()
                             ->title('Reservation fee successfully paid.')
@@ -179,9 +209,9 @@ class ViewConference extends ViewRecord
                                 FormComponents\Select::make('mode_of_payment')
                                     ->label('Mode of Payment')
                                     ->options([
-                                        'Cash',
-                                        'GCash',
-                                        'Bank Transfer'
+                                        'Cash' => 'Cash',
+                                        'GCash' => 'GCash',
+                                        'Bank Transfer' => 'Bank Transfer'
                                     ])
                                     ->required()
                                     ->native(false)

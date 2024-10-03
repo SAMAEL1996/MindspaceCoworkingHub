@@ -137,8 +137,6 @@ class Conference extends Model
             FormComponents\TextInput::make('host')
                 ->label('Name of POC')
                 ->required(),
-            FormComponents\TextInput::make('email')
-                ->email(),
             FormComponents\TextInput::make('contact_no')
                 ->tel()
                 ->required(),
@@ -222,6 +220,22 @@ class Conference extends Model
                                 return 'gray';
                             } 
                         }),
+                    InfolistComponents\Fieldset::make('')
+                        ->schema([
+                            InfolistComponents\TextEntry::make('book_by')
+                                ->label('Book By')
+                                ->formatStateUsing(function($state) {
+                                    $user = \App\Models\User::find($state);
+
+                                    return $user->name;
+                                }),
+                            InfolistComponents\TextEntry::make('created_at')
+                                ->label('Date Book')
+                                ->formatStateUsing(function($state) {
+                                    return \Carbon\Carbon::parse($state)->format(config('app.date_time_format'));
+                                }),
+                        ])      
+                        ->columnSpan('full')          
                 ])
                 ->columns(3)
                 ->columnSpan('full'),

@@ -35,6 +35,7 @@ class CheckOuts extends Component implements HasForms, HasTable
                 return \App\Models\DailySale::where('time_out_staff_id', $this->cashLog->user->staff->id)
                                             ->whereBetween('time_out', [$cashInDate, $cashOutDate]);
             })
+            ->heading('Check Outs')
             ->headerActions([
                 //
             ])

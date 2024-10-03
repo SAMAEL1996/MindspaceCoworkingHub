@@ -98,6 +98,10 @@ class FlexiUserResource extends Resource
                             return redirect()->to(FlexiUserResource::getUrl('index'));
                         })
                         ->visible(function($record) {
+                            if(!auth()->user()->hasRole('Super Administrator')) {
+                                return false;
+                            }
+                            
                             return $record->status ? true : false;
                         }),
                 ])

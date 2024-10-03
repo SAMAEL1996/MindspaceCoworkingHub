@@ -149,6 +149,10 @@ class MonthlyUserResource extends Resource
                             return redirect()->to(MonthlyUserResource::getUrl('index'));
                         })
                         ->visible(function($record) {
+                            if(!auth()->user()->hasRole('Super Administrator')) {
+                                return false;
+                            }
+                            
                             return $record->is_expired ? false : true;
                         }),
                 ])

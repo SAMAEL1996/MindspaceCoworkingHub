@@ -56,7 +56,6 @@ class CreateConference extends CreateRecord
             'members' => $data['members'],
             'host' => $data['host'],
             'contact_no' => $data['contact_no'],
-            'email' => $data['email'],
             'status' => 'approve',
             'amount' => $rate['price']
         ]);
