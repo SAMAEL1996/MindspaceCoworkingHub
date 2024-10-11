@@ -82,7 +82,7 @@ class Helper
                     ],
                     [
                         'label' => 'Whole Day',
-                        'hours' => 12,
+                        'hours' => 24,
                         'price' => 3500,
                     ],
                 ],
@@ -110,7 +110,7 @@ class Helper
                     ],
                     [
                         'label' => 'Whole Day',
-                        'hours' => 12,
+                        'hours' => 24,
                         'price' => 4500,
                     ],
                 ],
@@ -145,7 +145,7 @@ class Helper
                     ],
                     [
                         'label' => 'Whole Day',
-                        'hours' => 12,
+                        'hours' => 24,
                         'price' => 3500,
                     ],
                 ],
@@ -177,7 +177,7 @@ class Helper
                     ],
                     [
                         'label' => 'Whole Day',
-                        'hours' => 12,
+                        'hours' => 24,
                         'price' => 4500,
                     ],
                 ],

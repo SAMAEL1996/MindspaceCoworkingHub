@@ -84,13 +84,17 @@ class Conference extends Model
         $end = $this->end_at_carbon->addMinutes(15);
         $now = \Carbon\Carbon::now();
         $defaultTime = $start->diffInHours($end);
-        $ceil = ceil($start->diffInHours($now));
+        // $ceil = ceil($start->diffInHours($now));
 
-        if($defaultTime >= $ceil) {
+        if($now->copy()->lte($end)) {
             return 0.00;
         }
+
+        $diffInMinutes = $end->copy()->diffInMinutes($now->copy());
+        $exceed = ceil($diffInMinutes / 60);
+
         $package = \App\Library\Helper::getConferencePackageInfo($this->package_id);
-        $exceed = (int)$ceil - (int)$defaultTime;
+        // $exceed = (int)$ceil - (int)$defaultTime;
         return $exceed * $package['succeeding_hours'];
     }
 
