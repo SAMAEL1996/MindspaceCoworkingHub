@@ -15,5 +15,6 @@ use Filament\Facades\Filament;
 */
 
 Route::get('/', function () {
+    return view('frontend.dashboard.index');
     return redirect()->to(Filament::getUrl());
 });
