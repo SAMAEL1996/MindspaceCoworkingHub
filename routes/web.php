@@ -15,6 +15,13 @@ use Filament\Facades\Filament;
 */
 
 Route::get('/', function () {
-    return view('frontend.dashboard.index');
+    // return view('frontend.dashboard.index');
     return redirect()->to(Filament::getUrl());
 });
+
+Route::get('/flexi/{contact}', function() {
+    $flexi = \App\Models\FlexiUser::where('contact_no', request('contact'))->first();
+    $time = $flexi->getRemainingTimeArray();
+
+    return view('frontend.flexi.show', compact('flexi', 'time'));
+})->name('flexi.remaining-time');

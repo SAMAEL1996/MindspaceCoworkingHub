@@ -103,6 +103,22 @@ class FlexiUser extends Model
         $this->save();
     }
 
+    public function getRemainingTimeArray()
+    {
+        $interval = $this->start_at_carbon->diff($this->end_at_carbon);
+        $hours = $interval->h;
+        $minutes = $interval->i;
+        $seconds = $interval->s;
+
+        $hours += ($interval->d * 24);
+
+        return [
+            'hours' => $hours,
+            'minutes' => $minutes,
+            'seconds' => $seconds
+        ];
+    }
+
     public function checkRemainingTime()
     {
         $startAt = $this->start_at_carbon;

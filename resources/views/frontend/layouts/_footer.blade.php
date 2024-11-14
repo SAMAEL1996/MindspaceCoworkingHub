@@ -10,7 +10,7 @@
             </div>
             <!-- /column -->
             <div class="col-lg-3 offset-lg-2">
-                <div class="widget">
+                {{--<div class="widget">
                     <div class="d-flex flex-row">
                         <div>
                             <div class="icon text-primary fs-28 me-4 mt-n1"> <i class="uil uil-phone-volume"></i> </div>
@@ -21,7 +21,7 @@
                         </div>
                     </div>
                     <!--/div -->
-                </div>
+                </div>--}}
                 <div class="widget">
                     <div class="d-flex flex-row">
                         <div>
@@ -58,7 +58,7 @@
         <!--/.row -->
         <hr class="mt-13 mt-md-14 mb-7" />
         <div class="d-md-flex align-items-center justify-content-between">
-            <p class="mb-2 mb-lg-0">© Mindspace Coworking Hub. All rights reserved.</p>
+            <p class="mb-2 mb-lg-0">© 2024 Mindspace Coworking Hub. All rights reserved.</p>
             <nav class="nav social social-muted mb-0 text-md-end">
                 <!-- <a href="#"><i class="uil uil-twitter"></i></a> -->
                 <a href="https://www.facebook.com/mindspacecoworkandstudyhub"
