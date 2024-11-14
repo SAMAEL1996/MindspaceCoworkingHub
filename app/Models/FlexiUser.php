@@ -105,6 +105,13 @@ class FlexiUser extends Model
 
     public function getRemainingTimeArray()
     {
+        if($this->remaining == 0) {
+            return [
+                'hours' => 0,
+                'minutes' => 0,
+                'seconds' => 0
+            ];
+        }
         $interval = $this->start_at_carbon->diff($this->end_at_carbon);
         $hours = $interval->h;
         $minutes = $interval->i;
