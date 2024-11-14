@@ -29,6 +29,11 @@
                     </div>
                 </div>
             </div>
+            <div class="row py-3">
+                <div class="col-md-8 col-lg-7 col-xl-6 col-xxl-5 mx-auto mb-11">
+                    <p class="lead px-lg-7 px-xl-7 px-xxl-6 fs-sm fst-italic"><b>Note:</b> If you are currently checked in,<br>your remaining time will be updated after check-out.</p>
+                </div>
+            </div>
         </div>
     </section>
 @endsection
