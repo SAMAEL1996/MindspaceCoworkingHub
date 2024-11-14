@@ -29,7 +29,7 @@
                         </div>
                         <div>
                             <h5 class="mb-1">Email</h5>
-                            <p class="mb-0"><a href="mailto:mindspace.dasma@gmail.com" class="link-body">mindspace.dasma@gmail.com</a></p>
+                            <p class="mb-0"><a href="mailto:staff.mindspace@gmail.com" class="link-body">staff.mindspace@gmail.com</a></p>
                         </div>
                     </div>
                     <!--/div -->
