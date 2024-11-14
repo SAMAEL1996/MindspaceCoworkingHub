@@ -37,7 +37,8 @@ class FlexiUserResource extends Resource
                 TableColumns\TextColumn::make('name')
                     ->searchable(),
                 TableColumns\TextColumn::make('contact_no')
-                    ->label('Contact'),
+                    ->label('Contact')
+                    ->copyable(),
                 TableColumns\TextColumn::make('start_at')
                     ->label('Date Start')
                     ->date()
