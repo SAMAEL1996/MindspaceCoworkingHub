@@ -14,15 +14,15 @@
             <div class="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400 text-white border-radius-lg-top w-75 mx-auto" data-image-src="{{ asset('img/bg3.jpg') }}">
                 <div class="card-body p-9">
                     <div class="row align-items-center counter-wrapper text-center">
-                        <div class="col-6 col-lg-4">
+                        <div class="col-12 col-lg-4">
                             <h3 class="counter counter-lg text-white">{{ $time['hours'] }}</h3>
                             <p>Hours</p>
                         </div>
-                        <div class="col-6 col-lg-4">
+                        <div class="col-12 col-lg-4">
                             <h3 class="counter counter-lg text-white">{{ $time['minutes'] }}</h3>
                             <p>Minutes</p>
                         </div>
-                        <div class="col-6 col-lg-4">
+                        <div class="col-12 col-lg-4">
                             <h3 class="counter counter-lg text-white">{{ $time['seconds'] }}</h3>
                             <p>Seconds</p>
                         </div>
