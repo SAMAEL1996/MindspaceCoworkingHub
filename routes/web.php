@@ -21,6 +21,11 @@ Route::get('/', function () {
 
 Route::get('/flexi/{contact}', function() {
     $flexi = \App\Models\FlexiUser::where('contact_no', request('contact'))->first();
+
+    if(!$flexi->status) {
+        return abort(404);
+    }
+    
     $time = $flexi->getRemainingTimeArray();
 
     return view('frontend.flexi.show', compact('flexi', 'time'));
