@@ -29,7 +29,7 @@ class CreateDailySale extends CreateRecord
             'description' => $data['description'],
             'apply_discount' => $data['apply_discount'],
             'discount' => $discount,
-            'time_in' => \Carbon\Carbon::now()->addMinutes(15),
+            'time_in' => \Carbon\Carbon::now()->addMinutes(10),
             'status' => true,
             'is_monthly' => false
         ];

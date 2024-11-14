@@ -236,7 +236,7 @@ class IndexDailySales extends Page
                         'description' => 'Flexi',
                         'default_amount' => 0,
                         'discount' => 100,
-                        'time_in' => \Carbon\Carbon::now(),
+                        'time_in' => \Carbon\Carbon::now()->addMinutes(5),
                         'status' => true,
                         'is_flexi' => true
                     ];
