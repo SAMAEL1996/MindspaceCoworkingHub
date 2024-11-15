@@ -91,6 +91,25 @@ class FlexiUserResource extends Resource
                             $newRecord->end_at = \Carbon\Carbon::now()->addHours(50)->addMinutes($remainingMinutes);
                             $newRecord->save();
 
+                            $saleData = [
+                                'date' => \Carbon\Carbon::now(),
+                                'time_in' => \Carbon\Carbon::now(),
+                                'time_in_staff_id' => auth()->user()->staff->id,
+                                'time_out' => \Carbon\Carbon::now(),
+                                'time_out_staff_id' => auth()->user()->staff->id,
+                                'card_id' => $record->card_id ? $record->card_id : \App\Models\Card::where('type', 'Daily')->latest()->first()->id,
+                                'name' => $newRecord->name,
+                                'description' => 'Flexi',
+                                'apply_discount' => true,
+                                'discount' => 100,
+                                'status' => false,
+                                'is_flxi' => true,
+                                'is_monthly' => false,
+                                'amount_paid' => 1500
+                            ];
+                    
+                            $dailyPass = \App\Models\DailySale::create($saleData);
+
                             Notification::make()
                                 ->title('Flexi user successfully renew.')
                                 ->success()
@@ -99,10 +118,6 @@ class FlexiUserResource extends Resource
                             return redirect()->to(FlexiUserResource::getUrl('index'));
                         })
                         ->visible(function($record) {
-                            if(!auth()->user()->hasRole('Super Administrator')) {
-                                return false;
-                            }
-                            
                             return $record->status ? true : false;
                         }),
                 ])
