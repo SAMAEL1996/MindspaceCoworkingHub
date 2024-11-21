@@ -41,7 +41,7 @@
                         <form action="{{ route('flexi.remaining-time') }}" method="post">
                             @csrf
                             <h1 class="display-2 mb-3">Welcome Flexi User!</h1>
-                            <p class="lead px-lg-7 px-xl-7 px-xxl-6 pb-4">Please insert your mobile number regered to our system to show your remaining time.</p>
+                            <p class="lead px-lg-7 px-xl-7 px-xxl-6 pb-4">Enter the mobile number linked to your flexi pass.</p>
                             <div class="form-floating mb-4">
                                 <input id="form_name" type="text" name="contact" class="form-control" placeholder="Jane" required>
                                 <label for="form_name">Contact Number *</label>
