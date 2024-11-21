@@ -108,12 +108,14 @@ class DailySaleResource extends Resource
                         } else {
                             return ['class' => 'hidden'];
                         }
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumns\TextColumn::make('time_out_staff_id')
                     ->label('Staff Out')
                     ->formatStateUsing(function($state, $record) {
                         return $record->staffOut->user->name;
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumns\TextColumn::make('created_at')
                     ->label('Total Hours')
                     ->formatStateUsing(function($state, $record) {

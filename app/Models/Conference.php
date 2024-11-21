@@ -125,16 +125,19 @@ class Conference extends Model
     public static function getForm()
     {
         return [
-            FormComponents\Select::make('package')
+            FormComponents\ToggleButtons::make('package')
                 ->label('Package Type')
                 ->options([
                     '1' => 'Package 1 (Up to 8 pax)',
                     '2' => 'Package 2 (10 - 15 pax)',
                 ])
                 ->live()
-                ->native(false)
                 ->required()
-                ->columnSpan('full'),
+                ->columnSpan('full')
+                ->inline()
+                ->extraAttributes([
+                    'class' => 'flex justify-center items-center space-x-4',
+                ]),
             FormComponents\TextInput::make('event')
                 ->label('Event Name')
                 ->required(),

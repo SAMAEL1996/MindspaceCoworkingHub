@@ -425,7 +425,7 @@ class ListDailySales extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', true))
                 ->badge(DailySale::query()->where('status', true)->count()),
             'finished' => Tab::make('Finished')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', false)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', false)->where('time_out', '>=', \Carbon\Carbon::now()->subDays(2))),
             'all' => Tab::make(),
         ];
     }
