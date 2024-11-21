@@ -24,15 +24,20 @@ Route::get('/', function () {
 Route::get('/flexi', function() {
     $flexi = null;
     $time = [];
+    $error = false;
     
     if(request()->has('contact')) {
         $decrypted = Crypt::decryptString(request('contact'));
         $flexi = \App\Models\FlexiUser::where('contact_no', $decrypted)->first();
 
-        $time = $flexi->getRemainingTimeArray();
+        if($flexi) {
+            $time = $flexi->getRemainingTimeArray();
+        } else {
+            $error = true;
+        }
     }
 
-    return view('frontend.flexi.show', compact('flexi', 'time'));
+    return view('frontend.flexi.show', compact('flexi', 'time', 'error'));
 })->name('flexi.remaining-time');
 
 Route::post('/flexi', function(Request $request) {
