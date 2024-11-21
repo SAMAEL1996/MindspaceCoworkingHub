@@ -31,7 +31,6 @@ class ListDailySales extends ListRecords
                         ->schema([
                             FormComponents\DatePicker::make('date')
                                 ->default(\Carbon\Carbon::now())
-                                ->format('F d, Y')
                                 ->disabled()
                                 ->dehydrated(),
                             FormComponents\Grid::make(3)
