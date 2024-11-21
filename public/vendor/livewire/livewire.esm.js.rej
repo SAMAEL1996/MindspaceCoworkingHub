@@ -1,0 +1,10 @@
+diff a/public/vendor/livewire/livewire.esm.js b/public/vendor/livewire/livewire.esm.js	(rejected hunks)
+@@ -3302,7 +3302,7 @@
+         setValue(getInputValue(el, modifiers, e, getValue()));
+       });
+       if (modifiers.includes("fill")) {
+-        if ([void 0, null, ""].includes(getValue()) || el.type === "checkbox" && Array.isArray(getValue()) || el.tagName.toLowerCase() === "select" && el.multiple) {
++        if ([void 0, null, ""].includes(getValue()) || isCheckbox(el) && Array.isArray(getValue()) || el.tagName.toLowerCase() === "select" && el.multiple) {
+           setValue(getInputValue(el, modifiers, { target: el }, getValue()));
+         }
+       }
