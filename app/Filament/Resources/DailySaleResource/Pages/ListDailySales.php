@@ -22,7 +22,6 @@ class ListDailySales extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ActionGroup::make([
                 Actions\CreateAction::make()
                     ->label('Add Daily')
                     ->icon('heroicon-m-plus-circle')
@@ -280,20 +279,7 @@ class ListDailySales extends ListRecords
                         $monthly->save();
 
                         return $dailySale;
-                    }),
-            ])
-            ->label('Add')
-            ->icon('heroicon-m-chevron-down')
-            ->button()
-            ->visible(function() {
-                $user = auth()->user();
-
-                if($user->hasRole('Super Administrator')) {
-                    return true;
-                }
-
-                return $user->checkLatestCashLogs();
-            })
+                    })
         ];
     }
 
