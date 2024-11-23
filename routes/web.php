@@ -42,7 +42,7 @@ Route::get('/flexi', function() {
 
 Route::post('/flexi', function(Request $request) {
     $request->validate([
-        'contact' => 'required'
+        'contact' => ['required', 'regex:/^09\d{9}$/', 'size:11'],
     ]);
 
     return redirect()->route('flexi.remaining-time', ['contact' => Crypt::encryptString(request('contact'))]);
