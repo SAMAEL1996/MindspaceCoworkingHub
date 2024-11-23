@@ -28,7 +28,7 @@ Route::get('/flexi', function() {
     
     if(request()->has('contact')) {
         $decrypted = Crypt::decryptString(request('contact'));
-        $flexi = \App\Models\FlexiUser::where('contact_no', $decrypted)->first();
+        $flexi = \App\Models\FlexiUser::where('contact_no', $decrypted)->where('status', true)->latest()->first();
 
         if($flexi) {
             $time = $flexi->getRemainingTimeArray();
