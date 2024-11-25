@@ -26,9 +26,8 @@ Route::get('/flexi', function() {
     $time = [];
     $error = false;
     
-    if(request()->has('contact')) {
-        $decrypted = Crypt::decryptString(request('contact'));
-        $flexi = \App\Models\FlexiUser::where('contact_no', $decrypted)->where('status', true)->latest()->first();
+    if(request()->has('user')) {
+        $flexi = \App\Models\FlexiUser::where('uid', request('user'))->first();
 
         if($flexi) {
             $time = $flexi->getRemainingTimeArray();
@@ -45,5 +44,7 @@ Route::post('/flexi', function(Request $request) {
         'contact' => ['required', 'regex:/^09\d{9}$/', 'size:11'],
     ]);
 
-    return redirect()->route('flexi.remaining-time', ['contact' => Crypt::encryptString(request('contact'))]);
+    $flexi = \App\Models\FlexiUser::where('contact_no', request('contact'))->where('status', true)->latest()->first();
+
+    return redirect()->route('flexi.remaining-time', ['user' => $flexi->uid]);
 })->name('flexi.remaining-time');
