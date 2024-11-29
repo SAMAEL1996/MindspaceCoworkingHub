@@ -125,7 +125,13 @@ class ListDailySales extends ListRecords
                     return $dailyPass;
                 })
                 ->visible(function() {
-                    return auth()->user()->can('create daily-sales');
+                    $user = auth()->user();
+    
+                    if($user->hasRole('Super Administrator')) {
+                        return true;
+                    }
+    
+                    return $user->checkLatestCashLogs();
                 }),
             Actions\Action::make('add-flexi')
                 ->label('Add Flexi')
@@ -225,9 +231,6 @@ class ListDailySales extends ListRecords
                             return $get('type') == 'old' ? true : false;
                         })
                 ])
-                ->visible(function() {
-                    return auth()->user()->can('create daily-sales');
-                })
                 ->action(function($data) {
                     if($data['type'] == 'new') {
                         $data['start_at'] = \Carbon\Carbon::now();
@@ -267,6 +270,15 @@ class ListDailySales extends ListRecords
                     $flexi->save();
 
                     return $dailySale;
+                })
+                ->visible(function() {
+                    $user = auth()->user();
+    
+                    if($user->hasRole('Super Administrator')) {
+                        return true;
+                    }
+    
+                    return $user->checkLatestCashLogs();
                 }),
             Actions\Action::make('add-monthly')
                 ->label('Add Monthly')
@@ -373,9 +385,6 @@ class ListDailySales extends ListRecords
                             return $get('type') == 'old' ? true : false;
                         }),
                 ])
-                ->visible(function() {
-                    return auth()->user()->can('create daily-sales');
-                })
                 ->action(function($data) {
                     if($data['type'] == 'new') {
                         $data['date_start'] = \Carbon\Carbon::now();
@@ -413,6 +422,15 @@ class ListDailySales extends ListRecords
                     $monthly->save();
 
                     return $dailySale;
+                })
+                ->visible(function() {
+                    $user = auth()->user();
+    
+                    if($user->hasRole('Super Administrator')) {
+                        return true;
+                    }
+    
+                    return $user->checkLatestCashLogs();
                 })
         ];
     }

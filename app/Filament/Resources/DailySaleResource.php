@@ -48,9 +48,6 @@ class DailySaleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            // ->modifyQueryUsing(function (Builder $query) { 
-            //     return $query->where('status', false); 
-            // })
             ->defaultGroup(
                 Group::make('date')
                     ->date()
@@ -93,7 +90,8 @@ class DailySaleResource extends Resource
                     ->label('Staff In')
                     ->formatStateUsing(function($state, $record) {
                         return $record->staffIn->user->name;
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumns\TextColumn::make('time_out')
                     ->label('Time Out')
                     ->formatStateUsing(function($state, $record) {
@@ -108,8 +106,7 @@ class DailySaleResource extends Resource
                         } else {
                             return ['class' => 'hidden'];
                         }
-                    })
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    }),
                 TableColumns\TextColumn::make('time_out_staff_id')
                     ->label('Staff Out')
                     ->formatStateUsing(function($state, $record) {
@@ -167,7 +164,7 @@ class DailySaleResource extends Resource
                         'GCash' => 'GCash',
                         'Bank Transfer' => 'Bank Transfer'
                     ])
-            ])
+            ], layout: FiltersLayout::Modal)
             ->filtersTriggerAction(
                 fn (TableActions\Action $action) => $action
                     ->button()
@@ -519,7 +516,7 @@ class DailySaleResource extends Resource
                                 ->success()
                                 ->send();
 
-                            return redirect()->to(DailySaleResource::getUrl('view', ['record' => $record]));
+                            return $record;
                         })
                         ->modalWidth(MaxWidth::Medium),
                     Tables\Actions\Action::make('change_pass')
@@ -638,7 +635,7 @@ class DailySaleResource extends Resource
                                 ->success()
                                 ->send();
 
-                            return $data;
+                            return $record;
                         })
                         ->modalWidth(MaxWidth::Large)
                         ->visible(function($record) {
@@ -662,6 +659,11 @@ class DailySaleResource extends Resource
                 })
                 ->icon('heroicon-o-ellipsis-horizontal'),
             ])
+            ->toggleColumnsTriggerAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->button()
+                    ->label('Columns'),
+            )
             ->bulkActions([])
             ->defaultPaginationPageOption(25);
     }
@@ -737,6 +739,12 @@ class DailySaleResource extends Resource
             'create' => Pages\CreateDailySale::route('/create'),
             'view' => Pages\ViewDailySale::route('/{record}'),
             'edit' => Pages\EditDailySale::route('/{record}/edit'),
+        ];
+    }
+    public static function getScripts(): array
+    {
+        return [
+            asset('js/daily-sale-resource.js'), // Link to your custom script file
         ];
     }
 
