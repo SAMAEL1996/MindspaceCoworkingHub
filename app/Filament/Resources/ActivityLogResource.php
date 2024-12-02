@@ -23,7 +23,7 @@ class ActivityLogResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return Activity::query()->orderBy('created_at', 'desc');
+        return Activity::query()->where('log_name', 'notifications')->orderBy('created_at', 'desc');
     }
 
     public static function form(Form $form): Form

@@ -239,6 +239,7 @@ class FlexiUser extends Model
         }
 
         activity()
+            ->inLog('notifications')
             ->performedOn($this)
             ->log('<b>SMS Notification</b> <br>'.$content);
     }

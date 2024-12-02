@@ -54,6 +54,7 @@ class MonthlyReminder extends Command
                 }
 
                 activity()
+                    ->inLog('notifications')
                     ->performedOn($monthly)
                     ->log('<b>SMS Notification</b> <br>'.$content);
             }
@@ -79,6 +80,7 @@ class MonthlyReminder extends Command
                 }
 
                 activity()
+                    ->inLog('notifications')
                     ->performedOn($monthly)
                     ->log('<b>SMS Notification</b> <br>'.$content);
             }
