@@ -8,7 +8,7 @@ use App\Traits\HasUid;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Filament\Forms\Components as FormComponents;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class FlexiUser extends Model
 {
@@ -218,7 +218,7 @@ class FlexiUser extends Model
 
         $apikey = config('app.semaphore_key');
 
-        $content = 'You have ' . $this->remaining_time . ' remaining consumable hours on your Flexi Pass. Thank you. ';
+        $content = 'You have ' . $this->remaining_time . ' remaining consumable hours on your Flexi Pass. Thank you! ';
         $params = [
             'apikey' => $apikey,
             'number' => $this->contact_no,
@@ -239,9 +239,8 @@ class FlexiUser extends Model
         }
 
         activity()
-            ->causedBy(auth()->user())
             ->performedOn($this)
-            ->log('Flexi user sms sent: '.$this->remaining_time);
+            ->log('SMS Notification <br>'.$content);
     }
 
     public static function getForm()

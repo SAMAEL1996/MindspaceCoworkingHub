@@ -55,7 +55,7 @@ class MonthlyReminder extends Command
 
                 activity()
                     ->performedOn($monthly)
-                    ->log('Monthly user email notification: 3-day expiring');
+                    ->log('Email Notification <br>'.$content);
             }
 
             if($expireIn == 0 && $type == 'expired') {
@@ -80,7 +80,7 @@ class MonthlyReminder extends Command
 
                 activity()
                     ->performedOn($monthly)
-                    ->log('Monthly user email notification: expired');
+                    ->log('Email Notification <br>'.$content);
             }
         }
     }

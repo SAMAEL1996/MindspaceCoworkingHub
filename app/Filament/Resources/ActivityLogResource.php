@@ -38,17 +38,33 @@ class ActivityLogResource extends Resource
     {
         return $table
             ->columns([
+                TableColumns\TextColumn::make('subject_id')
+                    ->label('Pass')
+                    ->formatStateUsing(function($record) {
+                        $pass = '';
+
+                        switch(get_class($record->subject)) {
+                            case 'App\Models\MonthlyUser':
+                                $pass = 'Monthly User';
+                                break;
+
+                            case 'App\Models\FlexiUser':
+                                $pass = 'Flexi User';
+                                break;
+
+                            default:
+                        };
+
+                        return $pass;
+                    }),
                 TableColumns\TextColumn::make('subject_type')
                     ->label('User')
                     ->formatStateUsing(function($record) {
                         return $record->subject->name;
                     }),
-                TableColumns\TextColumn::make('description'),
-                TableColumns\TextColumn::make('causer_id')
-                    ->label('Staff')
-                    ->formatStateUsing(function($record) {
-                        return $record->causer ? $record->causer->name : '';
-                    }),
+                TableColumns\TextColumn::make('description')
+                    ->label('Content')
+                    ->html(),
                 TableColumns\TextColumn::make('created_at')
                     ->label('Date')
                     ->formatStateUsing(function($record) {
