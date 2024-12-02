@@ -45,11 +45,11 @@ class ActivityLogResource extends Resource
 
                         switch(get_class($record->subject)) {
                             case 'App\Models\MonthlyUser':
-                                $pass = 'Monthly User';
+                                $pass = 'Monthly';
                                 break;
 
                             case 'App\Models\FlexiUser':
-                                $pass = 'Flexi User';
+                                $pass = 'Flexi';
                                 break;
 
                             default:
@@ -64,7 +64,8 @@ class ActivityLogResource extends Resource
                     }),
                 TableColumns\TextColumn::make('description')
                     ->label('Content')
-                    ->html(),
+                    ->html()
+                    ->wrap(),
                 TableColumns\TextColumn::make('created_at')
                     ->label('Date')
                     ->formatStateUsing(function($record) {
