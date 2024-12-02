@@ -6,12 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
 use Filament\Forms\Components as FormComponents;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
 
 class MonthlyUser extends Model
 {
-    use HasFactory, HasUid, LogsActivity;
+    use HasFactory, HasUid;
 
     public static function boot() {
         parent::boot();
@@ -37,13 +35,6 @@ class MonthlyUser extends Model
             $dailySale->total_sales = (double)$dailySale->total_sales + (double)$monthly->amount_paid;
             $dailySale->save();
         });
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['name', 'card_id', 'contact_no'])
-            ->logOnlyDirty();
     }
 
     protected $fillable = [

@@ -9,12 +9,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Filament\Forms\Components as FormComponents;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
 
 class FlexiUser extends Model
 {
-    use HasFactory, HasUid, LogsActivity;
+    use HasFactory, HasUid;
 
     public static function boot() {
         parent::boot();
@@ -40,13 +38,6 @@ class FlexiUser extends Model
             $dailySale->total_sales = (double)$dailySale->total_sales + (double)$flexi->amount_paid;
             $dailySale->save();
         });
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['name', 'card_id', 'contact_no'])
-            ->logOnlyDirty();
     }
 
     protected $fillable = [
