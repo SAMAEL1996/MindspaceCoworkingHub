@@ -44,6 +44,11 @@ class ActivityLogResource extends Resource
                     ->formatStateUsing(function($record) {
                         return $record->causer ? $record->causer->name : '';
                     }),
+                TableColumns\TextColumn::make('created_at')
+                    ->label('Date')
+                    ->formatStateUsing(function($record) {
+                        return \Carbon\Carbon::parse($record->created_at)->format(config('app.date_time_format'));
+                    }),
             ])
             ->filters([])
             ->actions([])
