@@ -59,7 +59,7 @@ class MonthlyReminder extends Command
                     ->log('<b>SMS Notification</b> <br>'.$content);
             }
 
-            if($expireIn == 0 && $type == 'expired') {
+            if($type == 'expired' && \Carbon\Carbon::parse($monthly->date_start)->addMonth()->isToday()) {
                 $monthly->card_id = null;
                 $monthly->is_expired = true;
                 $monthly->save();
