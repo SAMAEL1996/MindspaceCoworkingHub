@@ -16,6 +16,7 @@
         "livewire/livewire": "^3.5",
         "pxlrbt/filament-excel": "^2.3",
         "saade/filament-fullcalendar": "3.0",
+        "spatie/laravel-activitylog": "^4.9",
         "spatie/laravel-permission": "^6.9"
     },
     "require-dev": {

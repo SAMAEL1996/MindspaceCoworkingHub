@@ -9,10 +9,12 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Filament\Forms\Components as FormComponents;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class FlexiUser extends Model
 {
-    use HasFactory, HasUid;
+    use HasFactory, HasUid, LogsActivity;
 
     public static function boot() {
         parent::boot();
@@ -38,6 +40,13 @@ class FlexiUser extends Model
             $dailySale->total_sales = (double)$dailySale->total_sales + (double)$flexi->amount_paid;
             $dailySale->save();
         });
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'card_id', 'contact_no'])
+            ->logOnlyDirty();
     }
 
     protected $fillable = [
@@ -237,6 +246,11 @@ class FlexiUser extends Model
             \Log::error($this->name.' send sms error on '.$now->copy()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
 
         }
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($this)
+            ->log('Flexi user sms sent: '.$this->remaining_time);
     }
 
     public static function getForm()
