@@ -55,7 +55,7 @@ class MonthlyReminder extends Command
 
                 activity()
                     ->performedOn($monthly)
-                    ->log('Email Notification <br>'.$content);
+                    ->log('<b>SMS Notification</b> <br>'.$content);
             }
 
             if($expireIn == 0 && $type == 'expired') {
@@ -80,7 +80,7 @@ class MonthlyReminder extends Command
 
                 activity()
                     ->performedOn($monthly)
-                    ->log('Email Notification <br>'.$content);
+                    ->log('<b>SMS Notification</b> <br>'.$content);
             }
         }
     }

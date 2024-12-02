@@ -240,7 +240,7 @@ class FlexiUser extends Model
 
         activity()
             ->performedOn($this)
-            ->log('SMS Notification <br>'.$content);
+            ->log('<b>SMS Notification</b> <br>'.$content);
     }
 
     public static function getForm()
