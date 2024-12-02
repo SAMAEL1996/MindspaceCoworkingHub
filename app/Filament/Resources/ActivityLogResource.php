@@ -18,8 +18,13 @@ class ActivityLogResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
+    protected static ?string $navigationIcon = 'heroicon-o-bell-alert';
     protected static ?string $navigationGroup = 'ADMIN';
+    
+    public static function getNavigationLabel(): string
+    {
+        return 'Notifications';
+    }
 
     public static function getEloquentQuery(): Builder
     {
