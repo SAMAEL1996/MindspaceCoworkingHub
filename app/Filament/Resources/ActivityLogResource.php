@@ -21,6 +21,11 @@ class ActivityLogResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
     protected static ?string $navigationGroup = 'ADMIN';
 
+    public static function getEloquentQuery(): Builder
+    {
+        return Activity::query()->orderBy('created_at', 'desc');
+    }
+
     public static function form(Form $form): Form
     {
         return $form
