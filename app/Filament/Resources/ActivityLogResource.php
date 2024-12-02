@@ -34,13 +34,13 @@ class ActivityLogResource extends Resource
         return $table
             ->columns([
                 TableColumns\TextColumn::make('subject_type')
-                    ->formatStateUsing(function($activity) {
-                        return $activity->subject->name;
+                    ->formatStateUsing(function($record) {
+                        return $record->subject->name;
                     }),
                 TableColumns\TextColumn::make('description'),
                 TableColumns\TextColumn::make('causer_id')
-                    ->formatStateUsing(function($activity) {
-                        return $activity->causer->name;
+                    ->formatStateUsing(function($record) {
+                        return $record->causer->name;
                     }),
             ])
             ->filters([])
