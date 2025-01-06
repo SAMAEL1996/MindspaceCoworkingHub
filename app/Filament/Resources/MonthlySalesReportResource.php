@@ -21,7 +21,7 @@ class MonthlySalesReportResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('type', 'monthly');
+        return parent::getEloquentQuery()->where('type', 'monthly')->orderBy('year', 'DESC');
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

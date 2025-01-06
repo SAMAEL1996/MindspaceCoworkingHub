@@ -43,7 +43,13 @@ class ExpenseResource extends Resource
             ->columns([
                 TableColumns\TextColumn::make('quantity'),
                 TableColumns\TextColumn::make('item'),
-                TableColumns\TextColumn::make('amount'),
+                TableColumns\TextColumn::make('amount')
+                    ->money('PHP'),
+                TableColumns\TextColumn::make('created_at')
+                    ->label('Date')
+                    ->formatStateUsing(function($state, $record) {
+                        return \Carbon\Carbon::parse($state)->format(config('app.date_time_format'));
+                    }),
             ])
             ->filters([])
             ->actions([])

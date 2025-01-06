@@ -23,7 +23,7 @@ class DailySalesReportResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('type', 'daily');
+        return parent::getEloquentQuery()->where('type', 'daily')->orderBy('year', 'DESC');
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
