@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
 use Filament\Forms\Components as FormComponents;
 use Carbon\Carbon;
+use Appstract\Meta\Metable;
 
 class DailySale extends Model
 {
-    use HasFactory, HasUid;
+    use HasFactory, HasUid, Metable;
 
     public static function boot() {
         parent::boot();

@@ -405,9 +405,33 @@ class DailySaleResource extends Resource
                                     }
 
                                     return false;
+                                }),
+                            FormComponents\Fieldset::make('')
+                                ->schema([
+                                    FormComponents\Checkbox::make('has_notes')
+                                        ->label(function($record) {
+                                            return 'Note: ' . $record->getMetaValue('notes');
+                                        })
+                                ])
+                                ->visible(function($record) {
+                                    return $record->hasMeta('notes');
                                 })
+                                ->extraAttributes([
+                                    'style' => 'border-color: #880808'
+                                ])
                         ])
-                        ->action(function($data, $record) {
+                        ->action(function($data, $record, $action) {
+                            if(isset($data['has_notes'])) {
+                                if(!$data['has_notes']) {
+                                    Notification::make()
+                                        ->title("Check 'Note' first before ending guest time.")
+                                        ->danger()
+                                        ->send();
+
+                                    return $action->halt();
+                                }
+                            }
+
                             if($record->is_flexi || $record->is_monthly) {
                                 $applyDisc = true;
                                 $disc = 100;
@@ -665,6 +689,7 @@ class DailySaleResource extends Resource
                     ->label('Columns'),
             )
             ->bulkActions([])
+            ->recordUrl(fn ($record): string => DailySaleResource::getUrl('view', ['record' => $record]))
             ->defaultPaginationPageOption(25);
     }
 
@@ -679,8 +704,8 @@ class DailySaleResource extends Resource
     {
         return $infolist
             ->schema([
-                InfolistComponents\Section::make('Information')
-                    ->schema([
+                InfolistComponents\Split::make([
+                    InfolistComponents\Section::make([
                         InfolistComponents\TextEntry::make('name')
                             ->label('Guest'),
                         InfolistComponents\TextEntry::make('card_id')
@@ -724,10 +749,22 @@ class DailySaleResource extends Resource
                             ->since()
                             ->visible(function($record) {
                                 return $record->time_out ? false : true;
-                            }),
-                    ])
-                    ->columns(4)
-                    ->columnSpan('full')
+                            })
+                    ])->columns(2),
+                    InfolistComponents\Section::make([
+                        InfolistComponents\TextEntry::make('metas')
+                            ->label('Notes')
+                            ->formatStateUsing(function($record) {
+                                return $record->hasMeta('notes') ? $record->getMetaValue('notes') : 'No Available Notes';
+                            })
+                            ->color(function($state, $record) {
+                                return $record->hasMeta('notes') ? 'danger' : 'success';
+                            })
+                            ->default('No Available Notes')
+                    ])->grow(false),
+                ])
+                ->from('md')
+                ->columnSpan('full')
             ]);
     }
 

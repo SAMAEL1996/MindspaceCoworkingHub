@@ -5,6 +5,8 @@ namespace App\Filament\Resources\DailySaleResource\Pages;
 use App\Filament\Resources\DailySaleResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Forms\Components as FormComponents;
+use Filament\Notifications\Notification;
 
 class ViewDailySale extends ViewRecord
 {
@@ -18,4 +20,37 @@ class ViewDailySale extends ViewRecord
             
         ];
     }
+
+    protected function getHeaderActions(): array
+{
+    return [
+        Actions\ActionGroup::make([
+            Actions\Action::make('add-notes')
+                ->label('Add Note')
+                ->fillForm(fn ($record): array => [
+                    'note' => $record->hasMeta('notes') ? $record->getMetaValue('notes') : null,
+                ])
+                ->form([
+                    FormComponents\Textarea::make('note')
+                        ->label('Note')
+                        ->rows(5)
+                        ->required()
+                ])
+                ->action(function($data, $record) {
+                    $record->addOrUpdateMeta('notes', $data['note']);
+
+                    Notification::make()
+                        ->title('Notes successfully attached.')
+                        ->success()
+                        ->send();
+
+                    return $record;
+                }),
+        ])
+        ->label('Action')
+        ->icon('heroicon-m-ellipsis-vertical')
+        ->color('primary')
+        ->button()
+    ];
+}
 }
