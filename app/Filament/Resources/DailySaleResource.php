@@ -412,6 +412,7 @@ class DailySaleResource extends Resource
                                         ->label(function($record) {
                                             return 'Note: ' . $record->getMetaValue('notes');
                                         })
+                                        ->columnSpan('full')
                                 ])
                                 ->visible(function($record) {
                                     return $record->hasMeta('notes');
