@@ -133,6 +133,17 @@ class DailySaleResource extends Resource
                     }),
                 TableColumns\TextColumn::make('mode_of_payment')
                     ->label('M.O.P.'),
+                TableColumns\TextColumn::make('metas.key')
+                    ->label(label: 'With Notes')
+                    ->badge()
+                    ->default(false)
+                    ->color(function($record) {
+                        return $record->hasMeta('notes') ? 'danger' : 'success';
+                    })
+                    ->formatStateUsing(function($record) {
+                        return $record->hasMeta('notes') ? 'Yes' : 'No';
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumns\TextColumn::make('amount_paid')
                     ->label('Amount')
                     ->money('PHP'),
