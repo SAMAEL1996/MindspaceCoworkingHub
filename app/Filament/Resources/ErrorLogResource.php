@@ -52,6 +52,9 @@ class ErrorLogResource extends Resource
                     ->formatStateUsing(function($record) {
                         return $record->subjectable->name;
                     }),
+                TableColumns\TextColumn::make('reason')
+                    ->label('Reason')
+                    ->wrap(),
             ])
             ->filters([
                 //
@@ -61,7 +64,10 @@ class ErrorLogResource extends Resource
             ])
             ->bulkActions([
                 //
-            ]);
+            ])
+            ->recordUrl(null)
+            ->defaultSort('created_at', 'desc')
+            ->defaultPaginationPageOption(25);
     }
 
     public static function getRelations(): array
