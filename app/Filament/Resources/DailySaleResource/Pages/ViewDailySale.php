@@ -46,6 +46,9 @@ class ViewDailySale extends ViewRecord
 
                     return $record;
                 }),
+            Actions\EditAction::make()
+                ->label('Edit')
+                ->visible(auth()->user()->hasRole('Super Administrator'))
         ])
         ->label('Action')
         ->icon('heroicon-m-ellipsis-vertical')

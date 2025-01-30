@@ -51,6 +51,13 @@ class EditDailySale extends EditRecord
         return $record;
     }
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            
+        ];
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
