@@ -21,6 +21,10 @@ Route::get('/', function () {
     return redirect()->to(Filament::getUrl());
 });
 
+Route::get('/test', function () {
+    abort(500);
+});
+
 Route::get('/flexi', function() {
     $flexi = null;
     $time = [];

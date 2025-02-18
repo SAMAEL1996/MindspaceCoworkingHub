@@ -6,6 +6,7 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget\Card;
 use App\Models\MonthlyUser;
+use App\Models\FlexiUser;
 use App\Models\DailySale;
 use App\Models\Conference;
 use Carbon\Carbon;
@@ -24,12 +25,12 @@ class SalesCount extends BaseWidget
     protected function getCards(): array
     {
         return [
-            Card::make(
-                    \Carbon\Carbon::now()->format('F') . ' Total Sales',
+            Stat::make(
+                    Carbon::now()->format('F') . ' Total Sales',
                     'PHP ' . self::getMonthTotalSales()
                 )
                 ->icon('heroicon-o-arrow-trending-up'),
-            Card::make(
+            Stat::make(
                     'Total Sales',
                     'PHP ' . self::getTotalSales()
                 )
@@ -39,40 +40,45 @@ class SalesCount extends BaseWidget
 
     public static function getMonthTotalSales()
     {
-        $dailyPass = \App\Models\DailySale::whereMonth('time_in', Carbon::now()->month)
-                                            ->whereYear('time_in', Carbon::now()->year)
-                                            ->where('is_flexi', false)
-                                            ->where('is_monthly', false);
+        $now = Carbon::now();
+        
+        $dailyPass = DailySale::where('is_flexi', false)
+                                ->where('is_monthly', false)
+                                ->whereMonth('created_at', $now->copy()->month)
+                                ->whereYear('created_at', $now->copy()->year)
+                                ->get();
 
-        $flexiPass = \App\Models\FlexiUser::whereMonth('created_at', Carbon::now()->month)
-                                            ->whereYear('created_at', Carbon::now()->year)
-                                            ->where('paid', true);
+        $flexiPass = FlexiUser::whereMonth('created_at', $now->copy()->month)
+                                ->whereYear('created_at', $now->copy()->year)
+                                ->get();
 
-        $monthlyPass = \App\Models\MonthlyUser::whereMonth('created_at', Carbon::now()->month)
-                                            ->whereYear('created_at', Carbon::now()->year);
+        $monthlyPass = MonthlyUser::whereMonth('created_at', $now->copy()->month)
+                                ->whereYear('created_at', $now->copy()->year)
+                                ->get();
 
-        $conferencePass = \App\Models\Conference::whereMonth('created_at', Carbon::now()->month)
-                                            ->whereYear('created_at', Carbon::now()->year)
-                                            ->where('has_reservation_fee', true);
+        $conferencePass = Conference::whereMonth('created_at', $now->copy()->month)
+                                ->whereYear('created_at', $now->copy()->year)
+                                ->get();
 
         $total = $dailyPass->sum('amount_paid') + $flexiPass->sum('amount') + $monthlyPass->sum('amount') + $conferencePass->sum('payment');
-        
+
         return number_format($total, 2);
     }
 
     public static function getTotalSales()
     {
-        $dailyPass = \App\Models\DailySale::where('is_flexi', false)
+        $dailyPass = DailySale::where('is_flexi', false)
                                             ->where('is_monthly', false)
                                             ->sum('amount_paid');
 
-        $flexiPass = \App\Models\FlexiUser::where('paid', true)->sum('amount');
+        $flexiPass = FlexiUser::where('paid', true)->sum('amount');
 
-        $monthlyPass = \App\Models\MonthlyUser::sum('amount');
+        $monthlyPass = MonthlyUser::sum('amount');
 
-        $conferencePass = \App\Models\Conference::where('has_reservation_fee', true)->sum('payment');
+        $conferencePass = Conference::where('has_reservation_fee', true)->sum('payment');
 
         $total = $dailyPass + $flexiPass + $monthlyPass + $conferencePass;
+
         return number_format($total, 2);
     }
 
