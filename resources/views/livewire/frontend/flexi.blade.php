@@ -82,7 +82,27 @@
                     </div>
                 </div>
             @else
-                <div class="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400 text-white border-radius-lg-top w-75 mx-auto" data-image-src="{{ asset('img/bg3.jpg') }}">
+                <style>
+                    .blink {
+                        animation: blink-animation 1s step-start infinite;
+                    }
+
+                    @keyframes blink-animation {
+                        50% {
+                            opacity: 0;
+                        }
+                        100% {
+                            opacity: 1;
+                        }
+                    }
+
+                    .bg-overlay {
+                        background-image: url('/img/bg3.jpg') !important;
+                        background-size: cover;
+                        background-position: center;
+                    }
+                </style>
+                <div class="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400 text-white border-radius-lg-top w-75 mx-auto">
                     <div class="card-body p-9">
                         <div class="row align-items-center counter-wrapper text-center">
                             <div class="col-5 col-lg-5">

@@ -30,18 +30,26 @@ class Flexi extends Component
     public function checkTime()
     {
         $this->showFlexiTime = true;
+        $this->timeIn = null;
+        $this->hours = null;
+        $this->minutes = null;
+        $this->seconds = null;
+        $this->endTime = null;
+        $this->blink = false;
 
         $this->flexi = FlexiUser::where('contact_no', $this->contact)->where('status', true)->latest()->first();
         if($this->flexi) {
             $this->time = $this->flexi->getRemainingTimeArray();
             
             $dailyPass = \App\Models\DailySale::where('card_id', $this->flexi->card_id)->where('is_flexi', true)->latest()->first();
-            $this->timeIn = Carbon::parse($dailyPass->time_in);
-            $this->hours = $this->time['hours'];
-            $this->minutes = $this->time['minutes'];
-            $this->seconds = $this->time['seconds'];
-
-            $this->calculateRemainingTime();
+            if($dailyPass) {
+                $this->timeIn = Carbon::parse($dailyPass->time_in);
+                $this->hours = $this->time['hours'];
+                $this->minutes = $this->time['minutes'];
+                $this->seconds = $this->time['seconds'];
+    
+                $this->calculateRemainingTime();
+            }
         }
     }
 
