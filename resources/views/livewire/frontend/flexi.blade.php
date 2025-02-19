@@ -11,7 +11,13 @@
                 @enderror
             </div>
             <div class="col-12 text-center">
-                <button wire:click="checkTime" class="btn btn-primary rounded-pill btn-send mb-3">Check Time</button>
+                <button wire:click="checkTime" class="btn btn-primary rounded-pill btn-send mb-3" wire:loading.attr="disabled">Check Time</button>
+                <br>
+                <div wire:loading wire:target="checkTime">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -30,6 +30,7 @@ class Flexi extends Component
     public function checkTime()
     {
         $this->showFlexiTime = true;
+
         $this->timeIn = null;
         $this->hours = null;
         $this->minutes = null;
@@ -38,6 +39,7 @@ class Flexi extends Component
         $this->blink = false;
 
         $this->flexi = FlexiUser::where('contact_no', $this->contact)->where('status', true)->latest()->first();
+
         if($this->flexi) {
             $this->time = $this->flexi->getRemainingTimeArray();
             
@@ -55,10 +57,16 @@ class Flexi extends Component
 
     public function calculateRemainingTime()
     {
+        $this->showFlexiTime = true;
+
         $currentTime = Carbon::now();
 
         // Calculate remaining time
-        $remaining = $this->timeIn->diffInSeconds($currentTime);
+        $dailyPassConsume = $this->timeIn->diffInSeconds($currentTime);
+        $startTime = $this->flexi->start_at_carbon;
+        $endTime = $this->flexi->end_at_carbon;
+        $flexiRemainingTime = $startTime->diffInSeconds($endTime);
+        $remaining = $flexiRemainingTime - $dailyPassConsume;
         if ($remaining <= 0) {
             $this->time = [
                 'hours' => 0,
