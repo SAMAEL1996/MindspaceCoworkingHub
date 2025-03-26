@@ -30,6 +30,7 @@ class ListDailySales extends ListRecords
         return [
             Actions\Action::make('search')
                 ->label('Add')
+                ->modalHeading('Guest Check-In')
                 ->form([
                     FormComponents\Wizard::make([
                         FormComponents\Wizard\Step::make('Search')
@@ -42,52 +43,51 @@ class ListDailySales extends ListRecords
                                     ->extraAttributes([
                                         'x-data' => '{}',
                                         'x-on:input' => "event.target.value = event.target.value.replace(/\b\w/g, c => c.toUpperCase())",
-                                    ])
-                                    ->afterStateUpdated(function ($set, $state) {
-                                        $set('selected_option', []);
-                                        $set('search_result_options', []);
-
-                                        if(!$state) {
-                                            return;
-                                        }
-
-                                        $formattedState = ucwords(strtolower($state));
-                                        $set('search_user', $formattedState);
-                                        $set('guest_name', $formattedState);
-
-                                        $flexiResults = FlexiUser::select('id', 'name')
-                                            ->where('name', 'like', "%{$state}%")
-                                            ->where('status', true)
-                                            ->get()
-                                            ->mapWithKeys(fn ($user) => ['flexi-'.$user->id => ['label' => $user->name, 'description' => 'Flexi User']])
-                                            ->toArray();
-
-                                        $monthlyResults = MonthlyUser::select('id', 'name')
-                                            ->where('name', 'like', "%{$state}%")
-                                            ->where('is_expired', false)
-                                            ->get()
-                                            ->mapWithKeys(fn ($user) => ['monthly-'.$user->id => ['label' => $user->name, 'description' => 'Monthly User']])
-                                            ->toArray();
-
-                                        $results = array_merge($flexiResults, $monthlyResults);
-
-                                        if (count($results)) {
-                                            $set('search_result_options', $results);
-                                        } else {
-                                            $set('search_result_options', [
-                                                'new_daily'   => ['label' => 'Add as New Daily', 'description' => null],
-                                                'new_flexi'   => ['label' => 'Add as New Flexi', 'description' => null],
-                                                'new_monthly' => ['label' => 'Add as New Monthly', 'description' => null],
-                                            ]);
-                                        }
-
-                                        $this->checkInModel = null;
-                                        $set('card_id', null);
-                                    }),
+                                    ]),
                                 FormComponents\Actions::make([
                                         FormComponents\Actions\Action::make('search')
-                                            ->action(function($get) {
-                                                dd($get('search_user'));
+                                            ->action(function($set, $get) {
+                                                $searchUser = $get('search_user');
+
+                                                $set('selected_option', []);
+                                                $set('search_result_options', []);
+
+                                                if(!$searchUser) {
+                                                    return;
+                                                }
+
+                                                $formattedState = ucwords(strtolower($searchUser));
+                                                $set('search_user', $formattedState);
+                                                $set('guest_name', $formattedState);
+
+                                                $flexiResults = FlexiUser::select('id', 'name')
+                                                    ->where('name', 'like', "%{$searchUser}%")
+                                                    ->where('status', true)
+                                                    ->get()
+                                                    ->mapWithKeys(fn ($user) => ['flexi-'.$user->id => ['label' => $user->name, 'description' => 'Flexi User']])
+                                                    ->toArray();
+
+                                                $monthlyResults = MonthlyUser::select('id', 'name')
+                                                    ->where('name', 'like', "%{$searchUser}%")
+                                                    ->where('is_expired', false)
+                                                    ->get()
+                                                    ->mapWithKeys(fn ($user) => ['monthly-'.$user->id => ['label' => $user->name, 'description' => 'Monthly User']])
+                                                    ->toArray();
+
+                                                $results = array_merge($flexiResults, $monthlyResults);
+
+                                                if (count($results)) {
+                                                    $set('search_result_options', $results);
+                                                } else {
+                                                    $set('search_result_options', [
+                                                        'new_daily'   => ['label' => 'Add as New Daily', 'description' => null],
+                                                        'new_flexi'   => ['label' => 'Add as New Flexi', 'description' => null],
+                                                        'new_monthly' => ['label' => 'Add as New Monthly', 'description' => null],
+                                                    ]);
+                                                }
+
+                                                $this->checkInModel = null;
+                                                $set('card_id', null);
                                             })
                                     ]),
                                 FormComponents\Radio::make('selected_option')
@@ -95,7 +95,7 @@ class ListDailySales extends ListRecords
                                     ->required()
                                     ->options(fn ($get) => collect($get('search_result_options'))->mapWithKeys(fn ($option, $key) => [$key => $option['label']]))
                                     ->descriptions(fn ($get) => collect($get('search_result_options'))->mapWithKeys(fn ($option, $key) => [$key => $option['description'] ?? null]))
-                                    ->visible(fn ($get) => $get('search_user'))
+                                    ->visible(fn ($get) => count($get('search_result_options') ?? []) > 0)
                                     ->reactive()
                                     ->live(debounce: 300)
                                     ->afterStateUpdated(function($state, $set, $get) {
@@ -179,9 +179,7 @@ class ListDailySales extends ListRecords
                                     ->schema([
                                         FormComponents\TextInput::make('time_in_staff_id')
                                             ->label('Staff ID')
-                                            ->default(function() {
-                                                return auth()->user()->staff ? auth()->user()->staff->id : '';
-                                            })
+                                            ->default(fn () => auth()->user()->staff ? auth()->user()->staff->id : auth()->user()->id)
                                             ->dehydrated()
                                             ->hidden(),
                                         FormComponents\TextInput::make('staff_name')
@@ -268,7 +266,6 @@ class ListDailySales extends ListRecords
                 ])
                 ->modalSubmitAction(false)
                 ->action(function($data) {
-                    dd($data);
                     $name = null;
                     if($this->checkInModel) {
                         $name = $this->checkInModel->name;
@@ -279,8 +276,44 @@ class ListDailySales extends ListRecords
                     }
 
                     $cardId = $data['card_id'];
-                    dd($name, $cardId);
+                    dd($name, $cardId, $data);
 
+                    $description = 'Daily';
+                    $timeIn = Carbon::parse($data['date'] . ' ' . $data['time']);
+                    $time_in_staff_id = auth()->user()->staff ? auth()->user()->staff->id : auth()->user()->id;
+                    $applyDiscount = false;
+                    $discount = 0;
+
+                    if($this->checkInModel) {
+                        // FOR FLEXI
+
+                        // FOR MONTHLY
+                    } else {
+                        // FOR DAILY
+                        if($data['apply_discount']) {
+                            $applyDiscount = true;
+                            $discount = $data['discount'];
+                        }
+
+                        $saleData = [
+                            'date' => $data['date'],
+                            'time_in_staff_id' => $data['time_in_staff_id'],
+                            'card_id' => $data['card_id'],
+                            'name' => $data['name'],
+                            'description' => 'Daily',
+                            'apply_discount' => $data['apply_discount'],
+                            'discount' => $discount,
+                            'time_in' => \Carbon\Carbon::now()->addMinutes(10),
+                            'status' => true,
+                            'is_monthly' => false
+                        ];
+
+                        $dailyPass = \App\Models\DailySale::create($saleData);
+
+                        $dailyPass->addCheckInToSalesReport();
+
+                        return $dailyPass;
+                    }
                 }),
             Actions\Action::make('add-daily')
                 ->label('Add Daily')
