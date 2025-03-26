@@ -12,6 +12,8 @@ use App\Models\FlexiUser;
 use App\Models\DailySale;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 
 class ListDailySales extends ListRecords
 {
@@ -19,9 +21,267 @@ class ListDailySales extends ListRecords
 
     protected static ?string $title = 'Daily Users';
 
+    public $guestName;
+    public $checkInModel;
+    public $newMember = false;
+
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('search')
+                ->label('Add')
+                ->form([
+                    FormComponents\Wizard::make([
+                        FormComponents\Wizard\Step::make('Search')
+                            ->schema([
+                                FormComponents\TextInput::make('search_user')
+                                    ->label('Search for Name')
+                                    ->live(debounce: 300)
+                                    ->autocomplete(false)
+                                    ->required()
+                                    ->extraAttributes([
+                                        'x-data' => '{}',
+                                        'x-on:input' => "event.target.value = event.target.value.replace(/\b\w/g, c => c.toUpperCase())",
+                                    ])
+                                    ->afterStateUpdated(function ($set, $state) {
+                                        $set('selected_option', []);
+                                        $set('search_result_options', []);
+
+                                        if(!$state) {
+                                            return;
+                                        }
+
+                                        $formattedState = ucwords(strtolower($state));
+                                        $set('search_user', $formattedState);
+                                        $set('guest_name', $formattedState);
+
+                                        $flexiResults = FlexiUser::select('id', 'name')
+                                            ->where('name', 'like', "%{$state}%")
+                                            ->where('status', true)
+                                            ->get()
+                                            ->mapWithKeys(fn ($user) => ['flexi-'.$user->id => ['label' => $user->name, 'description' => 'Flexi User']])
+                                            ->toArray();
+
+                                        $monthlyResults = MonthlyUser::select('id', 'name')
+                                            ->where('name', 'like', "%{$state}%")
+                                            ->where('is_expired', false)
+                                            ->get()
+                                            ->mapWithKeys(fn ($user) => ['monthly-'.$user->id => ['label' => $user->name, 'description' => 'Monthly User']])
+                                            ->toArray();
+
+                                        $results = array_merge($flexiResults, $monthlyResults);
+
+                                        if (count($results)) {
+                                            $set('search_result_options', $results);
+                                        } else {
+                                            $set('search_result_options', [
+                                                'new_daily'   => ['label' => 'Add as New Daily', 'description' => null],
+                                                'new_flexi'   => ['label' => 'Add as New Flexi', 'description' => null],
+                                                'new_monthly' => ['label' => 'Add as New Monthly', 'description' => null],
+                                            ]);
+                                        }
+
+                                        $this->checkInModel = null;
+                                        $set('card_id', null);
+                                    }),
+                                FormComponents\Actions::make([
+                                        FormComponents\Actions\Action::make('search')
+                                            ->action(function($get) {
+                                                dd($get('search_user'));
+                                            })
+                                    ]),
+                                FormComponents\Radio::make('selected_option')
+                                    ->label('Select Guest')
+                                    ->required()
+                                    ->options(fn ($get) => collect($get('search_result_options'))->mapWithKeys(fn ($option, $key) => [$key => $option['label']]))
+                                    ->descriptions(fn ($get) => collect($get('search_result_options'))->mapWithKeys(fn ($option, $key) => [$key => $option['description'] ?? null]))
+                                    ->visible(fn ($get) => $get('search_user'))
+                                    ->reactive()
+                                    ->live(debounce: 300)
+                                    ->afterStateUpdated(function($state, $set, $get) {
+                                        $this->checkInModel = null;
+                                        $set('card_id', null);
+
+                                        if(!in_array($state, ['new_daily', 'new_flexi', 'new_monthly'])) {
+                                            $arr = explode('-', $state);
+                                            $checkInType = $arr[0];
+                                            $checkInId = $arr[1];
+
+                                            switch($checkInType) {
+                                                case 'monthly':
+                                                    $this->checkInModel = MonthlyUser::find($checkInId);
+                                                    $set('card_id', $this->checkInModel->card_id);
+                                                    break;
+
+                                                case 'flexi':
+                                                    $this->checkInModel = FlexiUser::find($checkInId);
+                                                    break;
+
+                                                default:
+                                            }
+                                        }
+
+                                        if(in_array($state, ['new_flexi', 'new_monthly'])) {
+                                            $this->newMember = true;
+                                            if($state === 'new_flexi') {
+                                                $set('amount', 1500);
+                                            } else {
+                                                $set('amount', 3500);
+                                            }
+                                        } else {
+                                            $this->newMember = false;
+                                        }
+                                    })
+                            ]),
+                        FormComponents\Wizard\Step::make('Detail')
+                            ->schema([
+                                FormComponents\TextInput::make('guest_name')
+                                    ->label('Guest Name')
+                                    ->disabled()
+                                    ->dehydrated(),
+                                FormComponents\TextInput::make('contact_no')
+                                    ->required(),
+                                FormComponents\TextInput::make('amount')
+                                    ->label('Amount to pay')
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+                                FormComponents\Select::make('mode_of_payment')
+                                    ->options([
+                                        'Cash' => 'Cash',
+                                        'GCash' => 'GCash',
+                                        'Bank Transfer' => 'Bank Transfer'
+                                    ])
+                                    ->required()
+                                    ->native(false),
+                            ])
+                            ->columns(2)
+                            ->visible(fn () => $this->newMember),
+                        FormComponents\Wizard\Step::make('Check-In')
+                            ->schema([
+                                FormComponents\Grid::make(2)
+                                    ->schema([
+                                        FormComponents\DatePicker::make('date')
+                                            ->default(\Carbon\Carbon::now())
+                                            ->native(false)
+                                            ->displayFormat('F d, Y')
+                                            ->disabled()
+                                            ->dehydrated(),
+                                        FormComponents\TimePicker::make('time')
+                                            ->default(\Carbon\Carbon::now()->addMinutes(10))
+                                            ->native(false)
+                                            ->displayFormat('h:i A')
+                                            ->seconds(false)
+                                            ->disabled()
+                                            ->dehydrated()
+                                    ]),
+                                FormComponents\Grid::make(2)
+                                    ->schema([
+                                        FormComponents\TextInput::make('time_in_staff_id')
+                                            ->label('Staff ID')
+                                            ->default(function() {
+                                                return auth()->user()->staff ? auth()->user()->staff->id : '';
+                                            })
+                                            ->dehydrated()
+                                            ->hidden(),
+                                        FormComponents\TextInput::make('staff_name')
+                                            ->label('Staff')
+                                            ->default(function($get) {
+                                                $staff = \App\Models\Staff::where('id', $get('time_in_staff_id'))->first();
+                                                return $staff ? $staff->user->name : '';
+                                            })
+                                            ->disabled(),
+                                        FormComponents\Select::make('card_id')
+                                            ->label('Card ID')
+                                            ->native(false)
+                                            ->placeholder('Select Card ID')
+                                            ->options(function($get) {
+                                                $options = [];
+                                                $now = \Carbon\Carbon::now();
+
+                                                if($this->checkInModel && get_class($this->checkInModel) == 'App\Models\MonthlyUser') {
+                                                    $availabelCard = Card::where('type', 'Monthly')->get();
+                                                    foreach($availabelCard as $card) {
+                                                        $options[$card->id] = $card->code;
+                                                    }
+                                                } elseif($get('selected_option') == 'new_monthly') {
+                                                    $monthlyIds = MonthlyUser::where('is_expired', false)->pluck('card_id')->toArray();
+                                                    $availabelCard = Card::whereNotIn('id', $monthlyIds)->where('type', 'Monthly')->get();
+                                                    foreach($availabelCard as $card) {
+                                                        $options[$card->id] = $card->code;
+                                                    }
+                                                } else {
+                                                    $takenIds = DailySale::whereNull('time_out')->pluck('card_id')->toArray();
+                                                    $availabelCard = Card::whereNotIn('id', $takenIds)->where('type', 'Daily')->get();
+                                                    foreach($availabelCard as $card) {
+                                                        $options[$card->id] = $card->code;
+                                                    }
+                                                }
+
+                                                return $options;
+                                            })
+                                            ->disabled(function($get) {
+                                                if($this->checkInModel) {
+                                                    return get_class($this->checkInModel) == 'App\Models\MonthlyUser' ? true : false;
+                                                }
+
+                                                // if(in_array($get('selected_option'), ['new_flexi', 'new_monthly'])) {
+                                                //     return 
+                                                // }
+                                                return false;
+                                            })
+                                            ->dehydrated(),
+                                            // ->disabled(fn (): bool => $this->checkInModel && get_class($this->checkInModel) == 'App\Models\MonthlyUser' ? true : false )
+                                            // ->dehydrated(fn (): bool => $this->checkInModel && get_class($this->checkInModel) == 'App\Models\MonthlyUser' ? true : false ),
+                                        FormComponents\Grid::make(2)
+                                            ->schema([
+                                                FormComponents\Toggle::make('apply_discount')
+                                                    ->label('Apply Discount')
+                                                    ->columnSpan(2)
+                                                    ->live(),
+                                                FormComponents\TextInput::make('discount')
+                                                    ->numeric()
+                                                    ->minValue(1)
+                                                    ->placeholder('Discount percentage')
+                                                    ->visible(function($get) {
+                                                        return $get('apply_discount') ? true : false;
+                                                    })
+                                                    ->required(function($get) {
+                                                        return $get('apply_discount') ? true : false;
+                                                    })
+                                                    ->default(20)
+                                                    ->helperText('20% for Student Discount.')
+                                                    ->columnSpan(1)
+                                            ])
+                                            ->visible(fn (): bool => $this->checkInModel ? false : true)
+                                    ]),
+                            ])
+                        ])
+                        ->submitAction(new HtmlString(Blade::render(<<<BLADE
+                            <x-filament::button
+                                type="submit"
+                                size="sm"
+                            >
+                                Submit
+                            </x-filament::button>
+                        BLADE)))
+                ])
+                ->modalSubmitAction(false)
+                ->action(function($data) {
+                    dd($data);
+                    $name = null;
+                    if($this->checkInModel) {
+                        $name = $this->checkInModel->name;
+                    } elseif($this->newMember) {
+                        $name = $data['guest_name'];
+                    } else {
+                        $name = $data['search_user'];
+                    }
+
+                    $cardId = $data['card_id'];
+                    dd($name, $cardId);
+
+                }),
             Actions\Action::make('add-daily')
                 ->label('Add Daily')
                 ->icon('heroicon-m-plus-circle')
