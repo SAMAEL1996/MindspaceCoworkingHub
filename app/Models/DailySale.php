@@ -242,6 +242,16 @@ class DailySale extends Model
             ];
         }
 
+        // for night owl discount
+        if($this->hasMeta('night-owl-discount')) {
+            $nightOwlDiscount = $this->getMetaValue('night-owl-discount');
+            if($totalHours > 5) {
+                $this->apply_discount = true;
+                $this->discount = $nightOwlDiscount;
+                $this->save();
+            }
+        }
+
         if($this->apply_discount) {
             $percent = $this->discount / 100;
             $discount = (double)$amount * $percent;
@@ -387,5 +397,21 @@ class DailySale extends Model
                 ])
                 ->visibleOn('edit'),
         ];
+    }
+
+    public function applyNightOwlDiscount()
+    {
+        $checkIn = Carbon::parse($this->time_in);
+        $startTimeDiscount = $checkIn->copy()->setTime(21, 0, 0);
+        $endTimeDiscount = $checkIn->copy()->addDay()->setTime(2, 0, 0);
+        if ($checkIn->between($startTimeDiscount, $endTimeDiscount) || $checkIn->hour < 2) {
+            if($this->apply_discount) {
+                $discount = 25;
+            } else {
+                $discount = 15;
+            }
+
+            $this->addOrUpdateMeta('night-owl-discount', $discount);
+        }
     }
 }

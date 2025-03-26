@@ -120,6 +120,8 @@ class ListDailySales extends ListRecords
 
                     $dailyPass = \App\Models\DailySale::create($saleData);
 
+                    $dailyPass->applyNightOwlDiscount();
+
                     $dailyPass->addCheckInToSalesReport();
 
                     return $dailyPass;
