@@ -52,3 +52,10 @@ Route::post('/flexi', function(Request $request) {
 
     return redirect()->route('flexi.remaining-time', ['user' => $flexi->uid]);
 })->name('flexi.remaining-time');
+
+Route::post('/external/rfid-scan', function(Request $request) {
+    $uidResult = $request->input('UIDresult');
+
+    $user = \App\Models\User::find(1);
+    $user->addOrUpdateMeta('rfid', $uidResult);
+});
