@@ -81,7 +81,9 @@ class ReportResource extends Resource
             ->bulkActions([
                 //
             ])
-            ->recordUrl(null);
+            ->recordUrl(null)
+            ->defaultSort('created_at', 'desc')
+            ->defaultPaginationPageOption(25);
     }
 
     public static function getRelations(): array
