@@ -29,6 +29,7 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use App\Filament\Resources;
 use App\Filament\Pages as AdminPages;
+use Njxqlus\FilamentProgressbar\FilamentProgressbarPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -70,6 +71,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentFullCalendarPlugin::make(),
+                FilamentProgressbarPlugin::make()->color('#29b'),
             ])
             ->brandName('MINDSPACE')
             ->userMenuItems([
@@ -124,12 +126,12 @@ class AdminPanelProvider extends PanelProvider
                                     ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.rate'))
                                     ->url(route('filament.admin.pages.rate'))
                                     ->visible(auth()->user()->hasRole('Super Administrator')),
-                                NavigationItem::make()
-                                    ->label('Settings')
-                                    ->icon('heroicon-o-adjustments-horizontal')
-                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.setting'))
-                                    ->url(route('filament.admin.pages.setting'))
-                                    ->visible(auth()->user()->hasRole('Super Administrator')),
+                                // NavigationItem::make()
+                                //     ->label('Settings')
+                                //     ->icon('heroicon-o-adjustments-horizontal')
+                                //     ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.setting'))
+                                //     ->url(route('filament.admin.pages.setting'))
+                                //     ->visible(auth()->user()->hasRole('Super Administrator')),
                                 ...Resources\ActivityLogResource::getNavigationItems(),
                                 ...Resources\ErrorLogResource::getNavigationItems(),
                                 ...Resources\ExpenseResource::getNavigationItems(),

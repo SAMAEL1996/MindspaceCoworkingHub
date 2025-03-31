@@ -34,8 +34,17 @@ class MonthlyUserResource extends Resource
     {
         return $table
             ->columns([
+                TableColumns\TextColumn::make('id')
+                    ->label('ID')
+                    ->visible(auth()->user()->hasRole('Super Administrator')),
                 TableColumns\TextColumn::make('card.code')
-                    ->label('Card')
+                    ->label('Card ID')
+                    ->formatStateUsing(function($record, $state) {
+                        return $record->card_id ? $record->card->id : null;
+                    })
+                    ->description(function($record, $state) {
+                        return $record->card_id ? $record->card->code : null;
+                    })
                     ->searchable(),
                 TableColumns\TextColumn::make('name')
                     ->searchable(),
@@ -142,25 +151,22 @@ class MonthlyUserResource extends Resource
                             }
 
                             Notification::make()
-                                ->title('Monthly user successfully renew.')
+                                ->title('Success')
+                                ->body("Monthly user successfully renew.")
                                 ->success()
                                 ->send();
 
                             return redirect()->to(MonthlyUserResource::getUrl('index'));
-                        })
-                        ->visible(function($record) {
-                            if(!auth()->user()->hasRole('Super Administrator')) {
-                                return false;
-                            }
-                            
-                            return $record->is_expired ? false : true;
                         }),
                 ])
                 ->icon('heroicon-o-ellipsis-horizontal')
             ])
-            ->bulkActions([
-
-            ])
+            ->bulkActions([])
+            ->toggleColumnsTriggerAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->button()
+                    ->label('Columns'),
+            )
             ->defaultSort('is_active', 'desc')
             ->defaultPaginationPageOption(25)
             ->recordUrl(null);

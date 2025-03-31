@@ -5,9 +5,9 @@
     
     <x-filament-actions::modals />
 
-    <div class="flex justify-center w-full py-5">
-        <x-filament::button wire:click="create">
-            Submit
+    <div style="padding-top: 20px">
+        <x-filament::button type="submit" wire:loading.class="disabled" class="mr-2">
+            Create
         </x-filament::button>
     </div>
 </div>

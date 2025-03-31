@@ -41,12 +41,13 @@ class FlexiUser extends Model
     }
 
     protected $fillable = [
+        'rate_id',
         'card_id',
         'name',
         'contact_no',
-        'facebook',
         'start_at',
         'end_at',
+        'expired_at',
         'is_active',
         'status',
         'paid',
@@ -57,11 +58,17 @@ class FlexiUser extends Model
         'remaining_time',
         'start_at_carbon',
         'end_at_carbon',
+        'expired_at_carbon',
     ];
+
+    public function rate()
+    {
+        return $this->belongsTo(\App\Models\Rate::class, 'rate_id');
+    }
 
     public function card()
     {
-        return $this->hasOne(\App\Models\Card::class, 'card_id');
+        return $this->belongsTo(\App\Models\Card::class, 'card_id');
     }
 
     public function subject(): MorphOne
@@ -88,6 +95,11 @@ class FlexiUser extends Model
     public function getEndAtCarbonAttribute()
     {
         return \Carbon\Carbon::parse($this->end_at);
+    }
+
+    public function getExpiredAtCarbonAttribute()
+    {
+        return \Carbon\Carbon::parse($this->expired_at);
     }
 
     public function recalculateTimeRemaining($daily_sale_id)

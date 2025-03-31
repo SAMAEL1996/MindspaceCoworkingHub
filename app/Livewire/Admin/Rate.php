@@ -12,6 +12,7 @@ use App\Models\Rate as RateModel;
 use Filament\Infolists\Components as InfolistComponents;
 use Filament\Forms\Form;
 use Filament\Forms\Components as FormComponents;
+use Filament\Notifications\Notification;
 
 class Rate extends Component implements HasForms, HasInfolists
 {
@@ -89,14 +90,44 @@ class Rate extends Component implements HasForms, HasInfolists
                                 FormComponents\Repeater::make('items')
                                     ->label('')
                                     ->schema([
-                                        FormComponents\TextInput::make('id'),
-                                        FormComponents\TextInput::make('name'),
-                                        FormComponents\TextInput::make('consumable'),
-                                        FormComponents\TextInput::make('validity'),
+                                        FormComponents\TextInput::make('name')
+                                            ->required(),
+                                        FormComponents\TextInput::make('consumable')
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(function($get) {
+                                                $label = $get('../../label');
+                                                
+                                                return $label == 'Monthly' ? false : true;
+                                            })
+                                            ->hidden(function($get) {
+                                                $label = $get('../../label');
+                                                
+                                                return $label == 'Monthly' ? true : false;
+                                            })
+                                            ->helperText('Number of hours'),
+                                        FormComponents\TextInput::make('validity')
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(function($get) {
+                                                $label = $get('../../label');
+                                                
+                                                return $label == 'Flexi' ? true : false;
+                                            })
+                                            ->hidden(function($get) {
+                                                $label = $get('../../label');
+                                                
+                                                return $label == 'Flexi' ? false : true;
+                                            })
+                                            ->helperText('Number of days'),
                                         FormComponents\TextInput::make('price')
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required()
                                     ])
                                     ->grid(4)
-                                    ->addable(false)
+                                    // ->addable(false)
+                                    ->addActionLabel('Add')
                                     ->deletable(false)
                                     ->reorderable(false)
                             ])
@@ -107,5 +138,40 @@ class Rate extends Component implements HasForms, HasInfolists
                     ->reorderable(false)
             ])
             ->statePath('data');
+    }
+
+    public function save(): void
+    {
+        $data = $this->form->getState();
+
+        foreach($data['rates'] as $rate) {
+            $label = $rate['label'];
+            foreach($rate['items'] as $item) {
+                if (array_key_exists('id', $item)) {
+                    $rateModel = RateModel::find($item['id']);
+                    $rateModel->update([
+                        'name' => $item['name'],
+                        'consumable' => (int)$item['consumable'],
+                        'validity' => (int)$item['validity'],
+                        'price' => (int)$item['price'],
+                    ]);
+                } else {
+                    $newRate = RateModel::create([
+                        'type' => $label,
+                        'name' => $item['name'],
+                        'consumable' => $item['consumable'],
+                        'validity' => $item['validity'],
+                        'price' => $item['price'],
+                        'status' => true
+                    ]);
+                }
+            }
+        }
+
+        Notification::make()
+            ->title('Success')
+            ->body("Rates successfully upated.")
+            ->success()
+            ->send();
     }
 }

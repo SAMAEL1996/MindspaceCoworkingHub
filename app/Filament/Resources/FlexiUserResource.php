@@ -32,8 +32,22 @@ class FlexiUserResource extends Resource
     {
         return $table
             ->columns([
+                TableColumns\TextColumn::make('id')
+                    ->label('ID')
+                    ->visible(auth()->user()->hasRole('Super Administrator')),
+                TableColumns\TextColumn::make('rate_id')
+                    ->label('Package')
+                    ->formatStateUsing(function($record, $state) {
+                        return $record->rate->name;
+                    }),
                 TableColumns\TextColumn::make('card_id')
-                    ->label('Card'),
+                    ->label('Card ID')
+                    ->formatStateUsing(function($record, $state) {
+                        return $state ? $record->card->id : null;
+                    })
+                    ->description(function($record, $state) {
+                        return $state ? $record->card->code : null;
+                    }),
                 TableColumns\TextColumn::make('name')
                     ->searchable(),
                 TableColumns\TextColumn::make('contact_no')
@@ -41,12 +55,26 @@ class FlexiUserResource extends Resource
                     ->copyable(),
                 TableColumns\TextColumn::make('start_at')
                     ->label('Date Start')
-                    ->date()
+                    ->formatStateUsing(function($record, $state) {
+                        return $state ? $record->start_at_carbon->format(config('app.date_format')) : null;
+                    })
+                    ->description(function($record, $state) {
+                        return $state ? $record->start_at_carbon->format(config('app.time_format')) : null;
+                    })
                     ->sortable(),
                 TableColumns\TextColumn::make('remaining')
                     ->label('Remaining Time')
                     ->formatStateUsing(function($record) {
                         return $record->remaining_time;
+                    })
+                    ->sortable(),
+                TableColumns\TextColumn::make('expired_at')
+                    ->label('Expired At')
+                    ->formatStateUsing(function($record, $state) {
+                        return $state ? $record->expired_at_carbon->format(config('app.date_format')) : null;
+                    })
+                    ->description(function($record, $state) {
+                        return $state ? $record->expired_at_carbon->format(config('app.time_format')) : null;
                     })
                     ->sortable(),
                 TableColumns\TextColumn::make('status')
@@ -57,7 +85,8 @@ class FlexiUserResource extends Resource
                     })
                     ->formatStateUsing(function($state) {
                         return $state ? 'Active' : 'Expired';
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumns\TextColumn::make('paid')
                     ->label('Paid')
                     ->badge()
@@ -67,6 +96,7 @@ class FlexiUserResource extends Resource
                     ->formatStateUsing(function($state) {
                         return $state ? 'Yes' : 'No';
                     })
+                    ->toggleable(isToggledHiddenByDefault: true)
             ])
             ->filters([
                 //
@@ -78,6 +108,8 @@ class FlexiUserResource extends Resource
                     Tables\Actions\Action::make('Renew Pass')
                         ->requiresConfirmation()
                         ->action(function($record) {
+                            $rate = $record->rate;
+
                             $newRecord = $record->replicate();
 
                             $remainingMinutes = $record->start_at_carbon->diffInMinutes($record->end_at_carbon);
@@ -88,7 +120,8 @@ class FlexiUserResource extends Resource
                             $record->save();
 
                             $newRecord->start_at = \Carbon\Carbon::now();
-                            $newRecord->end_at = \Carbon\Carbon::now()->addHours(50)->addMinutes($remainingMinutes);
+                            $newRecord->end_at = \Carbon\Carbon::now()->addHours((int)$rate->consumable)->addMinutes($remainingMinutes);
+                            $newRecord->expired_at = \Carbon\Carbon::now()->addDays((int)$rate->validity);
                             $newRecord->save();
 
                             $saleData = [
@@ -111,7 +144,8 @@ class FlexiUserResource extends Resource
                             $dailyPass = \App\Models\DailySale::create($saleData);
 
                             Notification::make()
-                                ->title('Flexi user successfully renew.')
+                                ->title('Success')
+                                ->body("Flexi user successfully renew.")
                                 ->success()
                                 ->send();
 
@@ -126,6 +160,11 @@ class FlexiUserResource extends Resource
             ->bulkActions([
                 //
             ])
+            ->toggleColumnsTriggerAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->button()
+                    ->label('Columns'),
+            )
             ->defaultSort('is_active', 'desc')
             ->defaultPaginationPageOption(25)
             ->recordUrl(null);

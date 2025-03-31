@@ -56,6 +56,9 @@ class DailySaleResource extends Resource
                     ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy('date', 'DESC'))
             )
             ->columns([
+                TableColumns\TextColumn::make('id')
+                    ->label('ID')
+                    ->visible(auth()->user()->hasRole('Super Administrator')),
                 TableColumns\TextColumn::make('card.code')
                     ->label('Guest')
                     ->formatStateUsing(function($state, $record) {

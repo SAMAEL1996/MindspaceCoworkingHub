@@ -12,6 +12,7 @@ use App\Models\FlexiUser;
 use App\Models\DailySale;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Notifications\Notification;
 
 class ListDailySales extends ListRecords
 {
@@ -124,6 +125,14 @@ class ListDailySales extends ListRecords
 
                     $dailyPass->addCheckInToSalesReport();
 
+                    Notification::make()
+                        ->title('Success')
+                        ->body("Guest successfully added.")
+                        ->success()
+                        ->send();
+        
+                    $this->halt();
+
                     return $dailyPass;
                 })
                 ->visible(function() {
@@ -151,8 +160,22 @@ class ListDailySales extends ListRecords
                         ->extraAttributes([
                             'class' => 'flex justify-center items-center space-x-4',
                         ]),
-                        FormComponents\Grid::make(1)
+                    FormComponents\Grid::make(2)
                         ->schema([
+                            FormComponents\Select::make('rate_id')
+                                ->label('Type')
+                                ->options(\App\Models\Rate::where('type', 'Flexi')->get()->pluck('name', 'id'))
+                                ->preload()
+                                ->live()
+                                ->afterStateUpdated(function($state, $set) {
+                                    $rate = \App\Models\Rate::find($state);
+                                    $set('amount', $rate->price);
+
+                                    $helperText = 'Flexi Pass Rate: PHP ' . number_format($rate->price, 2);
+                                    $set('amount_helper_text', $helperText);
+                                })
+                                ->required()
+                                ->native(false),
                             FormComponents\Select::make('card_id')
                                 ->label('Card ID')
                                 ->options(function() {
@@ -170,32 +193,26 @@ class ListDailySales extends ListRecords
                                 ->searchable('code')
                                 ->required()
                                 ->native(false),
-                            FormComponents\Grid::make(2)
-                                ->schema([
-                                    FormComponents\TextInput::make('name')
-                                        ->required(),
-                                    FormComponents\TextInput::make('contact_no')
-                                        ->required(),
-                                ]),
-                            FormComponents\Grid::make(2)
-                                ->schema([
-                                    FormComponents\TextInput::make('amount')
-                                        ->label('Amount Paid')
-                                        ->numeric()
-                                        ->minValue(1)
-                                        ->maxValue(1500)
-                                        ->required()
-                                        ->default(1500)
-                                        ->helperText('Flexi Pass Rate: PHP 1,500.00'),
-                                    FormComponents\Select::make('mode_of_payment')
-                                        ->options([
-                                            'Cash' => 'Cash',
-                                            'GCash' => 'GCash',
-                                            'Bank Transfer' => 'Bank Transfer'
-                                        ])
-                                        ->required()
-                                        ->native(false)
+                            FormComponents\TextInput::make('name')
+                                ->required(),
+                            FormComponents\TextInput::make('contact_no')
+                                ->required(),
+                            FormComponents\TextInput::make('amount')
+                                ->label('Amount Paid')
+                                ->numeric()
+                                ->minValue(1)
+                                ->required()
+                                ->helperText(function($get) {
+                                    return $get('amount_helper_text') ?? '';
+                                }),
+                            FormComponents\Select::make('mode_of_payment')
+                                ->options([
+                                    'Cash' => 'Cash',
+                                    'GCash' => 'GCash',
+                                    'Bank Transfer' => 'Bank Transfer'
                                 ])
+                                ->required()
+                                ->native(false)
                         ])
                         ->visible(function($get) {
                             return $get('type') == 'new' ? true : false;
@@ -235,6 +252,9 @@ class ListDailySales extends ListRecords
                 ])
                 ->action(function($data) {
                     if($data['type'] == 'new') {
+                        $rate = \App\Models\Rate::find($data['rate_id']);
+
+                        $data['expired_at'] = \Carbon\Carbon::now()->addDays($rate->validity);
                         $data['start_at'] = \Carbon\Carbon::now();
                         $data['end_at'] = \Carbon\Carbon::now()->addHours(50);
                         $data['is_active'] = false;
@@ -271,6 +291,12 @@ class ListDailySales extends ListRecords
                     $flexi->card_id = $card_id;
                     $flexi->save();
 
+                    Notification::make()
+                        ->title('Success')
+                        ->body("Guest successfully added.")
+                        ->success()
+                        ->send();
+
                     return $dailySale;
                 })
                 ->visible(function() {
@@ -298,8 +324,22 @@ class ListDailySales extends ListRecords
                         ->extraAttributes([
                             'class' => 'flex justify-center items-center space-x-4',
                         ]),
-                        FormComponents\Grid::make(1)
+                    FormComponents\Grid::make(2)
                         ->schema([
+                            FormComponents\Select::make('rate_id')
+                                ->label('Type')
+                                ->options(\App\Models\Rate::where('type', 'Monthly')->get()->pluck('name', 'id'))
+                                ->preload()
+                                ->live()
+                                ->afterStateUpdated(function($state, $set) {
+                                    $rate = \App\Models\Rate::find($state);
+                                    $set('amount', $rate->price);
+
+                                    $helperText = 'Monthly Pass Rate: PHP ' . number_format($rate->price, 2);
+                                    $set('amount_helper_text', $helperText);
+                                })
+                                ->required()
+                                ->native(false),
                             FormComponents\Select::make('card_id')
                                 ->label('Card ID')
                                 ->options(function() {
@@ -316,32 +356,26 @@ class ListDailySales extends ListRecords
                                 ->searchable('code')
                                 ->required()
                                 ->native(false),
-                            FormComponents\Grid::make(2)
-                                ->schema([
-                                    FormComponents\TextInput::make('name')
-                                        ->required(),
-                                    FormComponents\TextInput::make('contact_no')
-                                        ->required(),
-                                ]),
-                            FormComponents\Grid::make(2)
-                                ->schema([
-                                    FormComponents\TextInput::make('amount')
-                                        ->label('Amount Paid')
-                                        ->numeric()
-                                        ->minValue(1)
-                                        ->maxValue(3500)
-                                        ->default(3500)
-                                        ->required()
-                                        ->helperText('Monthly Pass Rate: PHP 3,500.00'),
-                                    FormComponents\Select::make('mode_of_payment')
-                                        ->options([
-                                            'Cash' => 'Cash',
-                                            'GCash' => 'GCash',
-                                            'Bank Transfer' => 'Bank Transfer'
-                                        ])
-                                        ->required()
-                                        ->native(false)
+                            FormComponents\TextInput::make('name')
+                                ->required(),
+                            FormComponents\TextInput::make('contact_no')
+                                ->required(),
+                            FormComponents\TextInput::make('amount')
+                                ->label('Amount Paid')
+                                ->numeric()
+                                ->minValue(1)
+                                ->required()
+                                ->helperText(function($get) {
+                                    return $get('amount_helper_text') ?? '';
+                                }),
+                            FormComponents\Select::make('mode_of_payment')
+                                ->options([
+                                    'Cash' => 'Cash',
+                                    'GCash' => 'GCash',
+                                    'Bank Transfer' => 'Bank Transfer'
                                 ])
+                                ->required()
+                                ->native(false)
                         ])
                         ->visible(function($get) {
                             return $get('type') == 'new' ? true : false;
@@ -389,6 +423,8 @@ class ListDailySales extends ListRecords
                 ])
                 ->action(function($data) {
                     if($data['type'] == 'new') {
+                        $rate = \App\Models\Rate::find($data['rate_id']);
+
                         $data['date_start'] = \Carbon\Carbon::now();
                         $data['date_finish'] = \Carbon\Carbon::now()->addMonth()->subDay();
                         $data['is_active'] = false;
@@ -422,6 +458,12 @@ class ListDailySales extends ListRecords
 
                     $monthly->is_active = true;
                     $monthly->save();
+
+                    Notification::make()
+                        ->title('Success')
+                        ->body("Guest successfully added.")
+                        ->success()
+                        ->send();
 
                     return $dailySale;
                 })

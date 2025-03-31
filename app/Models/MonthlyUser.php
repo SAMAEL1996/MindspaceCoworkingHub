@@ -38,6 +38,7 @@ class MonthlyUser extends Model
     }
 
     protected $fillable = [
+        'rate_id',
         'card_id',
         'name',
         'contact_no',
@@ -55,6 +56,11 @@ class MonthlyUser extends Model
         'date_start_carbon',
         'date_finish_carbon',
     ];
+
+    public function rate()
+    {
+        return $this->belongsTo(\App\Models\Rate::class, 'rate_id');
+    }
 
     public function card()
     {
