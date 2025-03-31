@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns as TableColumns;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components as InfolistComponents;
 
 class CardResource extends Resource
 {
@@ -44,15 +46,10 @@ class CardResource extends Resource
                     ->searchable()
                     ->sortable(),
             ])
-            ->filters([
-
-            ])
-            ->actions([
-
-            ])
-            ->bulkActions([
-
-            ]);
+            ->filters([])
+            ->actions([])
+            ->bulkActions([])
+            ->recordUrl(fn ($record): string => CardResource::getUrl('view', ['record' => $record]));
     }
 
     public static function getRelations(): array
@@ -70,6 +67,21 @@ class CardResource extends Resource
             'view' => Pages\ViewCard::route('/{record}'),
             'edit' => Pages\EditCard::route('/{record}/edit'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistComponents\Tabs::make('Tabs')
+                ->tabs([
+                    InfolistComponents\Tabs\Tab::make('Information')
+                        ->schema([
+                            // ...
+                        ]),
+                ])
+                ->columnSpanFull()
+            ]);
     }
 
     public static function getNavigationItems(): array
