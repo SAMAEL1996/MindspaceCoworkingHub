@@ -66,7 +66,8 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
     $uidResult = $request->input('UIDresult');
 
     session()->forget('card');
-    session()->put('card', $uidResult);
+
+    $request->session()->put('card',$uidResult);
 
     \Cache::put('card', $uidResult, 300);
 
