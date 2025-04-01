@@ -226,14 +226,14 @@ class DailySale extends Model
             $flatRate = $cloneQuery->where('consumable', 8)->first();
             $amount = (int)$flatRate->price;
 
-        } elseif($totalHours > 8 && $totalHours < 24) {
+        } elseif($totalHours == 9) {
             $cloneQuery = clone $rateQuery;
             $flatRate = $cloneQuery->where('consumable', 8)->first();
             $excess = $totalHours - 8;
             $additional = $excess * (int)$hourlyRate->price;
             $amount = (int)$flatRate->price + $additional;
 
-        } elseif($totalHours == 24) {
+        } elseif($totalHours > 9 && $totalHours < 25) {
             $flatRate = clone $rateQuery->where('consumable', 24)->first();
             $amount = (int)$flatRate->price;
             

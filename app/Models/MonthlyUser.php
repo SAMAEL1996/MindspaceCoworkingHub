@@ -83,7 +83,7 @@ class MonthlyUser extends Model
     {
         $apikey = config('app.semaphore_key');
 
-        $content = 'Thank you for subscribing to Monthly Pass! Enjoy unlimited co-working access, valid for 30 days.';
+        $content = 'Thank you for subscribing to Monthly Pass! You can now enjoy unlimited co-working access, valid for 30 days.';
         $params = [
             'apikey' => $apikey,
             'number' => $this->contact_no,

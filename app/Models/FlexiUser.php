@@ -262,7 +262,7 @@ class FlexiUser extends Model
 
         $rate = $this->rate;
 
-        $content = "Thank you for subscribing to {$rate->name}! Enjoy {$rate->consumable} hours of consumable co-working access, valid for {$rate->validity} days.";
+        $content = "Thank you for subscribing to {$rate->name}! You can now enjoy {$rate->consumable} hours of consumable co-working access, valid for {$rate->validity} days.";
         $params = [
             'apikey' => $apikey,
             'number' => $this->contact_no,
