@@ -27,7 +27,7 @@ class Setting extends Model
     public static function getValue($key)
     {
         $setting = self::where('key', $key)->first();
-        return ($setting) ? $setting->value : false;
+        return ($setting) ? $setting->value : null;
     }
 
     public static function getValueAsArray($key)

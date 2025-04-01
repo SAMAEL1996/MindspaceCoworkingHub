@@ -8,6 +8,7 @@ use Filament\Forms\Components as FormComponents;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 
 class CardRfidForm extends Component implements HasForms
 {
@@ -34,7 +35,18 @@ class CardRfidForm extends Component implements HasForms
     public function save()
     {
         $data = $this->form->getState();
-        dd($data);
+        $this->card->update([
+            'code' => $data['code'],
+            'rfid' => $data['rfid'],
+            'type' => $data['type'],
+            'status' => $data['status']
+        ]);
+
+        Notification::make()
+            ->title('Success')
+            ->body('Card successfully updated.')
+            ->success()
+            ->send();
     }
 
     public function form(Form $form): Form
@@ -45,18 +57,21 @@ class CardRfidForm extends Component implements HasForms
                     ->schema([
                         FormComponents\TextInput::make('code')
                             ->label('Code')
+                            ->unique(ignoreRecord: true)
                             ->required(),
                         FormComponents\TextInput::make('rfid')
                             ->label('RFID')
-                            ->required(),
+                            ->unique(ignoreRecord: true),
                         FormComponents\Select::make('type')
                             ->label('Type')
                             ->options(Card::getTypeSelectOptions())
-                            ->native(false),
+                            ->native(false)
+                            ->required(),
                         FormComponents\Select::make('status')
                             ->label('Status')
                             ->options(Card::getStatusSelectOptions())
                             ->native(false)
+                            ->required()
                     ])
             ])
             ->statePath('data')
