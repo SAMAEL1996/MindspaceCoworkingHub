@@ -14,6 +14,7 @@ class Card extends Model
         'code',
         'rfid',
         'type',
+        'status',
     ];
 
     public static function getTypeSelectOptions()
@@ -22,6 +23,14 @@ class Card extends Model
             'Staff' => 'Staff',
             'Daily' => 'Daily',
             'Monthly' => 'Monthly',
+        ];
+    }
+
+    public static function getStatusSelectOptions()
+    {
+        return [
+            'Active' => 'Active',
+            'Inactive' => 'Inactive'
         ];
     }
 
