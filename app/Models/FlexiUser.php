@@ -256,6 +256,33 @@ class FlexiUser extends Model
             ->log('<b>SMS Notification</b> <br>'.$content);
     }
 
+    public function sendWelcomeMessage()
+    {
+        $apikey = config('app.semaphore_key');
+
+        $rate = $this->rate;
+
+        $content = "Thank you for subscribing to {$rate->name}! Enjoy {$rate->consumable} hours of consumable co-working access, valid for {$rate->validity} days.";
+        $params = [
+            'apikey' => $apikey,
+            'number' => $this->contact_no,
+            'message' => $content,
+        ];
+
+        try {
+            $client = new Client();
+            $request = new Request('POST', "https://api.semaphore.co/api/v4/messages?" . http_build_query($params));
+            $res = $client->sendAsync($request)->wait();
+        } catch (\Exception $e) {
+            \Log::error($this->name.' send sms error on '.\Carbon\Carbon::now()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
+        }
+
+        activity()
+            ->inLog('notifications')
+            ->performedOn($this)
+            ->log('<b>SMS Notification</b> <br>'.$content);
+    }
+
     public static function getForm()
     {
         return [

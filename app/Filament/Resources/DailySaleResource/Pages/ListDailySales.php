@@ -263,6 +263,8 @@ class ListDailySales extends ListRecords
     
                         $flexi = \App\Models\FlexiUser::create($data);
 
+                        $flexi->sendWelcomeMessage();
+
                         $card_id = $data['card_id'];
                     } else {
                         $flexi = \App\Models\FlexiUser::find($data['flexi_user_id']);
@@ -432,6 +434,8 @@ class ListDailySales extends ListRecords
                         $data['paid'] = $data['amount'] >= 3500 ? true : false;
     
                         $monthly = \App\Models\MonthlyUser::create($data);
+
+                        $monthly->sendWelcomeMessage();
                     } else {
                         $monthly = MonthlyUser::find($data['monthly_user_id']);
                     }
