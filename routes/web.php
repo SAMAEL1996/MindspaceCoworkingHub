@@ -65,6 +65,8 @@ Route::post('/external/rfid-scan', function(Request $request) {
     session(['card' => $uidResult]);
     \Session::put('card', $uidResult);
 
+    \Cache::put('card', $uidResult, 300);
+
     $user = \App\Models\User::find(1);
     $user->addOrUpdateMeta('rfid', session('card'));
 

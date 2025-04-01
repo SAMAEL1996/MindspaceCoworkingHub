@@ -18,6 +18,7 @@ class CardRfidForm extends Component implements HasForms
     public ?array $data = [];
 
     public $rfid;
+    public $rfidCache;
 
     public function mount()
     {
@@ -38,6 +39,7 @@ class CardRfidForm extends Component implements HasForms
 
     public function getSessionCard()
     {
+        $this->rfidCache = \Cache::get('card');
         $this->rfid = session('card');
         $this->form->fill(['rfid' => $this->rfid]); // Sync form value with session
     }
