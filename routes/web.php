@@ -54,6 +54,8 @@ Route::post('/flexi', function(Request $request) {
 })->name('flexi.remaining-time');
 
 Route::get('/external/rfid-scan', function(Request $request) {
+
+    \Cache::put('card', 'hey', 300);
     abort(403);
 
     $user = \App\Models\User::find(1);
@@ -69,6 +71,8 @@ Route::post('/external/rfid-scan', function(Request $request) {
 
     $user = \App\Models\User::find(1);
     $user->addOrUpdateMeta('rfid', session('card'));
+    return true;
+    abort(403);
 
     return response()->json(['message' => 'RFID received successfully']);
 });
