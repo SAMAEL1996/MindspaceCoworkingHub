@@ -55,7 +55,6 @@ Route::post('/flexi', function(Request $request) {
 
 Route::get('/external/rfid-scan', function(Request $request) {
     abort(403);
-    $uidResult = $request->input('UIDresult');
 
     $user = \App\Models\User::find(1);
     $user->addOrUpdateMeta('rfid', $uidResult);
@@ -63,10 +62,11 @@ Route::get('/external/rfid-scan', function(Request $request) {
 Route::post('/external/rfid-scan', function(Request $request) {
     $uidResult = $request->input('UIDresult');
 
-    session(['card' => $uidResult]);
-    
+    session(['card' => 'hey']);
+    \Session::put('card', 'hey');
+
     $user = \App\Models\User::find(1);
-    $user->addOrUpdateMeta('rfid', $uidResult);
+    $user->addOrUpdateMeta('rfid', session('card'));
 
     return response()->json(['message' => 'RFID received successfully']);
 });
