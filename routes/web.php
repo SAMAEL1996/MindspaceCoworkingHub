@@ -64,8 +64,30 @@ Route::get('/external/rfid-scan', function(Request $request) {
 });
 Route::middleware(['web'])->post('/external/rfid-scan', function(Request $request) {
     $uidResult = $request->input('UIDresult');
-
     \App\Models\Setting::upsertValue('card', $uidResult);
+
+    $card = \App\Models\Card::where('rfid', $uidResult)->first();
+    if($card) {
+        switch($card->type) {
+            case 'Staff':
+                $staff = \App\Models\Staff::where('card_id', $card->id)->first();
+                $user = $staff->user;
+                $attendance = $staff->attendances()->latest()->first();
+                if($attendance->check_out) {
+                    // create new attendance
+                    $newAttendance = \App\Models\Attendance::create([
+                        'staff_id' => $staff->id,
+                        'check_in' => \Carbon\Carbon::now()
+                    ]);
+                } else {
+                    // logout
+                    $attendance->update([
+                        'check_out' => \Carbon\Carbon::now()
+                    ]);
+                }
+                break;
+        }
+    }
 
     return response()->json(['message' => 'RFID received successfully']);
 });
