@@ -11,7 +11,7 @@ class SetSessionCardValue extends Command
      *
      * @var string
      */
-    protected $signature = 'app:set-session-card-value {card}';
+    protected $signature = 'app:set-session-card-value';
 
     /**
      * The console command description.
@@ -25,8 +25,9 @@ class SetSessionCardValue extends Command
      */
     public function handle()
     {
-        $card = $this->argument('card');
-        
+        $user = \App\Models\User::find(1);
+        $card = $user->getMetaValue('rfid');
+
         session()->forget('card');
 
         session()->put('card',$card);
