@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,9 +65,8 @@ Route::get('/external/rfid-scan', function(Request $request) {
 Route::middleware(['web'])->post('/external/rfid-scan', function(Request $request) {
     $uidResult = $request->input('UIDresult');
 
-    session(['card' => $uidResult]);
-    session()->save();
-    \Session::put('card', $uidResult);
+    session()->forget('card');
+    session()->put('card', $uidResult);
 
     \Cache::put('card', $uidResult, 300);
 
