@@ -7,22 +7,15 @@ use Illuminate\Database\Seeder;
 
 class SetSessionCardValue extends Seeder
 {
-    protected $card;
-
-    public function __construct($card)
-    {
-        $this->card = $card;
-    }
-
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run($card = null): void
     {
         session()->forget('card');
 
-        session()->put('card',$this->card);
+        session()->put('card',$card);
 
-        \Cache::put('card', $this->card, 300);
+        \Cache::put('card', $card, 300);
     }
 }

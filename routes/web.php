@@ -65,7 +65,7 @@ Route::get('/external/rfid-scan', function(Request $request) {
 Route::middleware(['web'])->post('/external/rfid-scan', function(Request $request) {
     $uidResult = $request->input('UIDresult');
 
-    (new \Database\Seeders\SetSessionCardValue())->run(['card' => $uidResult]);
+    \Artisan::call('app:set-session-card-value '.$uidResult);
 
     // session()->forget('card');
 
