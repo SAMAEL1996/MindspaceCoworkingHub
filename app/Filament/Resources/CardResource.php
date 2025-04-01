@@ -69,20 +69,6 @@ class CardResource extends Resource
             // 'edit' => Pages\EditCard::route('/{record}/edit'),
         ];
     }
-    public static function infolist(Infolist $infolist): Infolist
-        {
-            return $infolist
-                ->schema([
-                    InfolistComponents\Tabs::make('Tabs')
-                    ->tabs([
-                        InfolistComponents\Tabs\Tab::make('Information')
-                            ->schema([
-                                // ...
-                            ]),
-                    ])
-                    ->columnSpanFull()
-                ]);
-        }
 
     public static function infolist(Infolist $infolist): Infolist
     {
