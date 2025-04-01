@@ -36,23 +36,32 @@ class SendFlexiReminder extends Command
         foreach($flexiPass as $flexi) {
             $expiredAt = $flexi->expired_at_carbon;
         
-            $content = "Hi {$flexi->name}! This is a reminder that your Flexi Pass will be expired on {$flexi->expired_at_carbon->format(config('app.date_time_format'))}. Thank you!";
-            $firstNotif = $flexi->hasMeta('3-day-expiry-notification');
+            $content = "Hi {$flexi->name}! This is a reminder that your Flexi Pass with remaining time {$flexi->remaining_time}, will be expired on {$flexi->expired_at_carbon->format(config('app.date_time_format'))}. Thank you!";
+            $firstNotif = $flexi->hasMeta('7-day-expiry-notification');
             $secondNotif = $flexi->hasMeta('1-day-expiry-notification');
+            $thirdNotif = $flexi->hasMeta('on-day-expiry-notification');
 
-            if (!$firstNotif && $expiredAt->isSameDay($now->copy()->addDays(3))) {
+            if (!$firstNotif && $expiredAt->isSameDay($now->copy()->addDays(7))) {
                 $res = $this->sendSms($flexi, $content);
 
                 if($res) {
-                    $flexi->addOrUpdateMeta('3-day-expiry-notification', $now->copy()->format(config('app.date_time_format')));
+                    $flexi->addOrUpdateMeta('7-day-expiry-notification', $now->copy()->format(config('app.date_time_format')));
                 }
             }
 
-            if (!$secondNotif && $expiredAt->isToday()) {
+            if (!$secondNotif && $expiredAt->isSameDay($now->copy()->addDay())) {
                 $res = $this->sendSms($flexi, $content);
 
                 if($res) {
                     $flexi->addOrUpdateMeta('1-day-expiry-notification', $now->copy()->format(config('app.date_time_format')));
+                }
+            }
+
+            if (!$thirdNotif && $expiredAt->isToday()) {
+                $res = $this->sendSms($flexi, $content);
+
+                if($res) {
+                    $flexi->addOrUpdateMeta('on-day-expiry-notification', $now->copy()->format(config('app.date_time_format')));
                 }
             }
 

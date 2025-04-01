@@ -15,11 +15,11 @@ return new class extends Migration
             $table->bigInteger('rate_id')->nullable()->after('uid');
         });
 
-        foreach(\App\Models\MonthlyUser::all() as $monthly) {
-            $rate = \App\Models\Rate::where('type', 'Monthly')->where('status', true)->first();
-            $monthly->rate_id = $rate->id;
-            $monthly->save();
-        }
+        // foreach(\App\Models\MonthlyUser::all() as $monthly) {
+        //     $rate = \App\Models\Rate::where('type', 'Monthly')->where('status', true)->first();
+        //     $monthly->rate_id = $rate->id;
+        //     $monthly->save();
+        // }
     }
 
     /**

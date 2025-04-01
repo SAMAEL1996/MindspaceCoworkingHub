@@ -38,8 +38,9 @@ class FlexiUserResource extends Resource
                 TableColumns\TextColumn::make('rate_id')
                     ->label('Package')
                     ->formatStateUsing(function($record, $state) {
-                        return $record->rate->name;
-                    }),
+                        return $state ? $record->rate->name : 'Old';
+                    })
+                    ->placeholder('Old Pass'),
                 TableColumns\TextColumn::make('card_id')
                     ->label('Card ID')
                     ->formatStateUsing(function($record, $state) {
@@ -76,7 +77,8 @@ class FlexiUserResource extends Resource
                     ->description(function($record, $state) {
                         return $state ? $record->expired_at_carbon->format(config('app.time_format')) : null;
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->placeholder('No expiry'),
                 TableColumns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()

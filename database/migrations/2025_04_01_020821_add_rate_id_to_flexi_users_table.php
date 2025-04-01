@@ -16,13 +16,6 @@ return new class extends Migration
             $table->dateTime('expired_at')->nullable()->after('end_at');
         });
 
-        foreach(\App\Models\FlexiUser::all() as $flexi) {
-            $rate = \App\Models\Rate::where('type', 'Flexi')->where('consumable', 50)->first();
-            $flexi->rate_id = $rate->id;
-            $flexi->expired_at = \Carbon\Carbon::now()->addDays(60);
-            $flexi->save();
-        }
-        
         Schema::table('flexi_users', function (Blueprint $table) {
             $table->dropColumn('facebook');
         });
