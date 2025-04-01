@@ -130,8 +130,6 @@ class ListDailySales extends ListRecords
                         ->body("Guest successfully added.")
                         ->success()
                         ->send();
-        
-                    $this->halt();
 
                     return $dailyPass;
                 })

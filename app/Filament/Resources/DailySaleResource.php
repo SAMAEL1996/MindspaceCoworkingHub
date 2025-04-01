@@ -705,7 +705,9 @@ class DailySaleResource extends Resource
             )
             ->bulkActions([])
             ->recordUrl(fn ($record): string => DailySaleResource::getUrl('view', ['record' => $record]))
-            ->defaultPaginationPageOption(25);
+            ->defaultPaginationPageOption(25)
+            ->poll('30s')
+            ->deferLoading();
     }
 
     public static function getRelations(): array
