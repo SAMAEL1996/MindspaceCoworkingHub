@@ -65,11 +65,13 @@ Route::get('/external/rfid-scan', function(Request $request) {
 Route::middleware(['web'])->post('/external/rfid-scan', function(Request $request) {
     $uidResult = $request->input('UIDresult');
 
-    session()->forget('card');
+    (new \Database\Seeders\SetSessionCardValue())->run(['card' => $uidResult]);
 
-    $request->session()->put('card',$uidResult);
+    // session()->forget('card');
 
-    \Cache::put('card', $uidResult, 300);
+    // $request->session()->put('card',$uidResult);
+
+    // \Cache::put('card', $uidResult, 300);
 
     $user = \App\Models\User::find(1);
     $user->addOrUpdateMeta('rfid', session('card'));
