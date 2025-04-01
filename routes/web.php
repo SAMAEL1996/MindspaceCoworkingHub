@@ -65,13 +65,14 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
     $uidResult = $request->input('UIDresult');
 
     session(['card' => $uidResult]);
+    session()->save();
     \Session::put('card', $uidResult);
 
     \Cache::put('card', $uidResult, 300);
 
     $user = \App\Models\User::find(1);
     $user->addOrUpdateMeta('rfid', session('card'));
-    return true;
+    return session('card');
     abort(403);
 
     return response()->json(['message' => 'RFID received successfully']);
