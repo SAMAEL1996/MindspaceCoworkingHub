@@ -3,7 +3,6 @@
         {{ $this->form }}
 
         <div wire:poll.1s="getSessionCard">
-            {{ dd(session()->all(), $rfidCache) }}
             @if($rfid)
                 <p>Session Card: {{ $rfid }}</p>
             @else

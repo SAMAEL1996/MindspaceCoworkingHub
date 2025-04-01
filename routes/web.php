@@ -65,18 +65,7 @@ Route::get('/external/rfid-scan', function(Request $request) {
 Route::middleware(['web'])->post('/external/rfid-scan', function(Request $request) {
     $uidResult = $request->input('UIDresult');
 
-    \Artisan::call('app:set-session-card-value '.$uidResult);
-
-    // session()->forget('card');
-
-    // $request->session()->put('card',$uidResult);
-
-    // \Cache::put('card', $uidResult, 300);
-
-    $user = \App\Models\User::find(1);
-    $user->addOrUpdateMeta('rfid', session('card'));
-    return session('card');
-    abort(403);
+    \App\Models\Setting::upsertValue('card', $uidResult);
 
     return response()->json(['message' => 'RFID received successfully']);
 });

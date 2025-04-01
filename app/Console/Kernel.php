@@ -23,8 +23,6 @@ class Kernel extends ConsoleKernel
 
         // create sales record monthly/daily
         $schedule->command('app:create-sales-record')->dailyAt('00:00');
-
-        $schedule->command('app:set-session-card-value')->everySecond();;
     }
 
     /**
