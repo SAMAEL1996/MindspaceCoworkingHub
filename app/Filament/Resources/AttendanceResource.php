@@ -65,11 +65,9 @@ class AttendanceResource extends Resource
     {
         return $table
             ->columns([
-                TableColumns\TextColumn::make('staff_id')
+                TableColumns\TextColumn::make('staff.user.name')
                     ->label('Staff')
-                    ->formatStateUsing(function($record) {
-                        return $record->staff->user->name;
-                    })
+                    ->searchable()
                     ->visible(auth()->user()->can('export attendances')),
                 TableColumns\TextColumn::make('check_in')
                     ->label('Check In')

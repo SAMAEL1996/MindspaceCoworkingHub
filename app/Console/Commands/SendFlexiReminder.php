@@ -34,30 +34,40 @@ class SendFlexiReminder extends Command
 
         $flexiPass = \App\Models\FlexiUser::where('status', true)->get();
         foreach($flexiPass as $flexi) {
-            $startAt = $flexi->start_at_carbon;
-            $endAt = $flexi->end_at_carbon;
+            $expiredAt = $flexi->expired_at_carbon;
+        
+            $content = "Hi {$flexi->name}! This is a reminder that your Flexi Pass with remaining time {$flexi->remaining_time}, will be expired on {$flexi->expired_at_carbon->format(config('app.date_time_format'))}. Thank you!";
+            $firstNotif = $flexi->hasMeta('7-day-expiry-notification');
+            $secondNotif = $flexi->hasMeta('1-day-expiry-notification');
+            $thirdNotif = $flexi->hasMeta('on-day-expiry-notification');
 
-            $interval = $startAt->diff($endAt);
-            $hours = $interval->h;
-
-            $content = "Hi {$flexi->name}! This is a reminder that you only have {$flexi->remaining_time} on your Flexi Pass. Thank you!";
-            $firstNotif = $flexi->hasMeta('10-hour-notification');
-            $secondNotif = $flexi->hasMeta('3-hour-notification');
-
-            if(!$firstNotif) {
+            if (!$firstNotif && $expiredAt->isSameDay($now->copy()->addDays(7))) {
                 $res = $this->sendSms($flexi, $content);
 
                 if($res) {
-                    $flexi->addOrUpdateMeta('10-hour-notification', $now->copy()->format(config('app.date_time_format')));
+                    $flexi->addOrUpdateMeta('7-day-expiry-notification', $now->copy()->format(config('app.date_time_format')));
                 }
             }
 
-            if($firstNotif && !$secondNotif) {
+            if (!$secondNotif && $expiredAt->isSameDay($now->copy()->addDay())) {
                 $res = $this->sendSms($flexi, $content);
 
                 if($res) {
-                    $flexi->addOrUpdateMeta('3-hour-notification', $now->copy()->format(config('app.date_time_format')));
+                    $flexi->addOrUpdateMeta('1-day-expiry-notification', $now->copy()->format(config('app.date_time_format')));
                 }
+            }
+
+            if (!$thirdNotif && $expiredAt->isToday()) {
+                $res = $this->sendSms($flexi, $content);
+
+                if($res) {
+                    $flexi->addOrUpdateMeta('on-day-expiry-notification', $now->copy()->format(config('app.date_time_format')));
+                }
+            }
+
+            if($expiredAt->isPast()) {
+                $flexi->status = false;
+                $flexi->save();
             }
         }
     }

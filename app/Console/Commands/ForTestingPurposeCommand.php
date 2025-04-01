@@ -49,7 +49,7 @@ class ForTestingPurposeCommand extends Command
 
                 $user->addOrUpdateMeta('message-sent', $now->format(config('app.date_time_format')));
             } catch (\Exception $e) {
-                \Log::error($monthly->name.' send sms error on '.$now->copy()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
+                \Log::error('User send sms error on '.$now->copy()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
             }
         }
     }

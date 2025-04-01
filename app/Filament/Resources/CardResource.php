@@ -46,15 +46,10 @@ class CardResource extends Resource
                     ->searchable()
                     ->sortable(),
             ])
-            ->filters([
-
-            ])
-            ->actions([
-
-            ])
-            ->bulkActions([
-
-            ]);
+            ->filters([])
+            ->actions([])
+            ->bulkActions([])
+            ->recordUrl(fn ($record): string => CardResource::getUrl('view', ['record' => $record]));
     }
 
     public static function getRelations(): array
@@ -89,8 +84,37 @@ class CardResource extends Resource
                 ]);
         }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistComponents\Tabs::make('Tabs')
+                ->tabs([
+                    InfolistComponents\Tabs\Tab::make('Information')
+                        ->schema([
+                            // ...
+                        ]),
+                ])
+                ->columnSpanFull()
+            ]);
+    }
+
+    public static function getNavigationItems(): array
+    {
+        return [
+            \Filament\Navigation\NavigationItem::make(static::getNavigationLabel())
+                ->group(static::$navigationGroup ?? null)
+                ->parentItem(static::$navigationParentItem ?? null)
+                ->icon(static::$navigationIcon ?? null)
+                ->isActiveWhen(fn () => request()->routeIs(static::getRouteBaseName() . '.*'))
+                ->sort(static::$navigationSort ?? 0)
+                ->url(static::getUrl())
+                ->visible(auth()->user()->hasRole('Super Administrator')),
+        ];
+    }
+    
     public static function canViewAny(): bool
     {
-        return auth()->user()->can('view cards');
+        return auth()->user()->hasRole('Super Administrator');
     }
 }

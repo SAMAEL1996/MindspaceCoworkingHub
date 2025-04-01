@@ -14,6 +14,7 @@
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.5",
+        "njxqlus/filament-progressbar": "^1.1",
         "pxlrbt/filament-excel": "^2.3",
         "saade/filament-fullcalendar": "3.0",
         "spatie/laravel-activitylog": "^4.9",

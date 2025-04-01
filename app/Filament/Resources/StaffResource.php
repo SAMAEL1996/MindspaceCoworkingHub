@@ -108,8 +108,22 @@ class StaffResource extends Resource
             ]);
     }
 
+    public static function getNavigationItems(): array
+    {
+        return [
+            \Filament\Navigation\NavigationItem::make(static::getNavigationLabel())
+                ->group(static::$navigationGroup ?? null)
+                ->parentItem(static::$navigationParentItem ?? null)
+                ->icon(static::$navigationIcon ?? null)
+                ->isActiveWhen(fn () => request()->routeIs(static::getRouteBaseName() . '.*'))
+                ->sort(static::$navigationSort ?? 0)
+                ->url(static::getUrl())
+                ->visible(auth()->user()->hasRole('Super Administrator')),
+        ];
+    }
+    
     public static function canViewAny(): bool
     {
-        return auth()->user()->can('view staff');
+        return auth()->user()->hasRole('Super Administrator');
     }
 }

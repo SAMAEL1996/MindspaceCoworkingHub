@@ -41,12 +41,13 @@ class FlexiUser extends Model
     }
 
     protected $fillable = [
+        'rate_id',
         'card_id',
         'name',
         'contact_no',
-        'facebook',
         'start_at',
         'end_at',
+        'expired_at',
         'is_active',
         'status',
         'paid',
@@ -57,11 +58,17 @@ class FlexiUser extends Model
         'remaining_time',
         'start_at_carbon',
         'end_at_carbon',
+        'expired_at_carbon',
     ];
+
+    public function rate()
+    {
+        return $this->belongsTo(\App\Models\Rate::class, 'rate_id');
+    }
 
     public function card()
     {
-        return $this->hasOne(\App\Models\Card::class, 'card_id');
+        return $this->belongsTo(\App\Models\Card::class, 'card_id');
     }
 
     public function subject(): MorphOne
@@ -88,6 +95,11 @@ class FlexiUser extends Model
     public function getEndAtCarbonAttribute()
     {
         return \Carbon\Carbon::parse($this->end_at);
+    }
+
+    public function getExpiredAtCarbonAttribute()
+    {
+        return \Carbon\Carbon::parse($this->expired_at);
     }
 
     public function recalculateTimeRemaining($daily_sale_id)
@@ -236,6 +248,33 @@ class FlexiUser extends Model
 
             \Log::error($this->name.' send sms error on '.$now->copy()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
 
+        }
+
+        activity()
+            ->inLog('notifications')
+            ->performedOn($this)
+            ->log('<b>SMS Notification</b> <br>'.$content);
+    }
+
+    public function sendWelcomeMessage()
+    {
+        $apikey = config('app.semaphore_key');
+
+        $rate = $this->rate;
+
+        $content = "Thank you for subscribing to {$rate->name}! You can now enjoy {$rate->consumable} hours of consumable co-working access, valid for {$rate->validity} days.";
+        $params = [
+            'apikey' => $apikey,
+            'number' => $this->contact_no,
+            'message' => $content,
+        ];
+
+        try {
+            $client = new Client();
+            $request = new Request('POST', "https://api.semaphore.co/api/v4/messages?" . http_build_query($params));
+            $res = $client->sendAsync($request)->wait();
+        } catch (\Exception $e) {
+            \Log::error($this->name.' send sms error on '.\Carbon\Carbon::now()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
         }
 
         activity()

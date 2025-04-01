@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
 use Filament\Forms\Components as FormComponents;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request as GuzzleRequest;
 
 class MonthlyUser extends Model
 {
@@ -38,6 +40,7 @@ class MonthlyUser extends Model
     }
 
     protected $fillable = [
+        'rate_id',
         'card_id',
         'name',
         'contact_no',
@@ -56,6 +59,11 @@ class MonthlyUser extends Model
         'date_finish_carbon',
     ];
 
+    public function rate()
+    {
+        return $this->belongsTo(\App\Models\Rate::class, 'rate_id');
+    }
+
     public function card()
     {
         return $this->belongsTo(\App\Models\Card::class, 'card_id');
@@ -69,6 +77,31 @@ class MonthlyUser extends Model
     public function getDateFinishCarbonAttribute()
     {
         return \Carbon\Carbon::parse($this->end_at)->addDay();
+    }
+
+    public function sendWelcomeMessage()
+    {
+        $apikey = config('app.semaphore_key');
+
+        $content = 'Thank you for subscribing to Monthly Pass! You can now enjoy unlimited co-working access, valid for 30 days.';
+        $params = [
+            'apikey' => $apikey,
+            'number' => $this->contact_no,
+            'message' => $content,
+        ];
+
+        try {
+            $client = new Client();
+            $request = new GuzzleRequest('POST', "https://api.semaphore.co/api/v4/messages?" . http_build_query($params));
+            $res = $client->sendAsync($request)->wait();
+        } catch (\Exception $e) {
+            \Log::error($this->name.' send sms error on '.\Carbon\Carbon::now()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
+        }
+
+        activity()
+            ->inLog('notifications')
+            ->performedOn($this)
+            ->log('<b>SMS Notification</b> <br>'.$content);
     }
 
     public static function getForm()

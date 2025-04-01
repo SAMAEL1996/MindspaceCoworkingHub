@@ -79,6 +79,13 @@
                                 </div>
                             </div>
                         </div>
+                        @if($flexi->expired_at)
+                            <div class="row align-items-center text-center">
+                                <p class="text-white">
+                                    <em>Valid until {{ $flexi->expired_at_carbon->format(config('app.date_format')) }}</em>
+                                </p>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <div class="row py-3">
