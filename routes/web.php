@@ -61,7 +61,7 @@ Route::get('/external/rfid-scan', function(Request $request) {
     $user = \App\Models\User::find(1);
     $user->addOrUpdateMeta('rfid', $uidResult);
 });
-Route::post('/external/rfid-scan', function(Request $request) {
+Route::middleware(['web'])->post('/external/rfid-scan', function(Request $request) {
     $uidResult = $request->input('UIDresult');
 
     session(['card' => $uidResult]);
