@@ -70,7 +70,8 @@ class CardResource extends Resource
             'index' => Pages\ListCards::route('/'),
             'create' => Pages\CreateCard::route('/create'),
             'view' => Pages\ViewCard::route('/{record}'),
-            'edit' => Pages\EditCard::route('/{record}/edit'),
+            'edit' => Pages\CustomEditCard::route('/{record}/edit'),
+            // 'edit' => Pages\EditCard::route('/{record}/edit'),
         ];
     }
     public static function infolist(Infolist $infolist): Infolist

@@ -1,8 +1,19 @@
 <div>
-    <x-filament::input 
-        wire:model="rfid"
-        type="text"
-        label="RFID"
-        class="w-full"
-    />
+    <form wire:submit="create">
+        {{ $this->form }}
+
+        <div wire:poll.1s="getSessionCard">
+            @if($rfid)
+                <p>Session Card: {{ $rfid }}</p>
+            @else
+                <p>No card in session.</p>
+            @endif
+        </div>
+        
+        <button type="submit">
+            Submit
+        </button>
+    </form>
+    
+    <x-filament-actions::modals />
 </div>
