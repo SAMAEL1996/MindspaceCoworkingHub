@@ -96,8 +96,8 @@ class FlexiUserResource extends Resource
                         return $state ? 'Active' : 'Expired';
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
-                TableColumns\TextColumn::make('paid')
-                    ->label('Paid')
+                TableColumns\TextColumn::make('is_active')
+                    ->label('Is Active')
                     ->badge()
                     ->color(function($state) {
                         return $state ? 'success' : 'gray';
@@ -105,7 +105,6 @@ class FlexiUserResource extends Resource
                     ->formatStateUsing(function($state) {
                         return $state ? 'Yes' : 'No';
                     })
-                    ->toggleable(isToggledHiddenByDefault: true)
             ])
             ->filters([
                 //

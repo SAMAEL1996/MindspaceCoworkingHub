@@ -10,6 +10,8 @@ use App\Models\Card;
 use App\Models\MonthlyUser;
 use App\Models\FlexiUser;
 use App\Models\DailySale;
+use App\Models\Rate;
+use Carbon\Carbon;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
@@ -30,7 +32,9 @@ class ListDailySales extends ListRecords
     {
         return [
             Actions\Action::make('search')
-                ->label('Add')
+                ->label('Add Guest')
+                ->color('info')
+                ->icon('heroicon-m-plus-circle')
                 ->modalHeading('Guest Check-In')
                 ->form([
                     FormComponents\Wizard::make([
@@ -39,7 +43,7 @@ class ListDailySales extends ListRecords
                                 FormComponents\TextInput::make('search_user')
                                     ->label('Search for Name')
                                     ->live(debounce: 300)
-                                    ->autocomplete(false)
+                                    // ->autocomplete(false)
                                     ->required()
                                     ->extraAttributes([
                                         'x-data' => '{}',
@@ -64,6 +68,7 @@ class ListDailySales extends ListRecords
                                                 $flexiResults = FlexiUser::select('id', 'name')
                                                     ->where('name', 'like', "%{$searchUser}%")
                                                     ->where('status', true)
+                                                    ->where('is_active', false)
                                                     ->get()
                                                     ->mapWithKeys(fn ($user) => ['flexi-'.$user->id => ['label' => $user->name, 'description' => 'Flexi User']])
                                                     ->toArray();
@@ -71,6 +76,7 @@ class ListDailySales extends ListRecords
                                                 $monthlyResults = MonthlyUser::select('id', 'name')
                                                     ->where('name', 'like', "%{$searchUser}%")
                                                     ->where('is_expired', false)
+                                                    ->where('is_active', false)
                                                     ->get()
                                                     ->mapWithKeys(fn ($user) => ['monthly-'.$user->id => ['label' => $user->name, 'description' => 'Monthly User']])
                                                     ->toArray();
@@ -267,7 +273,7 @@ class ListDailySales extends ListRecords
                                                     ->helperText('20% for Student Discount.')
                                                     ->columnSpan(1)
                                             ])
-                                            ->visible(fn (): bool => $this->checkInModel ? false : true)
+                                            ->visible(fn ($get): bool => $this->checkInModel || in_array($get('selected_option'), ['new_flexi', 'new_monthly']) ? false : true)
                                     ]),
                             ])
                         ])
@@ -282,6 +288,7 @@ class ListDailySales extends ListRecords
                 ])
                 ->modalSubmitAction(false)
                 ->action(function($data) {
+                    $time_in_staff_id = auth()->user()->staff ? auth()->user()->staff->id : auth()->user()->id;
                     $name = null;
                     if($this->checkInModel) {
                         $name = $this->checkInModel->name;
@@ -292,54 +299,108 @@ class ListDailySales extends ListRecords
                     }
 
                     $cardId = $data['card_id'];
-                    dd($name, $cardId, $data, $this->checkInModel);
 
                     $description = 'Daily';
                     $timeIn = Carbon::parse($data['date'] . ' ' . $data['time']);
-                    $time_in_staff_id = auth()->user()->staff ? auth()->user()->staff->id : auth()->user()->id;
+
                     $applyDiscount = false;
                     $discount = 0;
 
+                    $saleData = [
+                        'date' => $data['date'],
+                        'time_in_staff_id' => $time_in_staff_id,
+                        'card_id' => $data['card_id'],
+                        'name' => $name,
+                        'description' => 'Daily',
+                        'apply_discount' => $applyDiscount,
+                        'discount' => $discount,
+                        'time_in' => Carbon::now()->addMinutes(10),
+                        'status' => true,
+                        'is_flexi' => false,
+                        'is_monthly' => false
+                    ];
+
                     if($this->checkInModel) {
-                        // FOR FLEXI
+                        $this->checkInModel->is_active = true;
+                        if(get_class($this->checkInModel) == 'App\Models\FlexiUser') {
+                            $this->checkInModel->card_id = $data['card_id'];
 
-                        // FOR MONTHLY
-                    } else {
-                        // FOR DAILY
-                        if($data['apply_discount']) {
-                            $applyDiscount = true;
-                            $discount = $data['discount'];
+                            $saleData['is_flexi'] = true;
+                        } else {
+                            $saleData['is_monthly'] = true;
                         }
+                        $this->checkInModel->save();
 
-                        $saleData = [
-                            'date' => $data['date'],
-                            'time_in_staff_id' => $data['time_in_staff_id'],
-                            'card_id' => $data['card_id'],
-                            'name' => $data['name'],
-                            'description' => 'Daily',
-                            'apply_discount' => $data['apply_discount'],
-                            'discount' => $discount,
-                            'time_in' => \Carbon\Carbon::now()->addMinutes(10),
-                            'status' => true,
-                            'is_monthly' => false
-                        ];
+                        $saleData['discount'] = 100;
+                        $saleData['apply_discount'] = true;
+                    } else {
+                        if(in_array($data['selected_option'], ['new_flexi', 'new_monthly'])) {
+                            $rate = Rate::find($data['rate_id']);
+                            // FOR NEW FLEXI
+                            if($data['selected_option'] == 'new_flexi') {
+                                $model = FlexiUser::create([
+                                    'rate_id' => $rate->id,
+                                    'card_id' => $data['card_id'],
+                                    'name' => $name,
+                                    'contact_no' => $data['contact_no'],
+                                    'start_at' => Carbon::now(),
+                                    'end_at' => Carbon::now()->addHours($rate->consumable),
+                                    'expired_at' => Carbon::now()->addDays($rate->validity),
+                                    'is_active' => true,
+                                    'status' => true,
+                                    'paid' => true,
+                                    'amount' => $data['amount'],
+                                    'mode_of_payment' => $data['mode_of_payment']
+                                ]);
+                                $saleData['is_flexi'] = true;
+                            } else {
+                                // FOR NEW MONTHLY
+                                $model = MonthlyUser::create([
+                                    'rate_id' => $rate->id,
+                                    'card_id' => $data['card_id'],
+                                    'name' => $name,
+                                    'contact_no' => $data['contact_no'],
+                                    'date_start' => Carbon::now(),
+                                    'date_finish' => Carbon::now()->addDays($rate->validity),
+                                    'is_active' => true,
+                                    'is_expired' => false,
+                                    'paid' => true,
+                                    'amount' => $data['amount'],
+                                    'mode_of_payment' => $data['mode_of_payment']
+                                ]);
+                                $saleData['is_monthly'] = true;
+                            }
 
-                        $dailyPass = \App\Models\DailySale::create($saleData);
-
-                        $dailyPass->applyNightOwlDiscount();
-
-                        $dailyPass->addCheckInToSalesReport();
-
-                        Notification::make()
-                            ->title('Success')
-                            ->body("Guest successfully added.")
-                            ->success()
-                            ->send();
-
-                        return $dailyPass;
+                            $saleData['amount_paid'] = $data['amount'];
+                            $saleData['mode_of_payment'] = $data['mode_of_payment'];
+                            $saleData['discount'] = 100;
+                            $saleData['apply_discount'] = true;
+                        }
                     }
-                })
-                ->visible(auth()->user()->hasRole('Super Administrator')),
+
+                    $dailyPass = \App\Models\DailySale::create($saleData);
+
+                    // $dailyPass->applyNightOwlDiscount();
+
+                    // $dailyPass->addCheckInToSalesReport();
+
+                    Notification::make()
+                        ->title('Success')
+                        ->body("Guest successfully added.")
+                        ->success()
+                        ->send();
+
+                    $this->guestName = null;
+                    $this->checkInModel = null;
+                    $this->newMember = false;
+
+                    return $dailyPass;
+                }),
+
+
+
+
+
             Actions\Action::make('add-daily')
                 ->label('Add Daily')
                 ->icon('heroicon-m-plus-circle')
@@ -571,7 +632,7 @@ class ListDailySales extends ListRecords
 
                         $data['expired_at'] = \Carbon\Carbon::now()->addDays($rate->validity);
                         $data['start_at'] = \Carbon\Carbon::now();
-                        $data['end_at'] = \Carbon\Carbon::now()->addHours(50);
+                        $data['end_at'] = \Carbon\Carbon::now()->addHours($rate->consumable);
                         $data['is_active'] = false;
                         $data['paid'] = $data['amount'] >= 1500 ? true : false;
                         $data['status'] = true;
