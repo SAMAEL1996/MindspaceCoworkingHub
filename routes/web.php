@@ -26,6 +26,9 @@ Route::get('/test', function () {
     abort(500);
 });
 
+Route::get('/book-conference', \App\Filament\Pages\BookConference::class)->name('book-conference.index');
+Route::get('/book-conference/success', \App\Filament\Pages\SuccessBooking::class)->name('book-conference.success');
+
 Route::get('/flexi', function() {
     $flexi = null;
     $time = [];

@@ -568,29 +568,56 @@ class DailySaleResource extends Resource
                                 ])
                                 ->required()
                                 ->live()
-                                ->native(false),
-                            FormComponents\Select::make('card_id')
-                                ->options(function() {
-                                    $options = [];
-                                    $monthlyIds = \App\Models\MonthlyUser::where('is_expired', false)->pluck('card_id')->toArray();
-                                    $availabelGuests = \App\Models\Card::whereNotIn('id', $monthlyIds)->where('type', 'Monthly')->get();
-                                    foreach($availabelGuests as $guest) {
-                                        $options[$guest->id] = $guest->code;
-                                    }
-        
-                                    return $options;
-                                })
-                                ->preload()
-                                ->searchable('code')
-                                ->required(function($get) {
-                                    return $get('pass_type') == 'monthly' ? true : false;
-                                })
-                                ->visible(function($get) {
-                                    return $get('pass_type') == 'monthly' ? true : false;
-                                })
-                                ->native(false),
+                                ->native(false)
+                                ->afterStateUpdated(function($set) {
+                                    $set('rate_id', null);
+                                    $set('amount', 0);
+                                    $set('amount_helper_text', '');
+                                }),
                             FormComponents\Grid::make(2)
                                 ->schema([
+                                    FormComponents\Select::make('rate_id')
+                                        ->label('Type')
+                                        ->options(function($get) {
+                                            if($get('pass_type') == 'flexi') {
+                                                return \App\Models\Rate::where('type', 'Flexi')->get()->pluck('name', 'id');
+                                            } else {
+                                                return \App\Models\Rate::where('type', 'Monthly')->get()->pluck('name', 'id');
+                                            }
+                                        })
+                                        ->preload()
+                                        ->live()
+                                        ->afterStateUpdated(function($state, $set) {
+                                            $rate = \App\Models\Rate::find($state);
+                                            $set('amount', $rate->price);
+
+                                            $helperText = $rate->name . ' Rate: PHP ' . number_format($rate->price, 2);
+                                            $set('amount_helper_text', $helperText);
+                                        })
+                                        ->required()
+                                        ->native(false)
+                                        ->columnSpan(2),
+                                    FormComponents\Select::make('card_id')
+                                        ->options(function() {
+                                            $options = [];
+                                            $monthlyIds = \App\Models\MonthlyUser::where('is_expired', false)->pluck('card_id')->toArray();
+                                            $availabelGuests = \App\Models\Card::whereNotIn('id', $monthlyIds)->where('type', 'Monthly')->get();
+                                            foreach($availabelGuests as $guest) {
+                                                $options[$guest->id] = $guest->code;
+                                            }
+                
+                                            return $options;
+                                        })
+                                        ->preload()
+                                        ->searchable('code')
+                                        ->required(function($get) {
+                                            return $get('pass_type') == 'monthly' ? true : false;
+                                        })
+                                        ->visible(function($get) {
+                                            return $get('pass_type') == 'monthly' ? true : false;
+                                        })
+                                        ->native(false)
+                                        ->columnSpan(2),
                                     FormComponents\TextInput::make('contact_no')
                                         ->label('Contact No.')
                                         ->required()
@@ -599,15 +626,10 @@ class DailySaleResource extends Resource
                                         ->label('Amount Paid')
                                         ->numeric()
                                         ->minValue(1)
-                                        ->maxValue(3500)
                                         ->required()
-                                        ->default(0)
                                         ->helperText(function($get) {
-                                            return $get('pass_type') == 'flexi' ?
-                                                'Flexi Pass Rate: PHP 1,500.00' :
-                                                'Monthly Pass Rate: PHP 3,500.00';
-                                        })
-                                        ->columnSpan(1),
+                                            return $get('amount_helper_text') ?? '';
+                                        }),
                                     FormComponents\Select::make('mode_of_payment')
                                         ->label('Mode of Payment')
                                         ->options([
@@ -625,19 +647,24 @@ class DailySaleResource extends Resource
                         ])
                         ->action(function($data, $record) {
                             $time_in = $record->time_in_carbon;
+                            $rate = \App\Models\Rate::find($data['rate_id']);
 
                             if($data['pass_type'] == 'flexi') {
                                 $flexi = \App\Models\FlexiUser::create([
+                                    'rate_id' => $rate->id,
                                     'card_id' => $record->card_id,
                                     'name' => $record->name,
                                     'contact_no' => $data['contact_no'],
                                     'start_at' => $time_in->copy(),
-                                    'end_at' => $time_in->copy()->addHours(50),
+                                    'end_at' => $time_in->copy()->addHours($rate->consumable),
+                                    'expired_at' => \Carbon\Carbon::now()->addDays($rate->validity),
                                     'is_active' => true,
                                     'status' => true,
                                     'paid' => $data['amount'] >= 1500 ? true : false,
                                     'amount' => $data['amount']
                                 ]);
+
+                                $flexi->sendWelcomeMessage();
 
                                 $record->is_flexi = true;
                                 $record->discount = 100;
@@ -648,16 +675,19 @@ class DailySaleResource extends Resource
 
                             if($data['pass_type'] == 'monthly') {
                                 $monthly = \App\Models\MonthlyUser::create([
+                                    'rate_id' => $rate->id,
                                     'card_id' => $data['card_id'],
                                     'name' => $record->name,
                                     'contact_no' => $data['contact_no'],
                                     'date_start' => $time_in->copy(),
-                                    'date_finish' => $time_in->copy()->addMonth()->subDay(),
+                                    'date_finish' => $time_in->copy()->addDays($rate->validity),
                                     'is_active' => true,
                                     'is_expired' => false,
                                     'paid' => $data['amount'] >= 3500 ? true : false,
                                     'amount' => $data['amount']
                                 ]);
+
+                                $monthly->sendWelcomeMessage();
 
                                 $record->card_id = $data['card_id'];
                                 $record->is_monthly = true;

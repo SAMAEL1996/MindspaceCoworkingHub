@@ -47,7 +47,9 @@ class Index extends Component implements HasForms, HasTable, HasActions
         $query = Conference::query();
 
         if ($this->activeTab === 'upcoming') {
-            $query->where('status', 'approve',);
+            $query->where('status', 'approve');
+        } elseif ($this->activeTab === 'pending') {
+            $query->where('status', 'pending');
         } elseif ($this->activeTab === 'past') {
             $query->where('status', 'finished');
         }
@@ -128,7 +130,8 @@ class Index extends Component implements HasForms, HasTable, HasActions
             ])
             ->bulkActions([
                 // ...
-            ]);
+            ])
+            ->defaultPaginationPageOption(25);
     }
 
     public function render(): View

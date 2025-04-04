@@ -120,12 +120,29 @@ class AttendanceResource extends Resource
                     }),
             ])
             ->filters([
+                Filters\SelectFilter::make('staff_id')
+                    ->label('Staff')
+                    ->multiple()
+                    ->native(false)
+                    ->options(function() {
+                        $options = [];
+                        foreach(\App\Models\Staff::where('is_active', true)->get() as $staff) {
+                            $options[$staff->id] = $staff->user->name;
+                        }
+
+                        return $options;
+                    })
+                    ->preload(),
                 Filters\Filter::make('created_at')
                     ->form([
                         Fieldset::make('Check In')
                             ->schema([
-                                DatePicker::make('from'),
-                                DatePicker::make('to'),
+                                DatePicker::make('from')
+                                    ->displayFormat('F d, Y')
+                                    ->native(false),
+                                DatePicker::make('to')
+                                    ->displayFormat('F d, Y')
+                                    ->native(false),
                             ])
                             ->columns(1),
                     ])

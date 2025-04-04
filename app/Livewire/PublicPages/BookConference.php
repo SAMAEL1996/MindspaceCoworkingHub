@@ -16,6 +16,8 @@ use App\Filament\Pages\SuccessBooking;
 class BookConference extends Component implements HasForms
 {
     use InteractsWithForms;
+
+    public $booked = false;
     
     public ?array $data = [];
 
@@ -33,7 +35,7 @@ class BookConference extends Component implements HasForms
                 FormComponents\TextInput::make('event')
                     ->required(),
                 FormComponents\TextInput::make('host')
-                    ->label('Name of POC')
+                    ->label('Name of POC (Point of Contact)')
                     ->required(),
                 FormComponents\TextInput::make('email')
                     ->email()
@@ -51,7 +53,7 @@ class BookConference extends Component implements HasForms
                         FormComponents\DatePicker::make('date')
                             ->label('Date')
                             ->required()
-                            ->displayFormat('d F Y')
+                            ->displayFormat('F d, Y')
                             ->timezone('Asia/Manila')
                             ->minDate(now())
                             ->native(false),
@@ -82,7 +84,8 @@ class BookConference extends Component implements HasForms
 
         if(!$this->termsCondition) {
             Notification::make()
-                ->title('Please check the terms and conditions before submitting.')
+                ->title('Error')
+                ->body('Please check the terms and conditions before submitting.')
                 ->danger()
                 ->send();
 
@@ -98,7 +101,8 @@ class BookConference extends Component implements HasForms
 
         if($checkDateTime) {
             Notification::make()
-                ->title('Date and time is taken.')
+                ->title('Error')
+                ->body('Date and time is taken.')
                 ->danger()
                 ->send();
 
@@ -117,14 +121,18 @@ class BookConference extends Component implements HasForms
             'status' => 'pending',
         ]);
 
-        $this->booked = true;
+        // email & sms to admin
+
+        // email & sms to customer
 
         Notification::make()
-            ->title('Your booking is pending and we will contact you once its okay.')
+            ->title('Success')
+            ->body('Your booking is pending and we will contact you once its okay.')
             ->success()
             ->send();
 
-        return redirect()->route('booking-conference.success');
+        $this->booked = true;
+        // return redirect()->route('book-conference.success');
     }
 
     public function render(): View

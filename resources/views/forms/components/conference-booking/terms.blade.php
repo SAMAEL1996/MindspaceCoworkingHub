@@ -23,12 +23,14 @@
             </div>
         </x-filament::fieldset>
 
-        <label>
-            <x-filament::input.checkbox wire:model="termsCondition" />
+        <div class="py-3">
+            <label>
+                <x-filament::input.checkbox wire:model="termsCondition" required/>
 
-            <span>
-                I accept and agree to the Terms and Conditions.
-            </span>
-        </label>
+                <span>
+                    I accept and agree to the Terms and Conditions.
+                </span>
+            </label>
+        </div>
     </div>
 </x-dynamic-component>

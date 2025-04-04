@@ -23,6 +23,13 @@
                 </x-filament::tabs.item>
                 
                 <x-filament::tabs.item
+                    :active="$activeTab === 'pending'"
+                    wire:click="setActiveTab('pending')"
+                >
+                    Pending
+                </x-filament::tabs.item>
+                
+                <x-filament::tabs.item
                     :active="$activeTab === 'past'"
                     wire:click="setActiveTab('past')"
                 >

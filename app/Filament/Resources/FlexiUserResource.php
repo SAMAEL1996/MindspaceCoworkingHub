@@ -24,6 +24,11 @@ class FlexiUserResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
     protected static ?string $navigationGroup = 'SALES';
 
+    public static function getEloquentQuery(): Builder
+    {
+        return FlexiUser::query()->orderBy('is_active', 'desc')->latest();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -206,7 +211,7 @@ class FlexiUserResource extends Resource
                     ->button()
                     ->label('Columns'),
             )
-            ->defaultSort('is_active', 'desc')
+            // ->defaultSort('is_active', 'desc')
             ->defaultPaginationPageOption(25)
             ->recordUrl(null);
     }
