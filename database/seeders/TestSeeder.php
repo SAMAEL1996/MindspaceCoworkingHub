@@ -12,16 +12,13 @@ class TestSeeder extends Seeder
      */
     public function run(): void
     {
-        // foreach(\App\Models\MonthlyUser::all() as $monthly) {
-        //     $monthly->contact_no = '09159473345';
-        //     $monthly->save();
-        // }
-
+        foreach(\App\Models\MonthlyUser::all() as $monthly) {
+            $monthly->contact_no = '09159473345';
+            $monthly->save();
+        }
         foreach(\App\Models\FlexiUser::all() as $flexi) {
-            if(!$flexi->remaining) {
-                $flexi->remaining = $flexi->start_at_carbon->diffInMinutes($flexi->end_at_carbon);
-                $flexi->save();
-            }
+            $flexi->contact_no = '09159473345';
+            $flexi->save();
         }
     }
 }

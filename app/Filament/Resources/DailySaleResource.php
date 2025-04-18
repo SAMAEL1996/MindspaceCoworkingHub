@@ -299,9 +299,11 @@ class DailySaleResource extends Resource
                                 ->schema([
                                     FormComponents\TextInput::make('flexi_amount_to_paid')
                                         ->label('Amount to Paid')
-                                        ->default(1500)
                                         ->disabled()
-                                        ->dehydrated(),
+                                        ->dehydrated()
+                                        ->helperText(function($get) {
+                                            return $get('amount_helper_text') ?? '';
+                                        }),
                                     FormComponents\Select::make('flexi_mode_of_payment')
                                         ->label('Mode of Payment')
                                         ->options([
@@ -408,6 +410,23 @@ class DailySaleResource extends Resource
 
                                     return false;
                                 }),
+                            FormComponents\Select::make('rate_id')
+                                ->label('Type')
+                                ->options(\App\Models\Rate::where('type', 'Flexi')->get()->pluck('name', 'id'))
+                                ->preload()
+                                ->live()
+                                ->afterStateUpdated(function($state, $set) {
+                                    $rate = \App\Models\Rate::find($state);
+                                    $set('flexi_amount_to_paid', $rate->price);
+
+                                    $helperText = 'Flexi Pass Rate: PHP ' . number_format($rate->price, 2);
+                                    $set('amount_helper_text', $helperText);
+                                })
+                                ->required()
+                                ->native(false)
+                                ->visible(function($get) {
+                                    return $get('renew_flexi');
+                                }),
                             FormComponents\Toggle::make('renew_flexi')
                                 ->label('Re-new Flexi Pass')
                                 ->live()
@@ -477,19 +496,35 @@ class DailySaleResource extends Resource
                                 $flexi = \App\Models\FlexiUser::where('card_id', $record->card_id)->where('is_active', true)->latest()->first();
 
                                 if($flexi->checkPassIsExpired($record->id)) {
+                                    $newRecord = $record->replicate();
+
                                     if($data['renew_flexi']) {
+                                        $rate = \App\Models\Rate::find($data['rate_id']);
+
                                         // create new flexi
                                         $newFlexi = $flexi->replicate();
 
+                                        $newFlexi->rate_id = $rate->id;
+                                        $newFlexi->expired_at = \Carbon\Carbon::now()->addDays($rate->validity);
                                         $newFlexi->start_at = \Carbon\Carbon::now();
-                                        $newFlexi->end_at = \Carbon\carbon::now()->addHours(50)->subMinutes($flexi->calculateAdditionalCharge($record->id, 'minutes'));
+                                        $newFlexi->end_at = \Carbon\carbon::now()->addHours($rate->consumable)->subMinutes($flexi->calculateAdditionalCharge($record->id, 'minutes'));
                                         $newFlexi->card_id = null;
                                         $newFlexi->status = true;
                                         $newFlexi->is_active = false;
                                         $newFlexi->save();
-                                    } else {
-                                        $newRecord = $record->replicate();
 
+                                        $newFlexi->sendWelcomeMessage();
+
+                                        $newRecord->time_in = \Carbon\Carbon::now();
+                                        $newRecord->time_out = \Carbon\Carbon::now();
+                                        $newRecord->total_time = $data['total_hours_accumulated'];
+                                        $newRecord->description = 'New Flexi';
+                                        $newRecord->amount_paid = $data['flexi_amount_to_paid'];
+                                        $newRecord->apply_discount = false;
+                                        $newRecord->discount = 0;
+                                        $newRecord->is_flexi = true;
+                                        $newRecord->status = false;
+                                    } else {
                                         $newRecord->time_in = \Carbon\Carbon::now()->subMinutes($flexi->calculateAdditionalCharge($record->id, 'minutes'));
                                         $newRecord->time_out = \Carbon\Carbon::now();
                                         $newRecord->total_time = $flexi->calculateAdditionalCharge($record->id, 'hours');
@@ -499,10 +534,10 @@ class DailySaleResource extends Resource
                                         $newRecord->discount = $data['flexi_apply_discount'] ? $data['flexi_discount'] : 0;
                                         $newRecord->is_flexi = false;
                                         $newRecord->status = false;
-                                        $newRecord->save();
-
-                                        $newRecord->addPaymenToMonthlySalesReport();
                                     }
+                                    $newRecord->save();
+
+                                    $newRecord->addPaymenToMonthlySalesReport();
 
                                     $flexi->end_at = $flexi->start_at_carbon;
                                     $flexi->status = false;
