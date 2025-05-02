@@ -96,6 +96,10 @@ class Conference extends Model
             return 0.00;
         }
 
+        if($hourDiff >= 12) {
+            
+        }
+
         $exceed = $hourDiff - $this->duration;
         $package = \App\Library\Helper::getConferencePackageInfo($this->package_id);
 
