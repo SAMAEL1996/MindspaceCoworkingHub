@@ -260,14 +260,14 @@ class DailySale extends Model
         }
 
         // for night owl discount
-        if($this->hasMeta('night-owl-discount')) {
-            $nightOwlDiscount = $this->getMetaValue('night-owl-discount');
-            if($totalHours > 5) {
-                $this->apply_discount = true;
-                $this->discount = $nightOwlDiscount;
-                $this->save();
-            }
-        }
+        // if($this->hasMeta('night-owl-discount')) {
+        //     $nightOwlDiscount = $this->getMetaValue('night-owl-discount');
+        //     if($totalHours > 5) {
+        //         $this->apply_discount = true;
+        //         $this->discount = $nightOwlDiscount;
+        //         $this->save();
+        //     }
+        // }
 
         if($this->apply_discount) {
             $percent = $this->discount / 100;
