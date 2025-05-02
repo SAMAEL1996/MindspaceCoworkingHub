@@ -132,6 +132,7 @@ class AdminPanelProvider extends PanelProvider
                                 //     ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.setting'))
                                 //     ->url(route('filament.admin.pages.setting'))
                                 //     ->visible(auth()->user()->hasRole('Super Administrator')),
+                                ...Resources\InventoryResource::getNavigationItems(),
                                 ...Resources\ActivityLogResource::getNavigationItems(),
                                 ...Resources\ErrorLogResource::getNavigationItems(),
                                 ...Resources\ExpenseResource::getNavigationItems(),

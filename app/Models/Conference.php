@@ -81,20 +81,24 @@ class Conference extends Model
     public function additionalCharges() {
         // for time
         $start = $this->start_at_carbon->addMinutes(15);
-        $end = $this->end_at_carbon->addMinutes(15);
+        $end = $start->copy()->addHours($this->duration)->addMinutes(15);
         $now = \Carbon\Carbon::now();
         $defaultTime = $start->diffInHours($end);
-        // $ceil = ceil($start->diffInHours($now));
 
-        if($now->copy()->lte($end)) {
+        $diff = $start->diff($now);
+        $hourDiff = $diff->h;
+        $minDiff = $diff->i;
+        if($minDiff > 15) {
+            $hourDiff += 1;
+        }
+
+        if($this->duration >= $hourDiff) {
             return 0.00;
         }
 
-        $diffInMinutes = $end->copy()->diffInMinutes($now->copy());
-        $exceed = ceil($diffInMinutes / 60);
-
+        $exceed = $hourDiff - $this->duration;
         $package = \App\Library\Helper::getConferencePackageInfo($this->package_id);
-        // $exceed = (int)$ceil - (int)$defaultTime;
+
         return $exceed * $package['succeeding_hours'];
     }
 
