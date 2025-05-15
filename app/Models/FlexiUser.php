@@ -202,23 +202,49 @@ class FlexiUser extends Model
             return $totalHours;
         }
 
+        $rateQuery = \App\Models\Rate::where('type', 'Daily')->where('status', true);
+        
+        $hourlyRateClone = clone $rateQuery;
+        $hourlyRate = $hourlyRateClone->where('consumable', 1)->first();
+
         $amount = 0;
         if($totalHours < 4) {
-            $amount = $totalHours * 65;
+            $amount = $totalHours * (int)$hourlyRate->price;
+
         } elseif($totalHours == 5 || $totalHours == 4) {
-            $amount = 250;
+            $cloneQuery = clone $rateQuery;
+            $flatRate = $cloneQuery->where('consumable', 5)->first();
+            $amount = (int)$flatRate->price;
+
         } elseif($totalHours > 5 && $totalHours < 7) {
+            $cloneQuery = clone $rateQuery;
+            $flatRate = $cloneQuery->where('consumable', 5)->first();
             $excess = $totalHours - 5;
-            $additional = $excess * 65;
-            $amount = 250 + $additional;
+            $additional = $excess * (int)$hourlyRate->price;
+            $amount = (int)$flatRate->price + $additional;
+
         } elseif($totalHours == 7 || $totalHours == 8) {
-            $amount = 350;
-        } elseif($totalHours > 8 && $totalHours < 11) {
+            $cloneQuery = clone $rateQuery;
+            $flatRate = $cloneQuery->where('consumable', 8)->first();
+            $amount = (int)$flatRate->price;
+
+        } elseif($totalHours == 9) {
+            $cloneQuery = clone $rateQuery;
+            $flatRate = $cloneQuery->where('consumable', 8)->first();
             $excess = $totalHours - 8;
-            $additional = $excess * 65;
-            $amount = 350 + $additional;
+            $additional = $excess * (int)$hourlyRate->price;
+            $amount = (int)$flatRate->price + $additional;
+
+        } elseif($totalHours > 9 && $totalHours < 25) {
+            $flatRate = clone $rateQuery->where('consumable', 24)->first();
+            $amount = (int)$flatRate->price;
+            
         } else {
-            $amount = 500;
+            // more that 24 hours
+            $flatRate = clone $rateQuery->where('consumable', 24)->first();
+            $excess = $totalHours - 24;
+            $additional = $excess * (int)$hourlyRate->price;
+            $amount = (int)$flatRate->price + $additional;
         }
 
         return $amount;
