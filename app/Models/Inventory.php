@@ -6,16 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Appstract\Meta\Metable;
 
 class Inventory extends Model
 {
-    use HasUid, SoftDeletes;
+    use HasUid, SoftDeletes, Metable;
     
     protected $fillable = [
         'uid',
         'user_id',
         'item',
         'quantity',
+        'unit',
         'date',
         'status',
         'is_active',

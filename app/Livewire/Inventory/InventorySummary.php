@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions as TableActions;
 use Filament\Forms\Components as FormComponents;
 use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Notifications\Notification;
 
 class InventorySummary extends Component implements HasForms, HasTable
 {
@@ -22,24 +24,37 @@ class InventorySummary extends Component implements HasForms, HasTable
 
     public array $items;
 
-    protected $listeners = ['inventory-updated' => '$refresh'];
+    protected $listeners = ['inventory-updated' => 'updateItems'];
+
+    public function updateItems($items)
+    {
+        $this->items = $items;
+    }
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(Inventory::whereIn('id', $this->items))
+            ->query(fn () => Inventory::query()->whereIn('id', $this->items))
             ->columns([
+                TableColumns\TextColumn::make('id')
+                    ->label('ID')
+                    ->color(fn ($record) => $record->status_color)
+                    ->visible(auth()->user()->hasRole('Super Administrator')),
                 TableColumns\TextColumn::make('item')
-                    ->color(fn ($record) => $record->status_color),
+                    ->color(fn ($record) => $record->status_color)
+                    ->searchable(),
                 TableColumns\TextColumn::make('quantity')
                     ->label('Stock Left')
                     ->formatStateUsing(function($record) {
-                        return $record->quantity . ' '. $record->unit;
+                        return $record->quantity;
                     })
+                    ->color(fn ($record) => $record->status_color),
+                TableColumns\TextColumn::make('unit')
                     ->color(fn ($record) => $record->status_color),
                 TableColumns\TextColumn::make('date')
                     ->label('Last Updated')
-                    ->formatStateUsing(fn ($state): string => \Carbon\Carbon::parse($state)->format(config('app.date_time_format')))
+                    ->formatStateUsing(fn ($state): string => \Carbon\Carbon::parse($state)->format(config('app.date_format')))
+                    // ->description(fn ($state): string => \Carbon\Carbon::parse($state)->format(config('app.time_format')))
                     ->color(fn ($record) => $record->status_color),
                 TableColumns\SelectColumn::make('status')
                     ->options([
@@ -50,35 +65,51 @@ class InventorySummary extends Component implements HasForms, HasTable
                     ->rules(['required']),
             ])
             ->actions([
-                TableActions\Action::make('update')
+                TableActions\Action::make('show')
+                    ->label('Show Record')
                     ->button()
                     ->size(ActionSize::Small)
                     ->outlined()
+                    ->modalWidth(MaxWidth::FourExtraLarge)
+                    ->modalHeading(fn ($record) => $record->item)
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->visible(false),
+                TableActions\Action::make('update')
+                    ->label('Update Stock')
+                    ->button()
+                    ->size(ActionSize::Small)
+                    ->outlined()
+                    ->modalWidth(MaxWidth::Small)
+                    ->modalHeading(fn ($record) => $record->item . ' stock')
                     ->form([
                         FormComponents\TextInput::make('quantity')
                             ->required()
                             ->numeric()
-                            ->minValue(1)
+                            ->minValue(0)
                     ])
                     ->action(function($data, $record) {
                         $user = auth()->user();
                         $now = \Carbon\Carbon::now();
 
-                        $inventory = Inventory::create([
+                        $record->update([
                             'user_id' => $user->id,
-                            'item' => $data['item'],
                             'quantity' => $data['quantity'],
-                            'date' => $now,
-                            'status' => $data['status'],
-                            'is_active' => true
+                            'date' => $now->copy()
                         ]);
 
-                        $this->loadItems();
+                        Notification::make()
+                            ->title('Success')
+                            ->body('Inventory successfully updated.')
+                            ->success()
+                            ->send();
+
+                        return $record;
                     })
             ])
             ->filters([])
             ->bulkActions([])
-            ->poll('1s');
+            ->paginated(false);
     }
 
     public function render()

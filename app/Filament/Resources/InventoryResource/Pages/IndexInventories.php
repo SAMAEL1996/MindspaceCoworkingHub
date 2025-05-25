@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\InventoryResource\Pages;
 
 use App\Filament\Resources\InventoryResource;
+use Carbon\Carbon;
 use Filament\Resources\Pages\Page;
 use Filament\Actions;
 use Filament\Forms\Components as FormComponents;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\MaxWidth;
+use Livewire\Livewire;
 
 class IndexInventories extends Page
 {
@@ -45,6 +47,34 @@ class IndexInventories extends Page
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('save-inventory')
+                ->label('Save')
+                ->requiresConfirmation()
+                ->color('success')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(function() {
+                    $now = Carbon::now();
+
+                    $inventories = Inventory::whereIn('id', $this->items)->get();
+                    foreach($inventories as $inventory) {
+                        $inventory->addOrUpdateMeta(
+                            $now->copy()->toDateString(),
+                            [
+                                'user_id' => $inventory->user_id,
+                                'quantity' => $inventory->quantity,
+                                'status' => $inventory->status,
+                                'date' => $inventory->date
+                            ]
+                        );
+                    }
+
+                    Notification::make()
+                        ->title('Success')
+                        ->body('Inventories successfully saved.')
+                        ->success()
+                        ->send();
+                })
+                ->visible(fn () => Inventory::where('is_active', true)->count() > 0),
             Actions\Action::make('add-new')
                 ->label('Add New')
                 ->icon('heroicon-m-plus-circle')
@@ -55,42 +85,47 @@ class IndexInventories extends Page
                         ->required()
                         ->autocomplete(false)
                         ->datalist(function() {
-                            return $this->items;
+                            return Inventory::whereIn('id', $this->items)->get()->pluck('item')->toArray();
                         }),
                     FormComponents\TextInput::make('quantity')
                         ->required()
                         ->numeric(),
-                    FormComponents\Select::make('status')
-                        ->options([
-                            'In Stock' => 'In Stock',
-                            'Running Out' => 'Running Out',
-                            'Out of Stock' => 'Out of Stock'
-                        ])
-                        ->native(false)
+                    FormComponents\TextInput::make('unit')
                         ->required()
                 ])
                 ->action(function($data) {
                     $user = auth()->user();
-                    $now = \Carbon\Carbon::now();
+                    $now = Carbon::now();
 
                     $inventory = Inventory::create([
                         'user_id' => $user->id,
                         'item' => $data['item'],
                         'quantity' => $data['quantity'],
-                        'date' => $now,
-                        'status' => $data['status'],
+                        'unit' => $data['unit'],
+                        'date' => $now->copy(),
+                        'status' => 'In Stock',
                         'is_active' => true
                     ]);
 
+                    $inventory->addOrUpdateMeta(
+                        $now->copy()->toDateString(),
+                        [
+                            'user_id' => $user->id,
+                            'quantity' => $data['quantity'],
+                            'status' => 'In Stock',
+                            'date' => $now->copy()
+                        ]
+                    );
+
                     Notification::make()
                         ->title('Success')
-                        ->body('Inventory successfully updated.')
+                        ->body('Inventory successfully created.')
                         ->success()
                         ->send();
 
                     $this->loadItems();
 
-                    $this->dispatch('inventory-updated');
+                    $this->dispatch('inventory-updated', items: $this->items);
                 })
         ];
     }
