@@ -62,6 +62,16 @@ class InventorySummary extends Component implements HasForms, HasTable
                         'Running Out' => 'Running Out',
                         'Out of Stock' => 'Out of Stock'
                     ])
+                    ->sortable(query: function ($query, $direction) {
+                        return $query->orderByRaw("
+                            CASE status
+                                WHEN 'In Stock' THEN 1
+                                WHEN 'Running Out' THEN 2
+                                WHEN 'Out of Stock' THEN 3
+                                ELSE 4
+                            END $direction
+                        ");
+                    })
                     ->rules(['required']),
             ])
             ->actions([

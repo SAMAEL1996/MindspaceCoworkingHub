@@ -78,8 +78,9 @@ class IndexInventories extends Page
             Actions\Action::make('add-new')
                 ->label('Add New')
                 ->icon('heroicon-m-plus-circle')
-                ->modalHeading('Guest Check-In')
+                ->modalHeading('Add Inventory Item')
                 ->modalWidth(MaxWidth::Medium)
+                ->modalSubmitActionLabel('Add')
                 ->form([
                     FormComponents\TextInput::make('item')
                         ->required()
