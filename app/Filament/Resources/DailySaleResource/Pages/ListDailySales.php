@@ -45,6 +45,7 @@ class ListDailySales extends ListRecords
                                     ->live(debounce: 300)
                                     // ->autocomplete(false)
                                     ->required()
+                                    ->datalist(fn () => DailySale::query()->select('name')->distinct()->pluck('name')->toArray())
                                     ->extraAttributes([
                                         'x-data' => '{}',
                                         'x-on:input' => "event.target.value = event.target.value.replace(/\b\w/g, c => c.toUpperCase())",
