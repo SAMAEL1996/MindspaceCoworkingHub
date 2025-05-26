@@ -306,7 +306,7 @@ class ListDailySales extends ListRecords
 
                     $applyDiscount = false;
                     $discount = 0;
-                    if($data['apply_discount']) {
+                    if(array_key_exists('apply_discount', $data) && $data['apply_discount']) {
                         $applyDiscount = true;
                         $discount = $data['discount'];
                     }
