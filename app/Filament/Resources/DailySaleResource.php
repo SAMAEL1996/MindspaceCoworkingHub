@@ -770,10 +770,7 @@ class DailySaleResource extends Resource
             )
             ->bulkActions([])
             ->recordUrl(fn ($record): string => DailySaleResource::getUrl('view', ['record' => $record]))
-            ->defaultPaginationPageOption(25)
-            ->poll('30s')
-            ->deferLoading()
-            ->poll('1s');
+            ->defaultPaginationPageOption(25);
     }
 
     public static function getRelations(): array
