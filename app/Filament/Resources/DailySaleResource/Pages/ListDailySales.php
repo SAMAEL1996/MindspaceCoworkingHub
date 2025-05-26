@@ -305,6 +305,10 @@ class ListDailySales extends ListRecords
 
                     $applyDiscount = false;
                     $discount = 0;
+                    if($data['apply_discount']) {
+                        $applyDiscount = true;
+                        $discount = $data['discount'];
+                    }
 
                     $saleData = [
                         'date' => $data['date'],
