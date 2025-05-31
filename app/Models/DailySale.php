@@ -8,10 +8,11 @@ use App\Traits\HasUid;
 use Filament\Forms\Components as FormComponents;
 use Carbon\Carbon;
 use Appstract\Meta\Metable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DailySale extends Model
 {
-    use HasFactory, HasUid, Metable;
+    use HasFactory, HasUid, Metable, SoftDeletes;
 
     public static function boot() {
         parent::boot();
