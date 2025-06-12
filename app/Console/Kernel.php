@@ -24,8 +24,11 @@ class Kernel extends ConsoleKernel
         // create sales record monthly/daily
         $schedule->command('app:create-sales-record')->dailyAt('00:00');
 
-        // flxi user reminder for expiry
-        $schedule->command('app:create-sales-record')->dailyAt('00:00');
+        // flexi user reminder for expiry
+        $schedule->command('app:send-flexi-reminder')->dailyAt('00:00');
+
+        // flexi user set expired
+        $schedule->command('app:flexi-set-expired')->dailyAt('00:10');
     }
 
     /**

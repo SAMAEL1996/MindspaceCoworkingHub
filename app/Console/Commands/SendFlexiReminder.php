@@ -41,7 +41,7 @@ class SendFlexiReminder extends Command
             $secondNotif = $flexi->hasMeta('1-day-expiry-notification');
             $thirdNotif = $flexi->hasMeta('on-day-expiry-notification');
 
-            if (!$firstNotif && $expiredAt->isSameDay($now->copy()->addDays(7))) {
+            if (!$firstNotif && $expiredAt->copy()->subDay()->isSameDay($now->copy()->addDays(7))) {
                 $res = $this->sendSms($flexi, $content);
 
                 if($res) {
@@ -49,7 +49,7 @@ class SendFlexiReminder extends Command
                 }
             }
 
-            if (!$secondNotif && $expiredAt->isSameDay($now->copy()->addDay())) {
+            if (!$secondNotif && $expiredAt->copy()->subDay()->isSameDay($now->copy()->addDay())) {
                 $res = $this->sendSms($flexi, $content);
 
                 if($res) {
@@ -57,17 +57,12 @@ class SendFlexiReminder extends Command
                 }
             }
 
-            if (!$thirdNotif && $expiredAt->isToday()) {
+            if (!$thirdNotif && $expiredAt->copy()->subDay()->isToday()) {
                 $res = $this->sendSms($flexi, $content);
 
                 if($res) {
                     $flexi->addOrUpdateMeta('on-day-expiry-notification', $now->copy()->format(config('app.date_time_format')));
                 }
-            }
-
-            if($expiredAt->isPast()) {
-                $flexi->status = false;
-                $flexi->save();
             }
         }
     }
