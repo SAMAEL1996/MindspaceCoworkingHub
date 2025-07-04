@@ -15,7 +15,7 @@ class SendFlexiReminder extends Command
      *
      * @var string
      */
-    protected $signature = 'mindspace:send-flexi-reminder';
+    protected $signature = 'app:send-flexi-reminder';
 
     /**
      * The console command description.

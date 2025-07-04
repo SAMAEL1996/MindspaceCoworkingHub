@@ -192,7 +192,7 @@ class DailySale extends Model
         $rateQuery = \App\Models\Rate::where('type', 'Daily')->where('status', true);
 
         $timeInCarbon = $this->time_in_carbon;
-        $timeOutCarbon = \Carbon\Carbon::now();
+        $timeOutCarbon = \Carbon\Carbon::now()->addMinutes(5);
 
         $hours = $timeInCarbon->diffInHours($timeOutCarbon);
 
