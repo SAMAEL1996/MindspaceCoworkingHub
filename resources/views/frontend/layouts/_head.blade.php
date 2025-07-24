@@ -8,5 +8,7 @@
     <link rel="stylesheet" href="{{ asset('css/frontend/plugins.css') }}">
     <link rel="stylesheet" href="{{ asset('css/frontend/style.css') }}">
 
+    <script src="https://kit.fontawesome.com/18817333d0.js" crossorigin="anonymous"></script>
+
     @livewireStyles
 </head>

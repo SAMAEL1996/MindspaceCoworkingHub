@@ -3,333 +3,384 @@
 @section('title', 'Contact')
 
 @section('content')
-<section id="home">
-    <div class="wrapper bg-gray">
-        <div class="container pt-10 pt-md-14 pb-14 pb-md-17 text-center">
-            <div class="row text-center">
-                <div class="col-lg-9 col-xxl-7 mx-auto" data-cues="zoomIn" data-group="welcome" data-interval="-200">
-                    <h2 class="display-1 mb-4">Creative. Smart. Awesome.</h2>
-                    <p class="lead fs-24 lh-sm px-md-5 px-xl-15 px-xxl-10">We are an award winning web & mobile design
-                        agency that strongly believes in the power of creative ideas.</p>
-                </div>
-                <!-- /column -->
+<section class="wrapper image-wrapper bg-image bg-overlay bg-overlay-300" data-image-src="{{ asset('img/bg16.png') }}">
+    <div class="container pt-17 pb-19 pt-md-18 pb-md-17 text-center">
+        <div class="row">
+            <div class="col-lg-8 col-xl-7 col-xxl-6 mx-auto" data-cues="slideInDown" data-group="page-title">
+                <h1 class="display-1 text-white fs-60 px-md-15 px-lg-0 mb-0">
+                    MINDSPACE
+                </h1>
+                <h4 class="display-3 text-white mb-5">Coworking & Study Hub</h4>
+                <p class="lead fs-lg text-white lh-sm mb-7 mx-md-6 mx-lg-5">
+                    Whether you’re a freelancer, entrepreneur, remote worker, or student, our coworking space offers the perfect environment to boost your focus and productivity.
+                </p>
             </div>
-            <!-- /.row -->
-            <div class="row text-center mt-10">
-                <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
-                    <figure><img class="w-auto" src="./assets/img/illustrations/i8.png"
-                            srcset="./assets/img/illustrations/i8@2x.png 2x" alt="" /></figure>
-                </div>
-                <!-- /column -->
-            </div>
-            <!-- /.row -->
+            <!-- /column -->
         </div>
-        <!-- /.container -->
+    <!-- /.row -->
     </div>
-    <!-- /.wrapper -->
+    <!-- /.container -->
+    <div class="overflow-hidden">
+        <div class="divider text-light mx-n2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60">
+            <path fill="currentColor" d="M0,0V60H1440V0A5771,5771,0,0,1,0,0Z" />
+            </svg>
+        </div>
+    </div>
 </section>
-<!-- /section -->
-<section id="services">
-    <div class="wrapper bg-light">
-        <div class="container py-14 py-md-17">
-            <div class="row gx-lg-8 gx-xl-12 gy-6 mb-10 align-items-center">
-                <div class="col-lg-6 order-lg-2">
-                    <ul class="progress-list">
-                        <li>
-                            <p>Marketing</p>
-                            <div class="progressbar line blue" data-value="100"></div>
-                        </li>
-                        <li>
-                            <p>Strategy</p>
-                            <div class="progressbar line green" data-value="80"></div>
-                        </li>
-                        <li>
-                            <p>Development</p>
-                            <div class="progressbar line yellow" data-value="85"></div>
-                        </li>
-                        <li>
-                            <p>Data Analysis</p>
-                            <div class="progressbar line orange" data-value="90"></div>
-                        </li>
-                    </ul>
-                    <!-- /.progress-list -->
+
+<section class="wrapper bg-light">
+    <div class="container py-14 py-md-17">
+        <div class="row">
+            <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 mx-auto text-center">
+                <h2 class="fs-15 text-uppercase text-muted mb-3">Our Passes</h2>
+                <h3 class="display-4 mb-10 px-xl-10 px-xxl-15">Find the perfect pass for your daily grind, creative bursts, or focused sprints.</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container py-14 py-md-17">
+        <div class="card shadow-lg mt-n16 mt-md-n21 mb-15 mb-md-14">
+            <div class="row gx-0">
+                <div class="col-lg-6 image-wrapper bg-image bg-cover rounded d-none d-md-block" data-image-src="https://ik.imagekit.io/wow2navhj/Mindspace/studying-01.jpg?updatedAt=1752539051893" data-cues="fadeIn">
                 </div>
-                <!--/column -->
                 <div class="col-lg-6">
-                    <h3 class="display-5 mb-5">The full service we are offering is specifically designed to meet your
-                        business needs and projects.</h3>
-                    <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Morbi leo risus, porta ac
-                        consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl
-                        consectetur duis mollis commodo.</p>
-                </div>
-                <!--/column -->
-            </div>
-            <!--/.row -->
-            <div class="row gx-lg-8 gx-xl-12 gy-6 gy-md-0 text-center">
-                <div class="col-md-6 col-lg-3">
-                    <img src="./assets/img/icons/lineal/megaphone.svg"
-                        class="svg-inject icon-svg icon-svg-md text-blue mb-3" alt="" />
-                    <h4>Marketing</h4>
-                    <p class="mb-2">Nulla vitae elit libero, a pharetra augue. Donec id elit non mi porta gravida at
-                        eget metus. Cras justo cum sociis natoque magnis.</p>
-                </div>
-                <!--/column -->
-                <div class="col-md-6 col-lg-3">
-                    <img src="./assets/img/icons/lineal/target.svg"
-                        class="svg-inject icon-svg icon-svg-md text-green mb-3" alt="" />
-                    <h4>Strategy</h4>
-                    <p class="mb-2">Nulla vitae elit libero, a pharetra augue. Donec id elit non mi porta gravida at
-                        eget metus. Cras justo cum sociis natoque magnis.</p>
-                </div>
-                <!--/column -->
-                <div class="col-md-6 col-lg-3">
-                    <img src="./assets/img/icons/lineal/settings-3.svg"
-                        class="svg-inject icon-svg icon-svg-md text-yellow mb-3" alt="" />
-                    <h4>Development</h4>
-                    <p class="mb-2">Nulla vitae elit libero, a pharetra augue. Donec id elit non mi porta gravida at
-                        eget metus. Cras justo cum sociis natoque magnis.</p>
-                </div>
-                <!--/column -->
-                <div class="col-md-6 col-lg-3">
-                    <img src="./assets/img/icons/lineal/bar-chart.svg"
-                        class="svg-inject icon-svg icon-svg-md text-orange mb-3" alt="" />
-                    <h4>Data Analysis</h4>
-                    <p class="mb-2">Nulla vitae elit libero, a pharetra augue. Donec id elit non mi porta gravida at
-                        eget metus. Cras justo cum sociis natoque magnis.</p>
-                </div>
-                <!--/column -->
-            </div>
-            <!--/.row -->
-        </div>
-        <!-- /.container -->
-    </div>
-    <!-- /.wrapper -->
-</section>
-<!-- /section -->
-<section id="process">
-    <div class="wrapper bg-gray">
-        <div class="container py-14 py-md-17">
-            <div class="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-16 align-items-center">
-                <div class="col-lg-7">
-                    <figure><img class="w-auto" src="./assets/img/illustrations/i3.png"
-                            srcset="./assets/img/illustrations/i3@2x.png 2x" alt="" /></figure>
-                </div>
-                <!--/column -->
-                <div class="col-lg-5">
-                    <h2 class="fs-15 text-uppercase text-line text-primary mb-3">How It Works?</h2>
-                    <h3 class="display-5 mb-7 pe-xxl-5">Everything you need on creating a business process.</h3>
-                    <div class="d-flex flex-row mb-4">
-                        <div>
-                            <img src="./assets/img/icons/lineal/light-bulb.svg"
-                                class="svg-inject icon-svg icon-svg-sm text-blue me-4" alt="" />
-                        </div>
-                        <div>
-                            <h4 class="mb-1">Collect Ideas</h4>
-                            <p class="mb-1">Nulla vitae elit libero pharetra augue dapibus.</p>
-                        </div>
+                    <div class="p-10 p-md-11 p-lg-13">
+                        <h2 class="display-4 mb-3" data-cues="slideInDown">Daily Pass</h2>
+                        <p class="lead fs-lg fst-italic">Pay only for the time you need.</p>
+                        <p>Ideal for short visits or spontaneous study sessions, it’s perfect for students or professionals who only need a few hours of focused time without any commitment.</p>
                     </div>
-                    <div class="d-flex flex-row mb-4">
-                        <div>
-                            <img src="./assets/img/icons/lineal/pie-chart-2.svg"
-                                class="svg-inject icon-svg icon-svg-sm text-green me-4" alt="" />
-                        </div>
-                        <div>
-                            <h4 class="mb-1">Data Analysis</h4>
-                            <p class="mb-1">Vivamus sagittis lacus augue laoreet vel.</p>
-                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container py-14 py-md-17">
+        <div class="card shadow-lg mt-n16 mt-md-n21 mb-15 mb-md-14">
+            <div class="row gx-0">
+                <div class="col-lg-6">
+                    <div class="p-10 p-md-11 p-lg-13" data-cues="slideInDown">
+                        <h2 class="display-4 mb-3">Flexi Pass</h2>
+                        <p class="lead fs-lg fst-italic">Your hours, your schedule.</p>
+                        <p>Purchase hours in advance and use them whenever it suits you. It's great for people with unpredictable routines who still want a productive environment.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6 image-wrapper bg-image bg-cover rounded d-none d-md-block" data-image-src="https://ik.imagekit.io/wow2navhj/Mindspace/studying-04.jpg?updatedAt=1752539053018" data-cues="fadeIn">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container py-14 py-md-17">
+        <div class="card shadow-lg mt-n16 mt-md-n21 mb-15 mb-md-14">
+            <div class="row gx-0">
+                <div class="col-lg-6 image-wrapper bg-image bg-cover rounded d-none d-md-block" data-image-src="https://ik.imagekit.io/wow2navhj/Mindspace/studying-03.jpg?updatedAt=1752539051763" data-cues="fadeIn">
+                </div>
+                <div class="col-lg-6">
+                    <div class="p-10 p-md-11 p-lg-13" data-cues="slideInDown">
+                        <h2 class="display-4 mb-3">Monthly Pass</h2>
+                        <p class="lead fs-lg fst-italic">Work or study without limits.</p>
+                        <p>Enjoy full access every day of the month. It’s the best choice for regular users who want a consistent and reliable workspace.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container py-14 py-md-17">
+        <div class="card shadow-lg mt-n16 mt-md-n21 mb-15 mb-md-14">
+            <div class="row gx-0">
+                <div class="col-lg-6">
+                    <div class="p-10 p-md-11 p-lg-13" data-cues="slideInDown">
+                        <h2 class="display-4 mb-3">Conference</h2>
+                        <p class="lead fs-lg fst-italic">Private space, professional feel.</p>
+                        <p>Allows you to reserve dedicated rooms for meetings, group discussions, or small events. Ideal for those needing a quiet and formal setting for collaboration.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6 image-wrapper bg-image bg-cover rounded d-none d-md-block" data-image-src="https://ik.imagekit.io/wow2navhj/Mindspace/group-meeting-02.jpg?updatedAt=1752539052466" data-cues="fadeIn">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="wrapper bg-white">
+    <div class="container py-7">
+        <div class="row mb-8 text-center">
+            <div class="col-lg-10 col-xl-9 col-xxl-8 mx-auto">
+                <h2 class="fs-15 text-uppercase text-muted mb-3">What We Offer</h2>
+                <h3 class="display-4">Everything you need for a productive, focused, and comfortable work or study experience.</h3>
+            </div>
+        </div>
+        <div class="row gx-md-8 gy-8 mb-15 mb-md-17 text-center">
+            <div class="col-md-6 col-lg-3">
+                <div class="px-md-3 px-lg-0 px-xl-3">
+                    <img src="{{ asset('img/wifi.svg') }}" class="svg-inject icon-svg icon-svg-md solid-mono text-grape mb-5" alt="" />
+                    <h4>Free WiFi</h4>
+                    <p class="mb-2">Fast and reliable internet connection</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="px-md-3 px-lg-0 px-xl-3">
+                    <img src="{{ asset('img/office-chair.svg') }}" class="svg-inject icon-svg icon-svg-md solid-mono text-grape mb-5" alt="" />
+                    <h4>Comfortable seats</h4>
+                    <p class="mb-2">Ergonomic and cozy seating.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="px-md-3 px-lg-0 px-xl-3">
+                    <img src="{{ asset('img/coffee-maker.svg') }}" class="svg-inject icon-svg icon-svg-md solid-mono text-grape mb-5" alt="" />
+                    <h4>Free Refreshments</h4>
+                    <p class="mb-2">Unlimited coffee, tea, and light snacks</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="px-md-3 px-lg-0 px-xl-3">
+                    <img src="{{ asset('img/24-hour.svg') }}" class="svg-inject icon-svg icon-svg-md solid-mono text-grape mb-5" alt="" />
+                    <h4>Flexible Hours</h4>
+                    <p class="mb-2">24 hours open except Sundays (until 7pm only)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="wrapper bg-gray">
+    <div class="container py-7 py-md-8">
+        <div class="row mb-8 text-center">
+            <div class="col-lg-10 col-xl-9 col-xxl-8 mx-auto">
+                <h2 class="fs-15 text-uppercase text-muted mb-3">Track Your Stay</h2>
+                <h3 class="display-4">See how long you've stayed, monitor your usage, or manage your remaining hours based on your pass type.</h3>
+            </div>
+        </div>
+        <div class="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-17 align-items-center">
+            <div class="col-lg-6 position-relative">
+                <div class="shape bg-dot leaf rellax w-17 h-18" data-rellax-speed="1" style="bottom: -2rem; left: -0.7rem;"></div>
+                <figure class="rounded"><img src="{{ asset('img/time-track.jpg') }}" srcset="{{ asset('img/time-track.jpg') }} 2x" alt="" /></figure>
+            </div>
+            <div class="col-lg-6 col-xxl-5">
+                <div class="d-flex flex-row mb-5">
+                    <div>
+                        <span class="icon btn btn-circle btn-soft-primary pe-none me-5"><span class="number fs-18"><i class="uil uil-bullseye"></i></span></span>
+                    </div>
+                    <div>
+                        <h4 class="mb-1"><a href="" class="hover more">Daily Pass</a></h4>
+                        <p class="mb-0">Track how many hours you’ve used today and see if you’re close to your limit.</p>
+                    </div>
+                    </div>
+                    <div class="d-flex flex-row mb-5">
+                    <div>
+                        <span class="icon btn btn-circle btn-soft-primary pe-none me-5"><span class="number fs-18"><i class="uil uil-bullseye"></i></span></span>
+                    </div>
+                    <div>
+                        <h4 class="mb-1"><a href="{{ route('flexi.remaining-time') }}" class="hover more">Flexi Pass</a></h4>
+                        <p class="mb-0">View your remaining hours, usage history, and expiration-free balance.</p>
+                    </div>
                     </div>
                     <div class="d-flex flex-row">
-                        <div>
-                            <img src="./assets/img/icons/lineal/design.svg"
-                                class="svg-inject icon-svg icon-svg-sm text-yellow me-4" alt="" />
-                        </div>
-                        <div>
-                            <h4 class="mb-1">Magic Touch</h4>
-                            <p class="mb-0">Cras mattis consectetur purus sit amet.</p>
-                        </div>
+                    <div>
+                        <span class="icon btn btn-circle btn-soft-primary pe-none me-5"><span class="number fs-18"><i class="uil uil-bullseye"></i></span></span>
+                    </div>
+                    <div>
+                        <h4 class="mb-1"><a href="" class="hover more">Monthly Pass</a></h4>
+                        <p class="mb-0">Track your daily visits and get a summary of your access history.</p>
                     </div>
                 </div>
-                <!--/column -->
             </div>
-            <!--/.row -->
-            <div class="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
-                <div class="col-lg-7 order-lg-2">
-                    <figure><img class="w-auto" src="./assets/img/illustrations/i2.png"
-                            srcset="./assets/img/illustrations/i2@2x.png 2x" alt="" /></figure>
-                </div>
-                <!--/column -->
-                <div class="col-lg-5">
-                    <h2 class="fs-15 text-uppercase text-line text-primary mb-3">Why Choose Us?</h2>
-                    <h3 class="display-5 mb-7">A few reasons why our valued customers choose us.</h3>
-                    <div class="accordion accordion-wrapper" id="accordionExample">
-                        <div class="card plain accordion-item">
-                            <div class="card-header" id="headingOne">
-                                <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-                                    aria-expanded="true" aria-controls="collapseOne"> Professional Design </button>
-                            </div>
-                            <!--/.card-header -->
-                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                                data-bs-parent="#accordionExample">
-                                <div class="card-body">
-                                    <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
-                                        fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet
-                                        fermentum. Praesent commodo cursus magna, vel.</p>
-                                </div>
-                                <!--/.card-body -->
-                            </div>
-                            <!--/.accordion-collapse -->
-                        </div>
-                        <!--/.accordion-item -->
-                        <div class="card plain accordion-item">
-                            <div class="card-header" id="headingTwo">
-                                <button class="collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
-                                    aria-expanded="false" aria-controls="collapseTwo"> Top-Notch Support </button>
-                            </div>
-                            <!--/.card-header -->
-                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-                                data-bs-parent="#accordionExample">
-                                <div class="card-body">
-                                    <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
-                                        fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet
-                                        fermentum. Praesent commodo cursus magna, vel.</p>
-                                </div>
-                                <!--/.card-body -->
-                            </div>
-                            <!--/.accordion-collapse -->
-                        </div>
-                        <!--/.accordion-item -->
-                        <div class="card plain accordion-item">
-                            <div class="card-header" id="headingThree">
-                                <button class="collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree"
-                                    aria-expanded="false" aria-controls="collapseThree"> Header and Slider Options
-                                </button>
-                            </div>
-                            <!--/.card-header -->
-                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
-                                data-bs-parent="#accordionExample">
-                                <div class="card-body">
-                                    <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
-                                        fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet
-                                        fermentum. Praesent commodo cursus magna, vel.</p>
-                                </div>
-                                <!--/.card-body -->
-                            </div>
-                            <!--/.accordion-collapse -->
-                        </div>
-                        <!--/.accordion-item -->
-                    </div>
-                    <!--/.accordion -->
-                </div>
-                <!--/column -->
-            </div>
-            <!--/.row -->
         </div>
-        <!-- /.container -->
     </div>
-    <!-- /.wrapper -->
 </section>
-<!-- /section -->
-<section id="about">
-    <div class="wrapper bg-light">
-        <div class="container py-14 py-md-17">
-            <div class="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
-                <div class="col-lg-4">
-                    <h2 class="fs-15 text-uppercase text-line text-primary text-center mb-3">Meet the Team</h2>
-                    <h3 class="display-5 mb-5">Save your time and money by choosing our professional team.</h3>
-                    <p>Donec id elit non mi porta gravida at eget metus. Morbi leo risus, porta ac consectetur ac,
-                        vestibulum at eros tempus porttitor.</p>
-                    <a href="#" class="btn btn-primary rounded-pill mt-3">See All Members</a>
-                </div>
-                <!--/column -->
-                <div class="col-lg-8">
-                    <div class="swiper-container text-center mb-6" data-margin="30" data-dots="true" data-items-xl="3"
-                        data-items-md="2" data-items-xs="1">
-                        <div class="swiper">
-                            <div class="swiper-wrapper">
-                                <div class="swiper-slide">
-                                    <img class="rounded-circle w-20 mx-auto mb-4" src="./assets/img/avatars/t1.jpg"
-                                        srcset="./assets/img/avatars/t1@2x.jpg 2x" alt="" />
-                                    <h4 class="mb-1">Cory Zamora</h4>
-                                    <div class="meta mb-2">Marketing Specialist</div>
-                                    <p class="mb-2">Etiam porta sem magna malesuada mollis.</p>
-                                    <nav class="nav social justify-content-center text-center mb-0">
-                                        <a href="#"><i class="uil uil-twitter"></i></a>
-                                        <a href="#"><i class="uil uil-slack"></i></a>
-                                        <a href="#"><i class="uil uil-linkedin"></i></a>
-                                    </nav>
-                                    <!-- /.social -->
-                                </div>
-                                <!--/.swiper-slide -->
-                                <div class="swiper-slide">
-                                    <img class="rounded-circle w-20 mx-auto mb-4" src="./assets/img/avatars/t2.jpg"
-                                        srcset="./assets/img/avatars/t2@2x.jpg 2x" alt="" />
-                                    <h4 class="mb-1">Coriss Ambady</h4>
-                                    <div class="meta mb-2">Financial Analyst</div>
-                                    <p class="mb-2">Aenean eu leo quam. Pellentesque ornare lacinia.</p>
-                                    <nav class="nav social justify-content-center text-center mb-0">
-                                        <a href="#"><i class="uil uil-youtube"></i></a>
-                                        <a href="#"><i class="uil uil-facebook-f"></i></a>
-                                        <a href="#"><i class="uil uil-dribbble"></i></a>
-                                    </nav>
-                                    <!-- /.social -->
-                                </div>
-                                <!--/.swiper-slide -->
-                                <div class="swiper-slide">
-                                    <img class="rounded-circle w-20 mx-auto mb-4" src="./assets/img/avatars/t3.jpg"
-                                        srcset="./assets/img/avatars/t3@2x.jpg 2x" alt="" />
-                                    <h4 class="mb-1">Nikolas Brooten</h4>
-                                    <div class="meta mb-2">Sales Manager</div>
-                                    <p class="mb-2">Donec ornare elit quam porta gravida at eget.</p>
-                                    <nav class="nav social justify-content-center text-center mb-0">
-                                        <a href="#"><i class="uil uil-linkedin"></i></a>
-                                        <a href="#"><i class="uil uil-tumblr-square"></i></a>
-                                        <a href="#"><i class="uil uil-facebook-f"></i></a>
-                                    </nav>
-                                    <!-- /.social -->
-                                </div>
-                                <!--/.swiper-slide -->
-                                <div class="swiper-slide">
-                                    <img class="rounded-circle w-20 mx-auto mb-4" src="./assets/img/avatars/t4.jpg"
-                                        srcset="./assets/img/avatars/t4@2x.jpg 2x" alt="" />
-                                    <h4 class="mb-1">Jackie Sanders</h4>
-                                    <div class="meta mb-2">Investment Planner</div>
-                                    <p class="mb-2">Nullam risus eget urna mollis ornare vel eu leo.</p>
-                                    <nav class="nav social justify-content-center text-center mb-0">
-                                        <a href="#"><i class="uil uil-twitter"></i></a>
-                                        <a href="#"><i class="uil uil-facebook-f"></i></a>
-                                        <a href="#"><i class="uil uil-dribbble"></i></a>
-                                    </nav>
-                                    <!-- /.social -->
-                                </div>
-                                <!--/.swiper-slide -->
-                                <div class="swiper-slide">
-                                    <img class="rounded-circle w-20 mx-auto mb-4" src="./assets/img/avatars/t5.jpg"
-                                        srcset="./assets/img/avatars/t5@2x.jpg 2x" alt="" />
-                                    <h4 class="mb-1">Tina Geller</h4>
-                                    <div class="meta mb-2">Assistant Buyer</div>
-                                    <p class="mb-2">Vivamus sagittis lacus vel augue laoreet rutrum.</p>
-                                    <nav class="nav social justify-content-center text-center mb-0">
-                                        <a href="#"><i class="uil uil-facebook-f"></i></a>
-                                        <a href="#"><i class="uil uil-slack"></i></a>
-                                        <a href="#"><i class="uil uil-dribbble"></i></a>
-                                    </nav>
-                                    <!-- /.social -->
-                                </div>
-                                <!--/.swiper-slide -->
-                            </div>
-                            <!--/.swiper-wrapper -->
-                        </div>
-                        <!-- /.swiper -->
-                    </div>
-                    <!-- /.swiper-container -->
-                </div>
-                <!--/column -->
+
+<!--
+    REVIEWS
+-->
+<section class="wrapper bg-soft-primary">
+    <div class="container py-7 py-md-8">
+        <div class="row">
+            <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 mx-auto text-center">
+                <h2 class="fs-15 text-uppercase text-muted mb-3">Customer Reviews</h2>
+                <h3 class="display-4 mb-10 px-xl-10 px-xxl-15">Don't take our word for it. See what customers are saying about us.</h3>
             </div>
-            <!--/.row -->
         </div>
-        <!-- /.container -->
+        <div class="grid">
+            <div class="row isotope gy-6">
+                <div class="item col-md-6 col-xl-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <span class="ratings five mb-3"></span>
+                            <blockquote class="icon mb-0">
+                                <p>“Perfect working area for WFH or Hybrid.”</p>
+                                <div class="blockquote-details">
+                                    <span class="avatar bg-pale-primary text-primary w-12 h-12">
+                                        <span>MC</span>
+                                    </span>
+                                    <!--<img class="rounded-circle w-12" src="./assets/img/avatars/te1.jpg" srcset="./assets/img/avatars/te1@2x.jpg 2x" alt="" />-->
+                                    <div class="info">
+                                        <h5 class="mb-1">Mark Vincent Cantero</h5>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+                <div class="item col-md-6 col-xl-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <span class="ratings five mb-3"></span>
+                            <blockquote class="icon mb-0">
+                                <p>“Amazing co-working space, environment is both professional and welcoming :) Staff is incredibly friendly and accommodating.”</p>
+                                <div class="blockquote-details">
+                                    <span class="avatar bg-pale-primary text-primary w-12 h-12">
+                                        <span>GM</span>
+                                    </span>
+                                    <!--<img class="rounded-circle w-12" src="./assets/img/avatars/te1.jpg" srcset="./assets/img/avatars/te1@2x.jpg 2x" alt="" />-->
+                                    <div class="info">
+                                        <h5 class="mb-1">Garcia Mila</h5>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+                <div class="item col-md-6 col-xl-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <span class="ratings five mb-3"></span>
+                            <blockquote class="icon mb-0">
+                                <p>“Great space! Owners were very accommodating to share and let me use one their facility. Will definitely come back!”</p>
+                                <div class="blockquote-details">
+                                    <span class="avatar bg-pale-primary text-primary w-12 h-12">
+                                        <span>JT</span>
+                                    </span>
+                                    <!--<img class="rounded-circle w-12" src="./assets/img/avatars/te1.jpg" srcset="./assets/img/avatars/te1@2x.jpg 2x" alt="" />-->
+                                    <div class="info">
+                                        <h5 class="mb-1">Joseph Tanael</h5>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+                <div class="item col-md-6 col-xl-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <span class="ratings five mb-3"></span>
+                            <blockquote class="icon mb-0">
+                                <p>“The staff and owners were very nice and friendly. They also have a spacious working area. They also have parking area for customer. BEST PART they are open 24 hrs from monday to saturday.”</p>
+                                <div class="blockquote-details">
+                                    <span class="avatar bg-pale-primary text-primary w-12 h-12">
+                                        <span>JR</span>
+                                    </span>
+                                    <!--<img class="rounded-circle w-12" src="./assets/img/avatars/te1.jpg" srcset="./assets/img/avatars/te1@2x.jpg 2x" alt="" />-->
+                                    <div class="info">
+                                        <h5 class="mb-1">Jessieca Roderno</h5>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+                <div class="item col-md-6 col-xl-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <span class="ratings five mb-3"></span>
+                            <blockquote class="icon mb-0">
+                                <p>
+                                    “1000 star reccommendation. Their rates are cheap but the place is really good. Wifi connection is fast, free snacks and drinks, open 24/7 during weekdays, chairs and tables are kept clean too. 
+                                    How I wish you have branch near my city but I am always willing to come to your Dasma branch.”
+                                </p>
+                                <div class="blockquote-details">
+                                    <span class="avatar bg-pale-primary text-primary w-12 h-12">
+                                        <span>CM</span>
+                                    </span>
+                                    <!--<img class="rounded-circle w-12" src="./assets/img/avatars/te1.jpg" srcset="./assets/img/avatars/te1@2x.jpg 2x" alt="" />-->
+                                    <div class="info">
+                                        <h5 class="mb-1">Christina Joy Mancilla</h5>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+                <div class="item col-md-6 col-xl-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <span class="ratings five mb-3"></span>
+                            <blockquote class="icon mb-0">
+                                <p>
+                                    “Finally found my co-working space! The workspace is comfortable, and the amenities are great!”
+                                </p>
+                                <div class="blockquote-details">
+                                    <span class="avatar bg-pale-primary text-primary w-12 h-12">
+                                        <span>MP</span>
+                                    </span>
+                                    <!--<img class="rounded-circle w-12" src="./assets/img/avatars/te1.jpg" srcset="./assets/img/avatars/te1@2x.jpg 2x" alt="" />-->
+                                    <div class="info">
+                                        <h5 class="mb-1">Michael Planas</h5>
+                                    </div>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- /.wrapper -->
 </section>
-<!-- /section -->
+
+<!--
+    FAQ
+-->
+<section class="wrapper bg-soft-primary">
+    <div class="container py-7 py-md-8">
+        <div class="row">
+            <div class="col-lg-11 col-xxl-10 mx-auto text-center">
+                <h2 class="fs-15 text-uppercase text-muted mb-3">FAQ</h2>
+                <h3 class="display-4 mb-10 px-lg-12 px-xl-10 px-xxl-15">If you don't see an answer to your question, you can send us an email from our contact form.</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-7 mx-auto">
+                <div id="accordion-3" class="accordion-wrapper">
+                    <div class="card accordion-item shadow-lg">
+                        <div class="card-header" id="accordion-heading-3-1">
+                            <button class="collapsed" data-bs-toggle="collapse" data-bs-target="#accordion-collapse-3-1" aria-expanded="false" aria-controls="accordion-collapse-3-1">How do I get my subscription receipt?</button>
+                        </div>
+                        <div id="accordion-collapse-3-1" class="collapse" aria-labelledby="accordion-heading-3-1" data-bs-target="#accordion-3">
+                            <div class="card-body">
+                                <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card accordion-item shadow-lg">
+                        <div class="card-header" id="accordion-heading-3-2">
+                            <button class="collapsed" data-bs-toggle="collapse" data-bs-target="#accordion-collapse-3-2" aria-expanded="false" aria-controls="accordion-collapse-3-2">Are there any discounts for people in need?</button>
+                        </div>
+                        <div id="accordion-collapse-3-2" class="collapse" aria-labelledby="accordion-heading-3-2" data-bs-target="#accordion-3">
+                            <div class="card-body">
+                                <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card accordion-item shadow-lg">
+                        <div class="card-header" id="accordion-heading-3-3">
+                            <button class="collapsed" data-bs-toggle="collapse" data-bs-target="#accordion-collapse-3-3" aria-expanded="false" aria-controls="accordion-collapse-3-3">Do you offer a free trial edit?</button>
+                        </div>
+                        <div id="accordion-collapse-3-3" class="collapse" aria-labelledby="accordion-heading-3-3" data-bs-target="#accordion-3">
+                            <div class="card-body">
+                                <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card accordion-item shadow-lg">
+                        <div class="card-header" id="accordion-heading-3-4">
+                            <button class="collapsed" data-bs-toggle="collapse" data-bs-target="#accordion-collapse-3-4" aria-expanded="false" aria-controls="accordion-collapse-3-4">How do I reset my Account password?</button>
+                        </div>
+                        <div id="accordion-collapse-3-4" class="collapse" aria-labelledby="accordion-heading-3-4" data-bs-target="#accordion-3">
+                            <div class="card-body">
+                                <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 @endsection

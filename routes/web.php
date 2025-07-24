@@ -22,6 +22,10 @@ Route::get('/', function () {
     return redirect()->to(Filament::getUrl());
 });
 
+Route::get('/test-index', function () {
+    return view('frontend.dashboard.index');
+});
+
 Route::get('/test', function () {
     abort(500);
 });

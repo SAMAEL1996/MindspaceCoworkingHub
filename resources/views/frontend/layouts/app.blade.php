@@ -5,7 +5,7 @@
 
 <body>
     <div class="content-wrapper">
-        <header class="wrapper bg-gray">
+        <header class="wrapper bg-soft-primary">
             @include('frontend.layouts._header')
         </header>
 
