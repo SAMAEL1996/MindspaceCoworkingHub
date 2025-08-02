@@ -307,7 +307,6 @@ class ListDailySales extends ListRecords
                 ])
                 ->modalSubmitAction(false)
                 ->action(function($data) {
-                    dd($data);
                     $time_in_staff_id = auth()->user()->staff ? auth()->user()->staff->id : auth()->user()->id;
                     $name = null;
                     if($this->checkInModel) {
