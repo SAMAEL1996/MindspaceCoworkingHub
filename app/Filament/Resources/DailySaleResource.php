@@ -5,8 +5,11 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DailySaleResource\Pages;
 use App\Filament\Resources\DailySaleResource\RelationManagers;
 use App\Models\DailySale;
+use App\Models\LoyaltyCard;
+use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -188,6 +191,56 @@ class DailySaleResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('End Time')
                         ->form([
+                            FormComponents\Fieldset::make('Loyalty Card No')
+                                ->schema([
+                                    FormComponents\TextInput::make('loyalty_card_no')
+                                        ->label('')
+                                        ->integer()
+                                        ->columnSpanFull()
+                                        ->helperText(function (Get $get) {
+                                            return $get('loyalty_card_placeholder');
+                                        })
+                                        ->suffixAction(
+                                        FormComponents\Actions\Action::make('apply')
+                                                ->icon('heroicon-o-check-circle')
+                                                ->action(function ($get, $set, $state, $record) {
+                                                    $set('loyalty_card_placeholder', 'Loyalty Card No. '.$state.' applied.');
+                                                    
+                                                    $LCvalue = 10;
+                                                    // $LCvalue = LoyaltyCard::getDiscount($state);
+                                                    if ($LCvalue != 0) {
+                                                        if (!$get('apply_discount')) {
+                                                            $set('apply_discount', true);
+                                                        }
+                                                        
+                                                        // Set the discount value from loyalty card
+                                                        $set('discount', $LCvalue);
+                                                        
+                                                        // Calculate and update the amount_to_paid
+                                                        $computeShowTime = $record->computeShowTime(true);
+                                                        $percent = $LCvalue / 100;
+                                                        $discount = (double)$computeShowTime['amount_to_paid'] * $percent;
+                                                        $amount = (double)$computeShowTime['amount_to_paid'] - (double)$discount;
+                                                        $set('amount_to_paid', $amount);
+                                                    }
+                                                })
+                                        )
+                                ])
+                                ->visible(function($record) {
+                                    if($record->is_flexi || $record->is_monthly) {
+                                        return false;
+                                    }
+
+                                    $computeShowTime = $record->computeShowTime();
+                                    $totalHours = $computeShowTime['total_hours_accumulated'];
+
+                                    if($totalHours >= 5) {
+                                        return true;
+                                    }
+
+                                    return false;
+                                })
+                                ->hidden(),
                             FormComponents\Grid::make(1)
                                 ->schema([
                                     FormComponents\Grid::make(2)

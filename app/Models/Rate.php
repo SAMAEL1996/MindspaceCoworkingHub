@@ -18,4 +18,13 @@ class Rate extends Model
         'price',
         'status'
     ];
+
+    public static function getConferenceRates($packageId)
+    {
+        return self::where('type', 'Conference')
+            ->where('name', 'like', '%Package '.$packageId.'%')
+            ->where('status', true)
+            ->pluck('price', 'consumable')
+            ->toArray();
+    }
 }

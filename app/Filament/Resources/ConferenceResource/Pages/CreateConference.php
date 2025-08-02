@@ -44,20 +44,19 @@ class CreateConference extends CreateRecord
             $this->halt();
         }
 
-        $package = \App\Library\Helper::getConferencePackageInfo((int)$data['package']);
-        $rate = \App\Library\Helper::getConferencePackageRate((int)$data['package'], $data['duration']);
+        $rate = Conference::getRateAmount((int)$data['package'], (int)$data['duration']);
 
         $conference = static::getModel()::create([
-            'package_id' => $package['id'],
+            'package_id' => (int)$data['package'],
             'book_by' => auth()->user()->id,
             'start_at' => $timeOfArrival->copy(),
-            'duration' => $data['duration'],
+            'duration' => (int)$data['duration'],
             'event' => $data['event'],
             'members' => $data['members'],
             'host' => $data['host'],
             'contact_no' => $data['contact_no'],
             'status' => 'approve',
-            'amount' => $rate['price']
+            'amount' => $rate
         ]);
 
         return $conference;

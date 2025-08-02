@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
+use Pelmered\FilamentMoneyField\Forms\Components\MoneyInput;
 
 class ListDailySales extends ListRecords
 {
@@ -31,9 +32,9 @@ class ListDailySales extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('search')
+            Actions\Action::make('add-guest')
                 ->label('Add Guest')
-                ->color('info')
+                // ->color('info')
                 ->icon('heroicon-m-plus-circle')
                 ->modalHeading('Guest Check-In')
                 ->form([
@@ -153,6 +154,7 @@ class ListDailySales extends ListRecords
                                     ->afterStateUpdated(function($state, $set) {
                                         $rate = \App\Models\Rate::find($state);
                                         $set('amount', $rate->price);
+                                        $set('orig_amount', $rate->price);
 
                                         $helperText = $rate->name . ' Rate: PHP ' . number_format($rate->price, 2);
                                         $set('amount_helper_text', $helperText);
@@ -169,11 +171,27 @@ class ListDailySales extends ListRecords
                                     ])
                                     ->required()
                                     ->native(false),
+                                FormComponents\TextInput::make('member_dscount')
+                                    ->label('Discount')
+                                    ->numeric()
+                                    ->live()
+                                    ->minValue(1)
+                                    ->default('0')
+                                    ->required()
+                                    ->afterStateUpdated(function($state, $set, $get) {
+                                        $originalAmount = Rate::find($get('rate_id'))?->price ?? 0;
+                                        $discount = floatval($state);
+                                        $discountedAmount = $originalAmount - ($originalAmount * ($discount / 100));
+
+                                        $set('amount', $discountedAmount);
+                                    })
+                                    ->helperText('Default value is 0.'),
                                 FormComponents\TextInput::make('amount')
                                     ->label('Amount Paid')
                                     ->numeric()
                                     ->minValue(1)
                                     ->required()
+                                    ->inputMode('decimal')
                                     ->helperText(function($get) {
                                         return $get('amount_helper_text') ?? '';
                                     }),
@@ -517,6 +535,7 @@ class ListDailySales extends ListRecords
                     return $dailyPass;
                 })
                 ->visible(function() {
+                    return false;
                     $user = auth()->user();
     
                     if($user->hasRole('Super Administrator')) {
@@ -683,6 +702,7 @@ class ListDailySales extends ListRecords
                     return $dailySale;
                 })
                 ->visible(function() {
+                    return false;
                     $user = auth()->user();
     
                     if($user->hasRole('Super Administrator')) {
@@ -853,6 +873,7 @@ class ListDailySales extends ListRecords
                     return $dailySale;
                 })
                 ->visible(function() {
+                    return false;
                     $user = auth()->user();
     
                     if($user->hasRole('Super Administrator')) {

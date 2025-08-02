@@ -130,6 +130,43 @@ class Conference extends Model
         $dailySale->save();
     }
 
+    public static function getRateAmount(int $packageId, int $duration)
+    {
+        $amount = 0;
+
+        $rates = Rate::getConferenceRates($packageId);
+
+        if($packageId == 1) {
+            $additionalHours = Setting::getValue('conference-package-1-succeeding-hours');
+        } else {
+            $additionalHours = Setting::getValue('conference-package-2-succeeding-hours');
+        }
+
+        if($duration <= 3) {
+            $amount = $rates[3];
+        } elseif($duration == 4) {
+            $amount = $rates[3] + $additionalHours;
+        } elseif($duration == 5) {
+            $amount = $rates[5];
+        } elseif($duration == 6) {
+            $amount = $rates[5] + $additionalHours;
+        } elseif($duration > 6 && $duration <= 8) {
+            $amount = $rates[8];
+        } elseif($duration > 8 && 12 >= $duration) {
+            $exceedingHours = $duration - 8;
+            $additionalHoursRate = $additionalHours * $exceedingHours;
+            $amount = $rates[8] + $additionalHoursRate;
+        } elseif($duration > 12 && 24 >= $duration) {
+            $amount = $rates[24];
+        } else {
+            $exceedingHours = $duration - 24;
+            $additionalHoursRate = $additionalHours * $exceedingHours;
+            $amount = $rates[24] + $additionalHoursRate;
+        }
+
+        return $amount;
+    }
+
     public static function getForm()
     {
         return [
@@ -145,7 +182,12 @@ class Conference extends Model
                 ->inline()
                 ->extraAttributes([
                     'class' => 'flex justify-center items-center space-x-4',
-                ]),
+                ])
+                ->afterStateUpdated(function($state, $set, $get) {
+                    $rate = Conference::getRateAmount((int)$state, (int)$get('duration'));
+
+                    $set('total_amount', $rate);
+                }),
             FormComponents\TextInput::make('event')
                 ->label('Event Name')
                 ->required(),
@@ -158,25 +200,6 @@ class Conference extends Model
             FormComponents\TextInput::make('members')
                 ->label('Total # of guests including POC')
                 ->numeric()
-                ->required(),
-            FormComponents\Select::make('duration')
-                ->label('Hours of Stay')
-                ->options(function($get) {
-                    $options = [];
-
-                    if(!$get('package')) {
-                        return $options;
-                    }
-
-                    $package = \App\Library\Helper::getConferencePackageInfo((int)$get('package'));
-                    foreach($package['rates'] as $rate) {
-                        $options[$rate['hours']] = $rate['label'];
-                    }
-
-                    return $options;
-                })
-                ->preload()
-                ->native(false)
                 ->required(),
             FormComponents\Fieldset::make('Schedule')
                 ->schema([
@@ -192,8 +215,34 @@ class Conference extends Model
                         ->options(\App\Library\Helper::get12HourTimeSelectOptions())
                         ->placeholder('Select Time')
                         ->native(false),
+                    FormComponents\TextInput::make('duration')
+                        ->label('Duration')
+                        ->integer()
+                        ->live()
+                        ->minValue(1)
+                        ->required()
+                        ->afterStateUpdated(function($state, $set, $get) {
+                            $rate = Conference::getRateAmount((int)$get('package'), (int)$state);
+
+                            $set('total_amount', $rate);
+                        }),
                 ])
-                ->columnSpan('full')
+                ->columns(3)
+                ->columnSpan('full'),
+            FormComponents\TextInput::make('total_amount')
+                ->label('TOTAL AMOUNT TO PAID')
+                ->disabled()
+                ->visible(function($get) {
+                    if($get('package') && $get('duration')) {
+                        return true;
+                    }
+
+                    return false;
+                })
+                ->columnSpan('1')
+                ->extraAttributes([
+                    'class' => 'flex justify-center items-center space-x-4',
+                ])
         ];
     }
 

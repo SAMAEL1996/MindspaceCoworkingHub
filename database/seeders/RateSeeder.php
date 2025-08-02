@@ -12,7 +12,7 @@ class RateSeeder extends Seeder
      */
     public function run(): void
     {
-        $data = [
+        $data1 = [
             [
                 'type' => 'Daily',
                 'name' => 'Hourly Pass',
@@ -71,15 +71,89 @@ class RateSeeder extends Seeder
             ]
         ];
 
-        foreach($data as $item) {
-            $rate = \App\Models\Rate::create([
-                'type' => $item['type'],
-                'name' => $item['name'],
-                'consumable' => $item['consumable'],
-                'validity' => $item['validity'],
-                'price' => $item['price'],
-                'status' => $item['status']
-            ]);
+        $data2 = [
+            [
+                'type' => 'Conference',
+                'name' => 'Package 1 - 3hrs',
+                'consumable' => 3,
+                'validity' => null,
+                'price' => 1500,
+                'status' => true
+            ],
+            [
+                'type' => 'Conference',
+                'name' => 'Package 1 - 5hrs',
+                'consumable' => 5,
+                'validity' => null,
+                'price' => 2000,
+                'status' => true
+            ],
+            [
+                'type' => 'Conference',
+                'name' => 'Package 1 - 8hrs',
+                'consumable' => 8,
+                'validity' => null,
+                'price' => 2500,
+                'status' => true
+            ],
+            [
+                'type' => 'Conference',
+                'name' => 'Package 1 - 24hrs',
+                'consumable' => 24,
+                'validity' => null,
+                'price' => 3500,
+                'status' => true
+            ],
+            [
+                'type' => 'Conference',
+                'name' => 'Package 2 - 3hrs',
+                'consumable' => 3,
+                'validity' => null,
+                'price' => 2000,
+                'status' => true
+            ],
+            [
+                'type' => 'Conference',
+                'name' => 'Package 2 - 5hrs',
+                'consumable' => 5,
+                'validity' => null,
+                'price' => 2500,
+                'status' => true
+            ],
+            [
+                'type' => 'Conference',
+                'name' => 'Package 2 - 8hrs',
+                'consumable' => 8,
+                'validity' => null,
+                'price' => 3000,
+                'status' => true
+            ],
+            [
+                'type' => 'Conference',
+                'name' => 'Package 2 - 24hrs',
+                'consumable' => 24,
+                'validity' => null,
+                'price' => 4500,
+                'status' => true
+            ],
+        ];
+
+        foreach($data2 as $item) {
+            $rate = \App\Models\Rate::firstOrCreate(
+                ['name' => $item['name']],
+                [
+                    'type' => $item['type'],
+                    'name' => $item['name'],
+                    'consumable' => $item['consumable'],
+                    'validity' => $item['validity'],
+                    'price' => $item['price'],
+                    'status' => $item['status']
+                ]
+            );
         }
+
+        \App\Models\Setting::upsertValue('conference-package-1-additional-person',300);
+        \App\Models\Setting::upsertValue('conference-package-1-succeeding-hours',250);
+        \App\Models\Setting::upsertValue('conference-package-2-succeeding-hours',300);
     }
 }
