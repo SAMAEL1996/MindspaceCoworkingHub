@@ -34,7 +34,7 @@ class ListDailySales extends ListRecords
         return [
             Actions\Action::make('add-guest')
                 ->label('Add Guest')
-                // ->color('info')
+                ->color('info')
                 ->icon('heroicon-m-plus-circle')
                 ->modalHeading('Guest Check-In')
                 ->form([
@@ -535,7 +535,6 @@ class ListDailySales extends ListRecords
                     return $dailyPass;
                 })
                 ->visible(function() {
-                    return false;
                     $user = auth()->user();
     
                     if($user->hasRole('Super Administrator')) {
@@ -605,6 +604,21 @@ class ListDailySales extends ListRecords
                                 ->helperText(function($get) {
                                     return $get('amount_helper_text') ?? '';
                                 }),
+                            FormComponents\TextInput::make('member_dscount')
+                                ->label('Discount')
+                                ->numeric()
+                                ->live()
+                                ->minValue(1)
+                                ->default('0')
+                                ->required()
+                                ->afterStateUpdated(function($state, $set, $get) {
+                                    $originalAmount = Rate::find($get('rate_id'))?->price ?? 0;
+                                    $discount = floatval($state);
+                                    $discountedAmount = $originalAmount - ($originalAmount * ($discount / 100));
+
+                                    $set('amount', $discountedAmount);
+                                })
+                                ->helperText('Default value is 0.'),
                             FormComponents\Select::make('mode_of_payment')
                                 ->options([
                                     'Cash' => 'Cash',
@@ -702,7 +716,6 @@ class ListDailySales extends ListRecords
                     return $dailySale;
                 })
                 ->visible(function() {
-                    return false;
                     $user = auth()->user();
     
                     if($user->hasRole('Super Administrator')) {
@@ -771,6 +784,21 @@ class ListDailySales extends ListRecords
                                 ->helperText(function($get) {
                                     return $get('amount_helper_text') ?? '';
                                 }),
+                            FormComponents\TextInput::make('member_dscount')
+                                ->label('Discount')
+                                ->numeric()
+                                ->live()
+                                ->minValue(1)
+                                ->default('0')
+                                ->required()
+                                ->afterStateUpdated(function($state, $set, $get) {
+                                    $originalAmount = Rate::find($get('rate_id'))?->price ?? 0;
+                                    $discount = floatval($state);
+                                    $discountedAmount = $originalAmount - ($originalAmount * ($discount / 100));
+
+                                    $set('amount', $discountedAmount);
+                                })
+                                ->helperText('Default value is 0.'),
                             FormComponents\Select::make('mode_of_payment')
                                 ->options([
                                     'Cash' => 'Cash',
@@ -873,7 +901,6 @@ class ListDailySales extends ListRecords
                     return $dailySale;
                 })
                 ->visible(function() {
-                    return false;
                     $user = auth()->user();
     
                     if($user->hasRole('Super Administrator')) {
