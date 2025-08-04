@@ -6,6 +6,7 @@ use App\Filament\Resources\DailySaleResource\Pages;
 use App\Filament\Resources\DailySaleResource\RelationManagers;
 use App\Models\DailySale;
 use App\Models\LoyaltyCard;
+use App\Models\Rate;
 use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -718,6 +719,20 @@ class DailySaleResource extends Resource
                                         ->helperText(function($get) {
                                             return $get('amount_helper_text') ?? '';
                                         }),
+                                    FormComponents\TextInput::make('member_dscount')
+                                        ->label('Discount')
+                                        ->numeric()
+                                        ->live()
+                                        ->minValue(0)
+                                        ->default('0')
+                                        ->required()
+                                        ->afterStateUpdated(function($state, $set, $get) {
+                                            $originalAmount = Rate::find($get('rate_id'))?->price ?? 0;
+                                            $discount = floatval($state);
+                                            $discountedAmount = $originalAmount - ($originalAmount * ($discount / 100));
+
+                                            $set('amount', $discountedAmount);
+                                        }),
                                     FormComponents\Select::make('mode_of_payment')
                                         ->label('Mode of Payment')
                                         ->options([
@@ -727,7 +742,6 @@ class DailySaleResource extends Resource
                                         ])
                                         ->required()
                                         ->native(false)
-                                        ->columnSpan(1)
                                 ])
                                 ->visible(function($get) {
                                     return $get('pass_type') ? true : false;
