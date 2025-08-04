@@ -175,7 +175,7 @@ class ListDailySales extends ListRecords
                                     ->label('Discount')
                                     ->numeric()
                                     ->live()
-                                    ->minValue(1)
+                                    ->minValue(0)
                                     ->default('0')
                                     ->required()
                                     ->afterStateUpdated(function($state, $set, $get) {
@@ -608,7 +608,7 @@ class ListDailySales extends ListRecords
                                 ->label('Discount')
                                 ->numeric()
                                 ->live()
-                                ->minValue(1)
+                                ->minValue(0)
                                 ->default('0')
                                 ->required()
                                 ->afterStateUpdated(function($state, $set, $get) {
@@ -788,7 +788,7 @@ class ListDailySales extends ListRecords
                                 ->label('Discount')
                                 ->numeric()
                                 ->live()
-                                ->minValue(1)
+                                ->minValue(0)
                                 ->default('0')
                                 ->required()
                                 ->afterStateUpdated(function($state, $set, $get) {
