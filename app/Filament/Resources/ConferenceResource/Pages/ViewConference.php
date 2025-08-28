@@ -153,15 +153,16 @@ class ViewConference extends ViewRecord
                             'name' => $record->host,
                             'description' => 'Conference',
                             'time_in' => \Carbon\Carbon::now(),
-                            'time_in_staff_id' => auth()->user()->staff->id,
+                            'time_in_staff_id' => auth()->user()->staff ? auth()->user()->staff->id : 1,
                             'time_out' => \Carbon\Carbon::now(),
-                            'time_out_staff_id' => auth()->user()->staff->id,
+                            'time_out_staff_id' => auth()->user()->staff ? auth()->user()->staff->id : 1,
                             'default_amount' => true,
                             'amount_paid' => $data['amount'],
                             'apply_discount' => false,
                             'discount' => 0,
                             'is_flexi' => false,
                             'is_monthly' => false,
+                            'is_conference' => true,
                             'status' => false,
                             'mode_of_payment' => $data['mop']
                         ]);
@@ -221,8 +222,29 @@ class ViewConference extends ViewRecord
                     ->action(function($data, $record) {
                         $record->amount = $record->amount + $record->additionalCharges();
                         $record->payment = $record->payment + $data['amount'];
+                        $record->mode_of_payment = $data['mode_of_payment'];
                         $record->is_paid = true;
                         $record->save();
+
+                        $sale = \App\Models\DailySale::create([
+                            'date' => \Carbon\Carbon::now()->format('Y-m-d'),
+                            'card_id' => 38,
+                            'name' => $record->host,
+                            'description' => 'Conference',
+                            'time_in' => \Carbon\Carbon::now(),
+                            'time_in_staff_id' => auth()->user()->staff ? auth()->user()->staff->id : 1,
+                            'time_out' => \Carbon\Carbon::now(),
+                            'time_out_staff_id' => auth()->user()->staff ? auth()->user()->staff->id : 1,
+                            'default_amount' => true,
+                            'amount_paid' => $data['amount'],
+                            'apply_discount' => false,
+                            'discount' => 0,
+                            'is_flexi' => false,
+                            'is_monthly' => false,
+                            'is_conference' => true,
+                            'status' => false,
+                            'mode_of_payment' => $record->mode_of_payment
+                        ]);
 
                         Notification::make()
                             ->title('Conference successfully paid.')
@@ -256,8 +278,6 @@ class ViewConference extends ViewRecord
                     ->action(function($record) {
                         $record->status = 'finished';
                         $record->save();
-
-                        $record->addCheckInToSalesReport();
 
                         Notification::make()
                             ->title('Conference booking successfully finished.')

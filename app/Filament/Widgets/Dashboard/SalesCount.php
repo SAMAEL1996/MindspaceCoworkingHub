@@ -41,9 +41,10 @@ class SalesCount extends BaseWidget
     public static function getMonthTotalSales()
     {
         $now = Carbon::now();
-        
+
         $dailyPass = DailySale::where('is_flexi', false)
                                 ->where('is_monthly', false)
+                                ->where('is_conference', false)
                                 ->whereMonth('created_at', $now->copy()->month)
                                 ->whereYear('created_at', $now->copy()->year)
                                 ->get();
@@ -69,13 +70,14 @@ class SalesCount extends BaseWidget
     {
         $dailyPass = DailySale::where('is_flexi', false)
                                             ->where('is_monthly', false)
+                                            ->where('is_conference', false)
                                             ->sum('amount_paid');
 
         $flexiPass = FlexiUser::where('paid', true)->sum('amount');
 
         $monthlyPass = MonthlyUser::sum('amount');
 
-        $conferencePass = Conference::where('has_reservation_fee', true)->sum('payment');
+        $conferencePass = Conference::sum('payment');
 
         $total = $dailyPass + $flexiPass + $monthlyPass + $conferencePass;
 

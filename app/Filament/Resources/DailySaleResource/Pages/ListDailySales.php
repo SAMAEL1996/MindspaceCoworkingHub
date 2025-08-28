@@ -296,6 +296,7 @@ class ListDailySales extends ListRecords
                                     ]),
                             ])
                         ])
+                        ->skippable(false)
                         ->submitAction(new HtmlString(Blade::render(<<<BLADE
                             <x-filament::button
                                 type="submit"

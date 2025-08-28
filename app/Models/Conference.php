@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
@@ -61,16 +62,22 @@ class Conference extends Model
         return $this->hasMany(\App\Models\ConferenceMember::class, 'conference_id');
     }
 
-    public static function getCheckTimeSchedules($checkStart, $checkEnd)
+    public static function getCheckTimeSchedules($checkStart, $checkEnd, $selfId = null)
     {
-        $schedules = self::where('status', 'approve')->get();
+        $query = self::where('status', 'approve');
+
+        if($selfId) {
+            $query->where('id', '!=', $selfId);
+        }
+
+        $schedules = $query->get();
 
         if(!$schedules) {
             return false;
         }
 
         foreach($schedules as $schedule) {
-            if($checkStart->between($schedule->start_at_carbon, $schedule->end_at_carbon) || $checkEnd->between($schedule->start_at_carbon, $schedule->end_at_carbon)) {
+            if ($checkStart->lt($schedule->end_at_carbon) && $checkEnd->gt($schedule->start_at_carbon)) {
                 return true;
             }
         }
@@ -106,9 +113,9 @@ class Conference extends Model
         return $exceed * $package['succeeding_hours'];
     }
 
-    public function addCheckInToSalesReport()
+    public function addCheckInToSalesReport($amount, $isFinished = false)
     {
-        $now = \Carbon\Carbon::now();
+        $now = Carbon::now();
         $month = $now->copy()->format('F');
         $year = $now->copy()->format('Y');
         $day = $now->copy()->day;
@@ -117,16 +124,20 @@ class Conference extends Model
         if(!$monthlySale) {
             $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
         }
-        $monthlySale->total_conference_users += 1;
-        $monthlySale->total_sales += $this->payment;
+        if($isFinished) {
+            $monthlySale->total_conference_users += 1;
+        }
+        $monthlySale->total_sales += $amount;
         $monthlySale->save();
 
         $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
         if(!$dailySale) {
             $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
         }
-        $dailySale->total_conference_users += 1;
-        $dailySale->total_sales += $this->payment;
+        if($isFinished) {
+            $dailySale->total_conference_users += 1;
+        }
+        $dailySale->total_sales += $amount;
         $dailySale->save();
     }
 
@@ -250,6 +261,122 @@ class Conference extends Model
     {
         return [
             InfolistComponents\Section::make('Information')
+                ->id('information')
+                ->headerActions([
+                    InfolistComponents\Actions\Action::make('edit')
+                        ->modalHeading('Edit Information')
+                        ->fillForm(fn($record): array => [
+                            'package' => $record->package_id,
+                            'event' => $record->event,
+                            'host' => $record->host,
+                            'contact_no' => $record->contact_no,
+                            'members' => $record->members,
+                            'date' => Carbon::parse($record->start_at)->format('Y-m-d'),
+                            'time' => Carbon::parse($record->start_at)->format('H:i A'),
+                            'duration' => $record->duration,
+                        ])
+                        ->form([
+                            FormComponents\ToggleButtons::make('package')
+                                ->label('Package Type')
+                                ->options([
+                                    '1' => 'Package 1 (Up to 8 pax)',
+                                    '2' => 'Package 2 (10 - 15 pax)',
+                                ])
+                                ->required()
+                                ->columnSpan('full')
+                                ->inline()
+                                ->extraAttributes([
+                                    'class' => 'flex justify-center items-center space-x-4',
+                                ]),
+                            FormComponents\TextInput::make('event')
+                                ->label('Event Name')
+                                ->required(),
+                            FormComponents\TextInput::make('host')
+                                ->label('Name of POC')
+                                ->required(),
+                            FormComponents\TextInput::make('contact_no')
+                                ->tel()
+                                ->required(),
+                            FormComponents\TextInput::make('members')
+                                ->label('Total # of guests including POC')
+                                ->numeric()
+                                ->required(),
+                            FormComponents\Fieldset::make('Schedule')
+                                ->schema([
+                                    FormComponents\DatePicker::make('date')
+                                        ->label('Date')
+                                        ->required()
+                                        ->displayFormat('d F Y')
+                                        ->timezone('Asia/Manila')
+                                        ->native(false),
+                                    FormComponents\Select::make('time')
+                                        ->label('Time')
+                                        ->required()
+                                        ->options(\App\Library\Helper::get12HourTimeSelectOptions())
+                                        ->placeholder('Select Time')
+                                        ->native(false),
+                                    FormComponents\TextInput::make('duration')
+                                        ->label('Duration')
+                                        ->integer()
+                                        ->live()
+                                        ->minValue(1)
+                                        ->required()
+                                        ->afterStateUpdated(function($state, $set, $get) {
+                                            $rate = Conference::getRateAmount((int)$get('package'), (int)$state);
+
+                                            $set('total_amount', $rate);
+                                        }),
+                                ])
+                                ->columns(3)
+                                ->columnSpan('full'),
+                        ])
+                        ->action(function ($data, $record) {
+                            $timeOfArrival = Carbon::parse($data['date'] . ' ' . $data['time']);
+                            if($timeOfArrival->copy()->subHour()->isPast()) {
+                                Notification::make()
+                                    ->title('Danger')
+                                    ->body('Date is already past.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+                            $timeOfLeave = $timeOfArrival->copy()->addHours((int)$data['duration']);
+                            $checkStart = $timeOfArrival->copy()->subMinutes(30);
+                            $checkEnd = $timeOfLeave->copy()->addMinutes(30);
+
+                            $checkDateTime = Conference::getCheckTimeSchedules($checkStart, $checkEnd, $record->id);
+
+                            if($checkDateTime) {
+                                Notification::make()
+                                    ->title('Danger')
+                                    ->body('Date and time is taken.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $record->update([
+                                'package_id' => (int)$data['package'],
+                                'start_at' => $timeOfArrival->copy(),
+                                'duration' => (int)$data['duration'],
+                                'event' => $data['event'],
+                                'members' => $data['members'],
+                                'host' => $data['host'],
+                                'contact_no' => $data['contact_no'],
+                            ]);
+                            
+                            Notification::make()
+                                ->title('Success')
+                                ->body('Conference information successfully updated.')
+                                ->success()
+                                ->send();
+
+                            return $record;
+                        })
+                        ->visible(auth()->user()->hasRole('Super Administrator')),
+                ])
                 ->schema([
                     InfolistComponents\TextEntry::make('event')
                         ->label('Event'),
@@ -265,7 +392,7 @@ class Conference extends Model
                         }),
                     InfolistComponents\TextEntry::make('host')
                         ->label('Name of POC'),
-                    InfolistComponents\TextEntry::make('email'),
+                    // InfolistComponents\TextEntry::make('email'),
                     InfolistComponents\TextEntry::make('contact_no'),
                     InfolistComponents\TextEntry::make('members')
                         ->label('Total no. of guests'),
@@ -304,6 +431,38 @@ class Conference extends Model
                 ->columns(3)
                 ->columnSpan('full'),
             InfolistComponents\Section::make('Payment Information')
+                ->id('payment')
+                ->headerActions([
+                    InfolistComponents\Actions\Action::make('edit')
+                        ->modalHeading('Edit Payment Information')
+                        ->fillForm(fn($record): array => [
+                            'amount' => (int)$record->amount,
+                            'payment' => (int)$record->payment
+                        ])
+                        ->form([
+                            FormComponents\TextInput::make('amount')
+                                ->label('Total Amount')
+                                ->integer(),
+                            FormComponents\TextInput::make('payment')
+                                ->label('Amount Paid')
+                                ->integer()
+                        ])
+                        ->action(function ($data, $record) {
+                            $record->update([
+                                'amount' => $data['amount'],
+                                'payment' => $data['payment'],
+                            ]);
+                            
+                            Notification::make()
+                                ->title('Success')
+                                ->body('Conference payment information successfully updated.')
+                                ->success()
+                                ->send();
+
+                            return $record;
+                        })
+                        ->visible(auth()->user()->hasRole('Super Administrator')),
+                ])
                 ->schema([
                     InfolistComponents\TextEntry::make('amount')
                         ->label('Total Amount')

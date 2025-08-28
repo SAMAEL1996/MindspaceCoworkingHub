@@ -72,7 +72,7 @@ class DailySaleResource extends Resource
                         return $record->name;
                     })
                     ->searchable(['code', 'name']),
-                TableColumns\TextColumn::make('is_monthly')
+                TableColumns\TextColumn::make('description')
                     ->label('Type')
                     ->formatStateUsing(function($record) {
                         if($record->is_flexi) {
@@ -81,6 +81,10 @@ class DailySaleResource extends Resource
 
                         if($record->is_monthly) {
                             return 'Monthly';
+                        }
+
+                        if($record->is_conference) {
+                            return 'Conference';
                         }
                         
                         return 'Daily';
@@ -138,8 +142,15 @@ class DailySaleResource extends Resource
                     ->formatStateUsing(function($state, $record) {
                         return $state == 0 ? 'No' : $state . '%';
                     }),
-                TableColumns\TextColumn::make('mode_of_payment')
-                    ->label('M.O.P.'),
+                TableColumns\SelectColumn::make('mode_of_payment')
+                    ->label('M.O.P.')
+                    ->options([
+                        'Cash' => 'Cash',
+                        'GCash' => 'GCash',
+                        'Bank Transfer' => 'Bank Transfer',
+                    ]),
+                // TableColumns\TextColumn::make('mode_of_payment')
+                //     ->label('M.O.P.'),
                 TableColumns\TextColumn::make('metas.key')
                     ->label(label: 'With Notes')
                     ->badge()

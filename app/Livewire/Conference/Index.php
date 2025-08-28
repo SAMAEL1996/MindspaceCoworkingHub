@@ -119,18 +119,11 @@ class Index extends Component implements HasForms, HasTable, HasActions
             ->filters([
                 // ...
             ])
-            ->actions([
-                TableActions\ActionGroup::make([
-                        TableActions\Action::make('view')
-                            ->url(function($record) {
-                                return ConferenceResource::getUrl('view', ['record' => $record]);
-                            })
-                    ])
-                    ->icon('heroicon-o-ellipsis-horizontal')
-            ])
+            ->actions([])
             ->bulkActions([
                 // ...
             ])
+            ->recordUrl(fn($record) => ConferenceResource::getUrl('view', ['record' => $record]))
             ->defaultPaginationPageOption(25);
     }
 
