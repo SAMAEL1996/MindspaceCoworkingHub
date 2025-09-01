@@ -61,7 +61,7 @@ class SalesCount extends BaseWidget
                                 ->whereYear('created_at', $now->copy()->year)
                                 ->where('status', 'finished')
                                 ->get();
-        dd($dailyPass, $dailyPass->sum('amount_paid'), $flexiPass, $flexiPass->sum('amount'),$monthlyPass, $monthlyPass->sum('amount'),$conferencePass, $conferencePass->sum('payment'));
+        // dd($dailyPass, $dailyPass->sum('amount_paid'), $flexiPass, $flexiPass->sum('amount'),$monthlyPass, $monthlyPass->sum('amount'),$conferencePass, $conferencePass->sum('payment'));
 
         $total = $dailyPass->sum('amount_paid') + $flexiPass->sum('amount') + $monthlyPass->sum('amount') + $conferencePass->sum('payment');
 
