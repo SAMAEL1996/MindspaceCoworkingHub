@@ -34,6 +34,7 @@ class DailySale extends Model
         'total_time',
         'is_monthly',
         'is_flexi',
+        'is_conference',
         'mode_of_payment',
         'default_amount'
     ];
