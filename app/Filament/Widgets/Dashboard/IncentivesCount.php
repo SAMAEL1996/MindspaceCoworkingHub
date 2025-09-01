@@ -29,7 +29,7 @@ class IncentivesCount extends BaseWidget
         return [
             Card::make('Average Daily Pass Check-in', DailySale::getAvarageSalesPerMonth())
                 ->icon('heroicon-o-user-group')
-                ->description(new HtmlString('<b>TARGET</b>: 15 average daily users.')),
+                ->description(new HtmlString('<b>TARGET</b>: 20 average daily users.')),
             Card::make(
                     'Add New Flexi Pass',
                     FlexiUser::whereMonth('start_at', Carbon::now()->month)
@@ -37,7 +37,7 @@ class IncentivesCount extends BaseWidget
                                 ->count()
                 )
                 ->icon('heroicon-o-users')
-                ->description(new HtmlString('<b>TARGET</b>: 40 flexi pass.')),
+                ->description(new HtmlString('<b>TARGET</b>: 45 flexi pass.')),
             Card::make(
                     'Add New Monthly Pass',
                     MonthlyUser::whereMonth('date_start', Carbon::now()->month)
@@ -45,7 +45,7 @@ class IncentivesCount extends BaseWidget
                                 ->count()
                 )
                 ->icon('heroicon-o-user-circle')
-                ->description(new HtmlString('<b>TARGET</b>: 18 monthly users.')),
+                ->description(new HtmlString('<b>TARGET</b>: 20 monthly users.')),
             Card::make(
                     'Completed Meeting Room Booking',
                     Conference::whereMonth('start_at', Carbon::now()->month)
@@ -54,7 +54,7 @@ class IncentivesCount extends BaseWidget
                                 ->count()
                 )
                 ->icon('heroicon-o-clipboard-document-check')
-                ->description(new HtmlString('<b>TARGET</b>: 15 completed meeting room booking.')),
+                ->description(new HtmlString('<b>TARGET</b>: 20 completed meeting room booking.')),
         ];
     }
 }

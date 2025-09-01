@@ -53,13 +53,15 @@ class SalesCount extends BaseWidget
                                 ->whereYear('created_at', $now->copy()->year)
                                 ->get();
 
-        $monthlyPass = MonthlyUser::whereMonth('created_at', $now->copy()->month)
-                                ->whereYear('created_at', $now->copy()->year)
+        $monthlyPass = MonthlyUser::whereMonth('date_start', $now->copy()->month)
+                                ->whereYear('date_start', $now->copy()->year)
                                 ->get();
 
         $conferencePass = Conference::whereMonth('created_at', $now->copy()->month)
                                 ->whereYear('created_at', $now->copy()->year)
+                                ->where('status', 'finished')
                                 ->get();
+        dd($dailyPass, $dailyPass->sum('amount_paid'), $flexiPass, $flexiPass->sum('amount'),$monthlyPass, $monthlyPass->sum('amount'),$conferencePass, $conferencePass->sum('payment'));
 
         $total = $dailyPass->sum('amount_paid') + $flexiPass->sum('amount') + $monthlyPass->sum('amount') + $conferencePass->sum('payment');
 

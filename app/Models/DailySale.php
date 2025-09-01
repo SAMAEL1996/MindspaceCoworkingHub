@@ -16,9 +16,6 @@ class DailySale extends Model
 
     public static function boot() {
         parent::boot();
-
-        static::created(function ($daily) {
-        });
     }
 
     protected $fillable = [
@@ -288,6 +285,7 @@ class DailySale extends Model
                     ->whereYear('time_in', Carbon::now()->year)
                     ->where('is_flexi', false)
                     ->where('is_monthly', false)
+                    ->where('is_conference', false)
                     ->get();
 
         if($sales->isEmpty()) {
