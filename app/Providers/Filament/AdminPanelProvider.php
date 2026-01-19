@@ -126,6 +126,12 @@ class AdminPanelProvider extends PanelProvider
                                     ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.rate'))
                                     ->url(route('filament.admin.pages.rate'))
                                     ->visible(auth()->user()->hasRole('Super Administrator')),
+                                NavigationItem::make()
+                                    ->label('Settings')
+                                    ->icon('heroicon-o-cog-6-tooth')
+                                    ->isActiveWhen(fn () => request()->routeIs('filament.admin.pages.setting'))
+                                    ->url(route('filament.admin.pages.setting'))
+                                    ->visible(auth()->user()->hasRole('Super Administrator')),
                                 // NavigationItem::make()
                                 //     ->label('Settings')
                                 //     ->icon('heroicon-o-adjustments-horizontal')

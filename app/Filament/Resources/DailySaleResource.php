@@ -504,6 +504,28 @@ class DailySaleResource extends Resource
 
                                     return false;
                                 }),
+                            FormComponents\TextInput::make('validate_card')
+                                ->label('Validate Card ID')
+                                ->required()
+                                ->disabled()
+                                ->dehydrated()
+                                ->suffixAction(
+                                    FormComponents\Actions\Action::make('fetch-card')
+                                        ->icon('heroicon-m-arrow-path')
+                                        ->color('warning')
+                                        ->action(function($livewire, $component, $record) {
+                                            $statePath = $component->getStatePath();
+                                            $confirmed = 'false';
+
+                                            $card = Setting::getValue('card');
+                                            if($card == $record->card->rfid) {
+                                                $confirmed = 'true';
+                                            }
+
+                                            $component->state($confirmed);
+                                        })
+                                )
+                                ->visible(Setting::getValue('validate-by-card')),
                             FormComponents\Fieldset::make('')
                                 ->schema([
                                     FormComponents\Checkbox::make('has_notes')
@@ -520,6 +542,17 @@ class DailySaleResource extends Resource
                                 ])
                         ])
                         ->action(function($data, $record, $action) {
+                            if(Setting::getValue('validate-by-card')) {
+                                if($data['validate_card'] == 'false') {
+                                    Notification::make()
+                                        ->title("Card ID not valid. Please tap ID.")
+                                        ->danger()
+                                        ->send();
+
+                                    return $action->halt();
+                                }
+                            }
+
                             if(isset($data['has_notes'])) {
                                 if(!$data['has_notes']) {
                                     Notification::make()
@@ -656,6 +689,14 @@ class DailySaleResource extends Resource
                                 ->send();
 
                             return $record;
+                        })
+                        ->modalSubmitAction(function (\Filament\Actions\StaticAction $action, $record) {
+                            $cardRfid = Setting::getValue('card');
+                            return $action
+                                ->label('Submit')
+                                ->disabled(function() use ($record, $cardRfid) {
+                                    return $record->card->rfid != $cardRfid;
+                                });
                         })
                         ->modalWidth(MaxWidth::Medium),
                     Tables\Actions\Action::make('change_pass')
