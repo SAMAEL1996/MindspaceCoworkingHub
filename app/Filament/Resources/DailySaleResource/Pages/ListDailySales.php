@@ -255,30 +255,18 @@ class ListDailySales extends ListRecords
                                             ->label('Card ID')
                                             ->native(false)
                                             ->placeholder('Select Card ID')
+                                            ->searchable()
                                             ->options(function($get) {
-                                                $options = [];
-                                                $now = \Carbon\Carbon::now();
-
                                                 if($this->checkInModel && get_class($this->checkInModel) == 'App\Models\MonthlyUser') {
-                                                    $availabelCard = Card::where('type', 'Monthly')->get();
-                                                    foreach($availabelCard as $card) {
-                                                        $options[$card->id] = $card->code;
-                                                    }
+                                                    return Card::where('type', 'Monthly')->pluck('code', 'id');
                                                 } elseif($get('selected_option') == 'new_monthly') {
                                                     $monthlyIds = MonthlyUser::where('is_expired', false)->pluck('card_id')->toArray();
-                                                    $availabelCard = Card::whereNotIn('id', $monthlyIds)->where('type', 'Monthly')->get();
-                                                    foreach($availabelCard as $card) {
-                                                        $options[$card->id] = $card->code;
-                                                    }
+                                                    return Card::whereNotIn('id', $monthlyIds)->where('type', 'Monthly')->pluck('code', 'id');
                                                 } else {
                                                     $takenIds = DailySale::whereNull('time_out')->pluck('card_id')->toArray();
                                                     $availabelCard = Card::whereNotIn('id', $takenIds)->where('type', 'Daily')->get();
-                                                    foreach($availabelCard as $card) {
-                                                        $options[$card->id] = $card->code;
-                                                    }
+                                                    return Card::whereNotIn('id', $takenIds)->where('type', 'Daily')->pluck('code', 'id');
                                                 }
-
-                                                return $options;
                                             })
                                             ->disabled(function($get) {
                                                 if($this->checkInModel) {
