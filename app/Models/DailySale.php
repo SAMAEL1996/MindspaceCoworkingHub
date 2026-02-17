@@ -308,10 +308,14 @@ class DailySale extends Model
         return [
             FormComponents\Grid::make(1)
                 ->schema([
-                    FormComponents\DatePicker::make('date')
-                        ->default(\Carbon\Carbon::now())
-                        ->disabled()
-                        ->dehydrated(),
+                    FormComponents\Grid::make(2)
+                        ->schema([
+                            FormComponents\DatePicker::make('date')
+                                ->default(\Carbon\Carbon::now()),
+                            FormComponents\TimePicker::make('time_in')
+                                ->default(\Carbon\Carbon::now())
+                                ->seconds(false),
+                        ]),
                     FormComponents\Grid::make(3)
                         ->schema([
                             FormComponents\TextInput::make('time_in_staff_id')

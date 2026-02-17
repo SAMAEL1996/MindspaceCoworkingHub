@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Blade;
 use Filament\Facades\Filament;
 use Filament\Navigation\UserMenuItem;
 use App\Filament\Pages\Profile;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
             'STAFF PROFILE',
             'ADMIN',
             'REPORTS',
+        ]);
+
+        FilamentAsset::register([
+            Js::make('custom-script', __DIR__ . '/../../resources/js/global.js'),
         ]);
     }
 }

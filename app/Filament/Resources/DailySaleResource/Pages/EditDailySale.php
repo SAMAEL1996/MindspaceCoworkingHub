@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DailySaleResource\Pages;
 
 use App\Filament\Resources\DailySaleResource;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +29,7 @@ class EditDailySale extends EditRecord
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         $old = $record->toArray();
+        $data['time_in'] = Carbon::parse($data['date'] . ' ' . $data['time_in'] . ':00')->toDateTimeString();
 
         $record->update($data);
 

@@ -12,4 +12,14 @@ class CustomEditCard extends Page
     protected static string $resource = CardResource::class;
 
     protected static string $view = 'filament.resources.card-resource.pages.custom-edit-card';
+
+    public function getTitle(): string
+    {
+        return 'Edit Card: ' . $this->record->code;
+    }
+
+    public function getSubheading(): string
+    {
+        return 'Type: ' . $this->record->type;
+    }
 }

@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Card;
+use App\Models\DailySale;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
@@ -71,32 +74,51 @@ Route::get('/external/rfid-scan', function(Request $request) {
     $user->addOrUpdateMeta('rfid', $uidResult);
 });
 Route::middleware(['web'])->post('/external/rfid-scan', function(Request $request) {
-    // return response()->json(['message' => 'pumapasok dito']);
     $uidResult = $request->input('UIDresult');
-    \App\Models\Setting::upsertValue('zcard', $uidResult);
 
-    // $card = \App\Models\Card::where('rfid', $uidResult)->first();
-    // if($card) {
-    //     switch($card->type) {
-    //         case 'Staff':
-    //             $staff = \App\Models\Staff::where('card_id', $card->id)->first();
-    //             $user = $staff->user;
-    //             $attendance = $staff->attendances()->latest()->first();
-    //             if($attendance->check_out) {
-    //                 // create new attendance
-    //                 $newAttendance = \App\Models\Attendance::create([
-    //                     'staff_id' => $staff->id,
-    //                     'check_in' => \Carbon\Carbon::now()
-    //                 ]);
-    //             } else {
-    //                 // logout
-    //                 $attendance->update([
-    //                     'check_out' => \Carbon\Carbon::now()
-    //                 ]);
-    //             }
-    //             break;
-    //     }
-    // }
+    if (!$uidResult) {
+        return response()->json(['message' => 'No UID provided'], 400);
+    }
 
-    return response()->json(['message' => 'RFID received successfully']);
+    $card = Card::where('rfid', $uidResult)->first();
+
+    if (!$card) {
+        Cache::put('scanned_rfid', $uidResult, now()->addSeconds(5));
+
+        return response()->json(['message' => 'Card successfully scanned'], 200);
+    }
+
+    $dailySale = DailySale::where('card_id', $card->id)
+        ->where('status', true)
+        ->latest()
+        ->first();
+
+    if ($dailySale) {
+        Cache::put('latest_rfid_scan', $dailySale->id);
+
+        return response()->json(['message' => 'Daily sale found.'], 200);
+    }
+
+    return response()->json(['message' => 'RFID not found.'], 404);
+});
+Route::get('/check-latest-rfid', function () {
+
+    $id = Cache::pull('latest_rfid_scan'); // get & delete
+
+    if (!$id) {
+        return response()->json(['success' => false]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'daily_sale_id' => $id,
+    ]);
+});
+Route::post('/clear-rfid-cache', function () {
+
+    Cache::forget('latest_rfid_scan');
+
+    return response()->json([
+        'success' => true,
+    ]);
 });

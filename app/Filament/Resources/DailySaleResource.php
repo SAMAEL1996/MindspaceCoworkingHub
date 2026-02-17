@@ -29,6 +29,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Actions as TableActions;
+use Illuminate\Support\Facades\Cache;
 
 class DailySaleResource extends Resource
 {
@@ -201,7 +202,10 @@ class DailySaleResource extends Resource
             )
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('End Time')
+                    Tables\Actions\Action::make('endTime')
+                        ->label('End Time')
+                        ->modalHeading(fn($record) => 'End Time: ' . $record->name)
+                        ->modalSubheading(fn($record) => 'ID No.: ' . $record->card->code)
                         ->form([
                             FormComponents\Fieldset::make('Loyalty Card No')
                                 ->schema([
@@ -504,28 +508,6 @@ class DailySaleResource extends Resource
 
                                     return false;
                                 }),
-                            FormComponents\TextInput::make('validate_card')
-                                ->label('Validate Card ID')
-                                ->required()
-                                ->disabled()
-                                ->dehydrated()
-                                ->suffixAction(
-                                    FormComponents\Actions\Action::make('fetch-card')
-                                        ->icon('heroicon-m-arrow-path')
-                                        ->color('warning')
-                                        ->action(function($livewire, $component, $record) {
-                                            $statePath = $component->getStatePath();
-                                            $confirmed = 'false';
-
-                                            $card = Setting::getValue('card');
-                                            if($card == $record->card->rfid) {
-                                                $confirmed = 'true';
-                                            }
-
-                                            $component->state($confirmed);
-                                        })
-                                )
-                                ->visible(Setting::getValue('validate-by-card')),
                             FormComponents\Fieldset::make('')
                                 ->schema([
                                     FormComponents\Checkbox::make('has_notes')
@@ -690,12 +672,16 @@ class DailySaleResource extends Resource
 
                             return $record;
                         })
-                        ->modalSubmitAction(function (\Filament\Actions\StaticAction $action, $record) {
-                            $cardRfid = Setting::getValue('card');
+                        ->modalSubmitAction(function (\Filament\Actions\StaticAction $action, $record, $livewire) {
+                            if(!Setting::getValue('validate-by-card')) {
+                                return $action->label('Submit');
+                            }
+                            
+                            $cardRfid = $livewire->rfidScanId;
                             return $action
                                 ->label('Submit')
                                 ->disabled(function() use ($record, $cardRfid) {
-                                    return $record->card->rfid != $cardRfid;
+                                    return $record->id != $cardRfid;
                                 });
                         })
                         ->modalWidth(MaxWidth::Medium),
