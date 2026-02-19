@@ -35,8 +35,8 @@ class Login extends BaseLogin
                 'user_id' => auth()->user()->id,
                 'country' => $location?->countryName,
                 'city' => $location?->cityName,
-                'latitude' => $location?->latitude,
-                'longitude' => $location?->longitude
+                'lat' => $location?->latitude,
+                'long' => $location?->longitude
             ]);
         }
 
