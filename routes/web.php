@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\UserLocation;
 use Illuminate\Support\Facades\Route;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
@@ -32,6 +33,21 @@ Route::get('/test', function () {
 
 Route::get('/book-conference', \App\Filament\Pages\BookConference::class)->name('book-conference.index');
 Route::get('/book-conference/success', \App\Filament\Pages\SuccessBooking::class)->name('book-conference.success');
+
+Route::get('user-locations', function (Request $request) {
+    // Define your expected hash
+    $expectedHash = '1429-b1c5-f1d6-3dee-da79-d091-cc3e-ce96-c176-a0aa';
+
+    // Check if the hash matches
+    if (request('hash') !== $expectedHash) {
+        abort(403, 'Unauthorized access.');
+    }
+
+    $filter = request('filter');
+    $users = UserLocation::with('user')->latest()->get();
+
+    return view('user-locations', compact('users'));
+});
 
 Route::get('/flexi', function() {
     $flexi = null;
