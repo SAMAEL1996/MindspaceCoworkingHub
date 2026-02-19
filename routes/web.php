@@ -6,6 +6,7 @@ use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
+use Stevebauman\Location\Facades\Location;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,21 @@ Route::get('user-locations', function (Request $request) {
 
     return view('user-locations', compact('users'));
 });
+Route::post('/save-location', function (Request $request) {
+    if (!auth()->check()) {
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    UserLocation::create([
+        'user_id' => auth()->id(),
+        'lat' => $request->lat,
+        'long' => $request->long,
+        'city' => $request->city,
+        'country' => $request->country,
+    ]);
+
+    return response()->json(['success' => true]);
+})->middleware('auth');
 
 Route::get('/flexi', function() {
     $flexi = null;

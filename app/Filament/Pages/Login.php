@@ -22,24 +22,4 @@ class Login extends BaseLogin
             ),
         ];
     }
-
-    public function authenticate(): ?\Filament\Http\Responses\Auth\Contracts\LoginResponse
-    {
-        $response = parent::authenticate();
-
-        if (auth()->check()) {
-            $ip = request()->ip();
-            $location = Location::get($ip);
-
-            UserLocation::create([
-                'user_id' => auth()->user()->id,
-                'country' => $location?->countryName,
-                'city' => $location?->cityName,
-                'lat' => $location?->latitude,
-                'long' => $location?->longitude
-            ]);
-        }
-
-        return $response;
-    }
 }

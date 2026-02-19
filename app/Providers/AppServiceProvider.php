@@ -36,5 +36,10 @@ class AppServiceProvider extends ServiceProvider
             'ADMIN',
             'REPORTS',
         ]);
+
+        Filament::registerRenderHook(
+            'panels::body.end',
+            fn () => view('filament.location-script')
+        );
     }
 }
