@@ -10,13 +10,29 @@ class MonthlySalesReportChart extends ChartWidget
     protected static ?string $pollingInterval = '10s';
     protected static string $color = 'warning';
     protected int|string|array $columnSpan = 'full';
+    public ?string $filter = 'All';
+
+    public function getHeading(): ?string
+    {
+        if($this->filter == 'All') {
+            return 'Monthly Sales';
+        } else {
+            return $this->filter . ' Monthly Sales';
+        }
+    }
 
     protected function getData(): array
     {
-        $salesDatabase = \DB::table('sales')
-            ->where('type', 'monthly')
-            ->orderBy('year')
-            ->orderByRaw("
+        $query = \DB::table('sales')
+            ->where('type', 'monthly');
+
+        if($this->filter == 'All') {
+            $query->orderBy('year');
+        } else {
+            $query->where('year', $this->filter);
+        }
+
+        $salesDatabase = $query->orderByRaw("
                 FIELD(month,
                     'January','February','March','April','May','June',
                     'July','August','September','October','November','December'
@@ -44,7 +60,7 @@ class MonthlySalesReportChart extends ChartWidget
 
     protected function getType(): string
     {
-        return 'line';
+        return 'bar';
     }
 
     protected static ?array $options = [
@@ -54,6 +70,20 @@ class MonthlySalesReportChart extends ChartWidget
             ],
         ],
     ];
+
+    public function getFilters(): ?array
+    {
+        $years = \DB::table('sales')
+            ->select('year')
+            ->distinct()
+            ->orderBy('year', 'asc')
+            ->pluck('year', 'year') // key => value
+            ->toArray();
+
+        $years = ['All' => 'All'] + $years;
+
+        return $years;
+    }
 
     public static function canView(): bool
     {

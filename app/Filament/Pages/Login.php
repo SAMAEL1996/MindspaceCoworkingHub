@@ -27,7 +27,7 @@ class Login extends BaseLogin
     {
         $response = parent::authenticate();
 
-        if (auth()->check()) {
+        if (auth()->check() && env('APP_ENV') != 'local') {
             $ip = request()->ip();
             $location = Location::get($ip);
 

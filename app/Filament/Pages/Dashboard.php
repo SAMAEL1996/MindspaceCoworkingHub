@@ -2,6 +2,12 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\AccountWidget;
+use App\Filament\Widgets\DailySalesReportChart;
+use App\Filament\Widgets\Dashboard\IncentivesCount;
+use App\Filament\Widgets\Dashboard\SalesCount;
+use App\Filament\Widgets\MonthlySalesReportChart;
+use App\Filament\Widgets\StaffShiftWidget;
 use Filament\Pages\Page;
 use Filament\Facades\Filament;
 use Filament\Pages\Dashboard as BasePage;
@@ -38,5 +44,17 @@ class Dashboard extends BasePage
         session(['staff-shift' => false]);
 
         return redirect()->intended(Filament::getUrl());
+    }
+
+    public function getWidgets(): array
+    {
+        return [
+            AccountWidget::class,
+            IncentivesCount::class,
+            SalesCount::class,
+            DailySalesReportChart::class,
+            MonthlySalesReportChart::class,
+            StaffShiftWidget::class
+        ];
     }
 }
