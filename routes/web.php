@@ -77,6 +77,14 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
     $uidResult = $request->input('UIDresult');
 
     if (!$uidResult) {
+
+        Cache::put('rfid-scanned-response', [
+            'status' => 'danger',
+            'message' => 'No UID request provided!',
+            'card_id' => null,
+            'rfid' => null,
+        ], now()->addSeconds(5));
+
         return response()->json(['message' => 'No UID provided'], 400);
     }
 
@@ -84,6 +92,13 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
 
     if (!$card) {
         Cache::put('scanned_rfid', $uidResult, now()->addSeconds(5));
+
+        Cache::put('rfid-scanned-response', [
+            'status' => 'success',
+            'message' => 'Card successfully scanned',
+            'card_id' => null,
+            'rfid' => $uidResult,
+        ], now()->addSeconds(5));
 
         return response()->json(['message' => 'Card successfully scanned'], 200);
     }
@@ -96,8 +111,22 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
     if ($dailySale) {
         Cache::put('latest_rfid_scan', $dailySale->id);
 
+        Cache::put('rfid-scanned-response', [
+            'status' => 'success',
+            'message' => 'Daily check-in found!',
+            'card_id' => $card->id,
+            'rfid' => $uidResult,
+        ], now()->addSeconds(5));
+
         return response()->json(['message' => 'Daily sale found.'], 200);
     }
+
+    Cache::put('rfid-scanned-response', [
+        'status' => 'danger',
+        'message' => 'RFID not found!',
+        'card_id' => $card->id,
+        'rfid' => $uidResult,
+    ], now()->addSeconds(5));
 
     return response()->json(['message' => 'RFID not found.'], 404);
 });

@@ -11,6 +11,7 @@ use Filament\Navigation\UserMenuItem;
 use App\Filament\Pages\Profile;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,5 +43,20 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Js::make('custom-script', __DIR__ . '/../../resources/js/global.js'),
         ]);
+
+        Filament::serving(function () {
+
+            Filament::registerRenderHook(
+                PanelsRenderHook::BODY_START,
+                function (): ?string {
+                    if (! filament()->auth()->check()) {
+                        return null;
+                    }
+
+                    return Livewire::mount('filament-response');
+                }
+            );
+
+        });
     }
 }
