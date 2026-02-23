@@ -92,7 +92,7 @@ class DailySalesReportChart extends ChartWidget
     {
         return [
             'total_sales' => 'Total Sales',
-            'daily_checkins' => 'Daily Check-Ins',
+            'daily_checkins' => 'Daily Pass Users',
             'flexi_users' => 'Flexi Users',
             'monthly_users' => 'Monthly Users',
             'conference_booking' => 'Conference Booking',

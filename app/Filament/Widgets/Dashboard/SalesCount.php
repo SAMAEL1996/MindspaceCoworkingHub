@@ -40,28 +40,26 @@ class SalesCount extends BaseWidget
 
     public static function getMonthTotalSales()
     {
-        $now = Carbon::now();
-
-        $dailyPass = DailySale::where('is_flexi', false)
+        $dailyPass = DailySale::withTrashed()
+                                ->where('is_flexi', false)
                                 ->where('is_monthly', false)
                                 ->where('is_conference', false)
-                                ->whereMonth('created_at', $now->copy()->month)
-                                ->whereYear('created_at', $now->copy()->year)
+                                ->whereMonth('time_in', now()->month)
+                                ->whereYear('time_in', now()->year)
                                 ->get();
 
-        $flexiPass = FlexiUser::whereMonth('created_at', $now->copy()->month)
-                                ->whereYear('created_at', $now->copy()->year)
+        $flexiPass = FlexiUser::where('paid', true)
+                                ->whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)
                                 ->get();
 
-        $monthlyPass = MonthlyUser::whereMonth('date_start', $now->copy()->month)
-                                ->whereYear('date_start', $now->copy()->year)
+        $monthlyPass = MonthlyUser::whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)
                                 ->get();
 
-        $conferencePass = Conference::whereMonth('created_at', $now->copy()->month)
-                                ->whereYear('created_at', $now->copy()->year)
-                                ->where('status', 'finished')
+        $conferencePass = Conference::whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)
                                 ->get();
-        // dd($dailyPass, $dailyPass->sum('amount_paid'), $flexiPass, $flexiPass->sum('amount'),$monthlyPass, $monthlyPass->sum('amount'),$conferencePass, $conferencePass->sum('payment'));
 
         $total = $dailyPass->sum('amount_paid') + $flexiPass->sum('amount') + $monthlyPass->sum('amount') + $conferencePass->sum('payment');
 
@@ -70,16 +68,18 @@ class SalesCount extends BaseWidget
 
     public static function getTotalSales()
     {
-        $dailyPass = DailySale::where('is_flexi', false)
-                                            ->where('is_monthly', false)
-                                            ->where('is_conference', false)
-                                            ->sum('amount_paid');
+        $dailyPass = DailySale::withTrashed()
+                                ->where('is_flexi', false)
+                                ->where('is_monthly', false)
+                                ->where('is_conference', false)
+                                ->sum('amount_paid');
 
-        $flexiPass = FlexiUser::where('paid', true)->sum('amount');
+        $flexiPass = FlexiUser::where('paid', true)
+                                ->sum('amount');
 
         $monthlyPass = MonthlyUser::sum('amount');
 
-        $conferencePass = Conference::sum('payment');
+        $conferencePass = Conference::sum('amount');
 
         $total = $dailyPass + $flexiPass + $monthlyPass + $conferencePass;
 

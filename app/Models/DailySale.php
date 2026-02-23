@@ -75,20 +75,22 @@ class DailySale extends Model
         $year = $this->time_in_carbon->format('Y');
         $day = $this->time_in_carbon->day;
 
-        if(!$this->is_flexi && !$this->is_monthly) {
-            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
-            if(!$monthlySale) {
-                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
-            }
-            $monthlySale->total_daily_users = (int)$monthlySale->total_daily_users + 1;
-            $monthlySale->save();
-
+        if(!$this->is_flexi && !$this->is_monthly && !$this->is_conference) {
+            // DAILY SALE
             $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
             if(!$dailySale) {
                 $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
             }
-            $dailySale->total_daily_users = (int)$dailySale->total_daily_users + 1;
+            $dailySale->total_daily_users += 1;
             $dailySale->save();
+
+            // MONTHLY SALE
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
+            }
+            $monthlySale->total_daily_users += 1;
+            $monthlySale->save();
         }
     }
 
@@ -96,22 +98,24 @@ class DailySale extends Model
     {
         $month = $this->time_in_carbon->format('F');
         $year = $this->time_in_carbon->format('Y');
-        $day = $this->time_in_carbon->day;
+        $day = $this->time_in_carbon->format('d');
 
-        if(!$this->is_flexi && !$this->is_monthly) {
-            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
-            if(!$monthlySale) {
-                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
-            }
-            $monthlySale->total_sales = (double)$monthlySale->total_sales + (double)$this->amount_paid;
-            $monthlySale->save();
-
+        if(!$this->is_flexi && !$this->is_monthly && !$this->is_conference) {
+            // DAILY SALE
             $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
             if(!$dailySale) {
                 $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
             }
-            $dailySale->total_sales = (double)$dailySale->total_sales + (double)$this->amount_paid;
+            $dailySale->total_sales += (double)$this->amount_paid;
             $dailySale->save();
+
+            // MONTHLY SALE
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
+            }
+            $monthlySale->total_sales += (double)$this->amount_paid;
+            $monthlySale->save();
         }
     }
 
@@ -190,7 +194,7 @@ class DailySale extends Model
         $rateQuery = \App\Models\Rate::where('type', 'Daily')->where('status', true);
 
         $timeInCarbon = $this->time_in_carbon;
-        $timeOutCarbon = \Carbon\Carbon::now()->addMinutes(5);
+        $timeOutCarbon = Carbon::now()->addMinutes(5);
 
         $hours = $timeInCarbon->diffInHours($timeOutCarbon);
 
@@ -311,9 +315,9 @@ class DailySale extends Model
                     FormComponents\Grid::make(2)
                         ->schema([
                             FormComponents\DatePicker::make('date')
-                                ->default(\Carbon\Carbon::now()),
+                                ->default(Carbon::now()),
                             FormComponents\TimePicker::make('time_in')
-                                ->default(\Carbon\Carbon::now())
+                                ->default(Carbon::now())
                                 ->seconds(false),
                         ]),
                     FormComponents\Grid::make(3)
@@ -345,7 +349,7 @@ class DailySale extends Model
                                 ->label('Card ID')
                                 ->options(function() {
                                     $options = [];
-                                    $now = \Carbon\Carbon::now();
+                                    $now = Carbon::now();
                                     $takenIds = self::whereNull('time_out')->pluck('card_id')->toArray();
                                     $availabelGuests = \App\Models\Card::whereNotIn('id', $takenIds)->where('type', 'Daily')->get();
                                     foreach($availabelGuests as $guest) {

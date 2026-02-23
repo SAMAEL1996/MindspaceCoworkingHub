@@ -525,14 +525,7 @@ class DailySaleResource extends Resource
                         ])
                         ->action(function($data, $record, $action) {
                             if(Setting::getValue('validate-by-card')) {
-                                if($data['validate_card'] == 'false') {
-                                    Notification::make()
-                                        ->title("Card ID not valid. Please tap ID.")
-                                        ->danger()
-                                        ->send();
-
-                                    return $action->halt();
-                                }
+                                //
                             }
 
                             if(isset($data['has_notes'])) {

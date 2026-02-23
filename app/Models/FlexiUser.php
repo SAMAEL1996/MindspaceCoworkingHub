@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
@@ -18,25 +19,29 @@ class FlexiUser extends Model
         parent::boot();
 
         static::created(function ($flexi) {
-            $month = $flexi->start_at_carbon->format('F');
-            $year = $flexi->start_at_carbon->format('Y');
-            $day = $flexi->start_at_carbon->day;
+            $createdAt = Carbon::parse($flexi->created_at);
 
-            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
-            if(!$monthlySale) {
-                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
-            }
-            $monthlySale->total_flexi_users = (int)$monthlySale->total_flexi_users + 1;
-            $monthlySale->total_sales = (double)$monthlySale->total_sales + (double)$flexi->amount_paid;
-            $monthlySale->save();
+            $day = $createdAt->copy()->format('d');
+            $month = $createdAt->copy()->format('F');
+            $year = $createdAt->copy()->format('Y');
 
+            // DAILY SALE
             $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
             if(!$dailySale) {
                 $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
             }
-            $dailySale->total_flexi_users = (int)$dailySale->total_flexi_users + 1;
-            $dailySale->total_sales = (double)$dailySale->total_sales + (double)$flexi->amount_paid;
+            $dailySale->total_flexi_users += 1;
+            $dailySale->total_sales += (double)$flexi->amount;
             $dailySale->save();
+
+            // MONTHLY SALE
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
+            }
+            $monthlySale->total_flexi_users += 1;
+            $monthlySale->total_sales += (double)$flexi->amount;
+            $monthlySale->save();
         });
     }
 
@@ -89,17 +94,17 @@ class FlexiUser extends Model
 
     public function getStartAtCarbonAttribute()
     {
-        return \Carbon\Carbon::parse($this->start_at);
+        return Carbon::parse($this->start_at);
     }
 
     public function getEndAtCarbonAttribute()
     {
-        return \Carbon\Carbon::parse($this->end_at);
+        return Carbon::parse($this->end_at);
     }
 
     public function getExpiredAtCarbonAttribute()
     {
-        return \Carbon\Carbon::parse($this->expired_at);
+        return Carbon::parse($this->expired_at);
     }
 
     public function recalculateTimeRemaining($daily_sale_id)
@@ -111,7 +116,7 @@ class FlexiUser extends Model
 
         $consumed = $timeInCarbon->diffInMinutes($timeOutCarbon);
 
-        $this->end_at = \Carbon\Carbon::parse($this->end_at)->subMinutes($consumed);
+        $this->end_at = Carbon::parse($this->end_at)->subMinutes($consumed);
         $this->save();
     }
 
@@ -153,7 +158,7 @@ class FlexiUser extends Model
     {
         $dailySale = \App\Models\DailySale::find($daily_sale_id);
         $timeInCarbon = $dailySale->time_in_carbon;
-        $timeOutCarbon = \Carbon\Carbon::now();
+        $timeOutCarbon = Carbon::now();
 
         $consumed = $timeInCarbon->diffInMinutes($timeOutCarbon);
         $timeNow = $this->end_at_carbon->subMinutes($consumed);
@@ -173,7 +178,7 @@ class FlexiUser extends Model
         
         $dailySale = \App\Models\DailySale::find($daily_sale_id);
         $timeInCarbon = $dailySale->time_in_carbon;
-        $timeOutCarbon = \Carbon\Carbon::now();
+        $timeOutCarbon = Carbon::now();
 
         $dailyTotalTime = $timeInCarbon->diffInMinutes($timeOutCarbon);
 
@@ -184,7 +189,7 @@ class FlexiUser extends Model
 
         $totalTime = $dailyTotalTime - $flexiTotalTime;
 
-        $now = \Carbon\Carbon::now();
+        $now = Carbon::now();
         $end = $now->copy()->addMinutes($totalTime);
 
         if($filter == 'minutes') {
@@ -252,7 +257,7 @@ class FlexiUser extends Model
 
     public function sendSmsReminder()
     {
-        $now = \Carbon\Carbon::now();
+        $now = Carbon::now();
 
         $apikey = config('app.semaphore_key');
 
@@ -300,7 +305,7 @@ class FlexiUser extends Model
             $request = new Request('POST', "https://api.semaphore.co/api/v4/messages?" . http_build_query($params));
             $res = $client->sendAsync($request)->wait();
         } catch (\Exception $e) {
-            \Log::error($this->name.' send sms error on '.\Carbon\Carbon::now()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
+            \Log::error($this->name.' send sms error on '.Carbon::now()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
         }
 
         activity()

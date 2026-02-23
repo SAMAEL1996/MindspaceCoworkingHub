@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
@@ -17,25 +18,29 @@ class MonthlyUser extends Model
         parent::boot();
 
         static::created(function ($monthly) {
-            $month = $monthly->date_start_carbon->format('F');
-            $year = $monthly->date_start_carbon->format('Y');
-            $day = $monthly->date_start_carbon->day;
+            $createdAt = Carbon::parse($monthly->created_at);
 
-            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
-            if(!$monthlySale) {
-                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
-            }
-            $monthlySale->total_monthly_users = (int)$monthlySale->total_monthly_users + 1;
-            $monthlySale->total_sales = (double)$monthlySale->total_sales + (double)$monthly->amount_paid;
-            $monthlySale->save();
+            $day = $createdAt->copy()->format('d');
+            $month = $createdAt->copy()->format('F');
+            $year = $createdAt->copy()->format('Y');
 
+            // DAILY SALE
             $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
             if(!$dailySale) {
                 $dailySale = \App\Models\Sale::create(['type' => 'daily', 'day' => $day, 'month' => $month, 'year' => $year]);
             }
-            $dailySale->total_monthly_users = (int)$dailySale->total_monthly_users + 1;
-            $dailySale->total_sales = (double)$dailySale->total_sales + (double)$monthly->amount_paid;
+            $dailySale->total_monthly_users += 1;
+            $dailySale->total_sales += (double)$monthly->amount;
             $dailySale->save();
+
+            // MONTHLY SALE
+            $monthlySale = \App\Models\Sale::where('type', 'monthly')->where('month', $month)->where('year', $year)->first();
+            if(!$monthlySale) {
+                $monthlySale = \App\Models\Sale::create(['type' => 'monthly', 'month' => $month, 'year' => $year]);
+            }
+            $monthlySale->total_monthly_users += 1;
+            $monthlySale->total_sales += (double)$monthly->amount;
+            $monthlySale->save();
         });
     }
 
@@ -71,12 +76,12 @@ class MonthlyUser extends Model
 
     public function getDateStartCarbonAttribute()
     {
-        return \Carbon\Carbon::parse($this->start_at);
+        return Carbon::parse($this->start_at);
     }
 
     public function getDateFinishCarbonAttribute()
     {
-        return \Carbon\Carbon::parse($this->end_at)->addDay();
+        return Carbon::parse($this->end_at)->addDay();
     }
 
     public function sendWelcomeMessage()
@@ -95,7 +100,7 @@ class MonthlyUser extends Model
             $request = new GuzzleRequest('POST', "https://api.semaphore.co/api/v4/messages?" . http_build_query($params));
             $res = $client->sendAsync($request)->wait();
         } catch (\Exception $e) {
-            \Log::error($this->name.' send sms error on '.\Carbon\Carbon::now()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
+            \Log::error($this->name.' send sms error on '.Carbon::now()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
         }
 
         activity()
