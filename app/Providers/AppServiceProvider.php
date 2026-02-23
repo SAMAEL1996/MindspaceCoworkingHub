@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Blade;
 use Filament\Facades\Filament;
 use Filament\Navigation\UserMenuItem;
 use App\Filament\Pages\Profile;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +39,25 @@ class AppServiceProvider extends ServiceProvider
             'ADMIN',
             'REPORTS',
         ]);
+
+        FilamentAsset::register([
+            Js::make('custom-script', __DIR__ . '/../../resources/js/global.js'),
+        ]);
+
+        Filament::serving(function () {
+
+            Filament::registerRenderHook(
+                PanelsRenderHook::BODY_START,
+                function (): ?string {
+                    if (! filament()->auth()->check()) {
+                        return null;
+                    }
+
+                    return Livewire::mount('filament-response');
+                }
+            );
+
+        });
 
         Filament::registerRenderHook(
             'panels::body.end',

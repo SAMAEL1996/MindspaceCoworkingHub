@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Filament\Resources\CardResource;
 use Livewire\Component;
 use App\Models\Card;
 use Filament\Forms\Components as FormComponents;
@@ -9,6 +10,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Cache;
 
 class CardRfidForm extends Component implements HasForms
 {
@@ -17,9 +19,6 @@ class CardRfidForm extends Component implements HasForms
     public Card $card;
 
     public ?array $data = [];
-
-    public $rfid;
-    public $rfid_fetched;
 
     public function mount()
     {
@@ -47,6 +46,8 @@ class CardRfidForm extends Component implements HasForms
             ->body('Card successfully updated.')
             ->success()
             ->send();
+
+        return redirect()->to(CardResource::getUrl('index'));
     }
 
     public function form(Form $form): Form
@@ -61,7 +62,9 @@ class CardRfidForm extends Component implements HasForms
                             ->required(),
                         FormComponents\TextInput::make('rfid')
                             ->label('RFID')
-                            ->unique(ignoreRecord: true),
+                            ->unique(ignoreRecord: true)
+                            ->disabled()
+                            ->dehydrated(),
                         FormComponents\Select::make('type')
                             ->label('Type')
                             ->options(Card::getTypeSelectOptions())
@@ -78,26 +81,20 @@ class CardRfidForm extends Component implements HasForms
             ->model($this->card);
     }
 
-    public function getSessionCard()
-    {
-        $this->rfid = \App\Models\Setting::getValue('card');
-        $this->rfid_fetched = $this->rfid;
-    }
-
     public function render()
     {
         return view('livewire.card-rfid-form');
     }
 
-    public function fetchRfidScanned()
+    public function checkScannedRfid()
     {
-        $this->rfid = \App\Models\Setting::getValue('card');
-        $this->rfid_fetched = $this->rfid;
-    }
+        $rfid = Cache::pull('scanned_rfid');
 
-    public function getRfidScanned()
-    {
-        $this->data['rfid'] = $this->rfid_fetched;
-        $this->form->fill($this->data);
+        if ($rfid) {
+            $this->data['rfid'] = $rfid;
+
+            // Important: update Filament form state
+            $this->form->fill($this->data);
+        }
     }
 }

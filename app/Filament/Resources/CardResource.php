@@ -49,7 +49,8 @@ class CardResource extends Resource
             ->filters([])
             ->actions([])
             ->bulkActions([])
-            ->recordUrl(fn ($record): string => CardResource::getUrl('view', ['record' => $record]));
+            ->recordUrl(fn ($record): string => CardResource::getUrl('edit', ['record' => $record]))
+            ->defaultPaginationPageOption(25);
     }
 
     public static function getRelations(): array
@@ -64,7 +65,7 @@ class CardResource extends Resource
         return [
             'index' => Pages\ListCards::route('/'),
             'create' => Pages\CreateCard::route('/create'),
-            'view' => Pages\ViewCard::route('/{record}'),
+            // 'view' => Pages\ViewCard::route('/{record}'),
             'edit' => Pages\CustomEditCard::route('/{record}/edit'),
             // 'edit' => Pages\EditCard::route('/{record}/edit'),
         ];

@@ -29,6 +29,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Actions as TableActions;
+use Illuminate\Support\Facades\Cache;
 
 class DailySaleResource extends Resource
 {
@@ -201,7 +202,10 @@ class DailySaleResource extends Resource
             )
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('End Time')
+                    Tables\Actions\Action::make('endTime')
+                        ->label('End Time')
+                        ->modalHeading(fn($record) => 'End Time: ' . $record->name)
+                        ->modalSubheading(fn($record) => 'ID No.: ' . $record->card->code)
                         ->form([
                             FormComponents\Fieldset::make('Loyalty Card No')
                                 ->schema([
@@ -520,6 +524,17 @@ class DailySaleResource extends Resource
                                 ])
                         ])
                         ->action(function($data, $record, $action) {
+                            if(Setting::getValue('validate-by-card')) {
+                                if($data['validate_card'] == 'false') {
+                                    Notification::make()
+                                        ->title("Card ID not valid. Please tap ID.")
+                                        ->danger()
+                                        ->send();
+
+                                    return $action->halt();
+                                }
+                            }
+
                             if(isset($data['has_notes'])) {
                                 if(!$data['has_notes']) {
                                     Notification::make()
@@ -656,6 +671,18 @@ class DailySaleResource extends Resource
                                 ->send();
 
                             return $record;
+                        })
+                        ->modalSubmitAction(function (\Filament\Actions\StaticAction $action, $record, $livewire) {
+                            if(!Setting::getValue('validate-by-card')) {
+                                return $action->label('Submit');
+                            }
+                            
+                            $cardRfid = $livewire->rfidScanId;
+                            return $action
+                                ->label('Submit')
+                                ->disabled(function() use ($record, $cardRfid) {
+                                    return $record->id != $cardRfid;
+                                });
                         })
                         ->modalWidth(MaxWidth::Medium),
                     Tables\Actions\Action::make('change_pass')
