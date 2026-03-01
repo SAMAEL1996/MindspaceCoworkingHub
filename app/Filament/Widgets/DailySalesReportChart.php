@@ -41,7 +41,7 @@ class DailySalesReportChart extends ChartWidget
                     break;
 
                 case 'daily_checkins':
-                    $label = 'Daily Check-Ins';
+                    $label = 'Daily Pass Users';
                     $totalSales[] = $data->total_daily_users;
                     break;
 

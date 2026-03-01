@@ -77,7 +77,10 @@ class Conference extends Model
         }
 
         foreach($schedules as $schedule) {
-            if ($checkStart->lt($schedule->end_at_carbon) && $checkEnd->gt($schedule->start_at_carbon)) {
+            $start = $schedule->start_at_carbon;
+            $end = $schedule->end_at_carbon;
+
+            if ($start->between($checkStart, $checkEnd) || $end->between($checkStart, $checkEnd)) {
                 return true;
             }
         }
@@ -168,11 +171,11 @@ class Conference extends Model
             $additionalHoursRate = $additionalHours * $exceedingHours;
             $amount = $rates[8] + $additionalHoursRate;
         } elseif($duration > 12 && 24 >= $duration) {
-            $amount = $rates[24];
+            $amount = $rates[12];
         } else {
             $exceedingHours = $duration - 24;
             $additionalHoursRate = $additionalHours * $exceedingHours;
-            $amount = $rates[24] + $additionalHoursRate;
+            $amount = $rates[12] + $additionalHoursRate;
         }
 
         return $amount;
@@ -211,6 +214,7 @@ class Conference extends Model
             FormComponents\TextInput::make('members')
                 ->label('Total # of guests including POC')
                 ->numeric()
+                ->minValue(1)
                 ->required(),
             FormComponents\Fieldset::make('Schedule')
                 ->schema([

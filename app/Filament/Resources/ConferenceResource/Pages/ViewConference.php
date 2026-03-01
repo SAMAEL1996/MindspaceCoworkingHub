@@ -167,6 +167,8 @@ class ViewConference extends ViewRecord
                             'mode_of_payment' => $data['mop']
                         ]);
 
+                        $sale->addPaymenToMonthlySalesReport();
+
                         Notification::make()
                             ->title('Reservation fee successfully paid.')
                             ->success()
@@ -245,6 +247,8 @@ class ViewConference extends ViewRecord
                             'status' => false,
                             'mode_of_payment' => $record->mode_of_payment
                         ]);
+
+                        $sale->addPaymenToMonthlySalesReport();
 
                         Notification::make()
                             ->title('Conference successfully paid.')

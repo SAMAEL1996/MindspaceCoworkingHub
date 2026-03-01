@@ -100,7 +100,7 @@ class DailySale extends Model
         $year = $this->time_in_carbon->format('Y');
         $day = $this->time_in_carbon->format('d');
 
-        if(!$this->is_flexi && !$this->is_monthly && !$this->is_conference) {
+        if(!$this->is_flexi && !$this->is_monthly) {
             // DAILY SALE
             $dailySale = \App\Models\Sale::where('type', 'daily')->where('day', $day)->where('month', $month)->where('year', $year)->first();
             if(!$dailySale) {

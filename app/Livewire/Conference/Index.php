@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Conference;
 
+use Carbon\Carbon;
+use Filament\Notifications\Notification;
+use Filament\Support\Enums\MaxWidth;
 use Livewire\Component;
 use App\Filament\Resources\ConferenceResource;
 use App\Models\Conference;
@@ -16,6 +19,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 
 class Index extends Component implements HasForms, HasTable, HasActions
 {
@@ -75,29 +79,87 @@ class Index extends Component implements HasForms, HasTable, HasActions
             ->query($this->getTableQuery())
             ->headerActions([
                 TableActions\Action::make('add')
-                    ->url(ConferenceResource::getUrl('create'))
+                    ->label('Book')
+                    ->icon('heroicon-o-plus-circle')
+                    ->modalWidth(MaxWidth::ThreeExtraLarge)
+                    ->modalHeading('Book Meeting Room')
+                    ->form(Conference::getForm())
+                    ->action(function($data) {
+                        $timeOfArrival = Carbon::parse($data['date'] . ' ' . $data['time']);
+                        if($timeOfArrival->copy()->subHour()->isPast()) {
+                            Notification::make()
+                                ->title('Danger')
+                                ->body('Date is already past.')
+                                ->danger()
+                                ->send();
+
+                            return false;
+                        }
+                        $timeOfLeave = $timeOfArrival->copy()->addHours((int)$data['duration']);
+
+                        $checkStart = $timeOfArrival->copy()->subMinutes(30);
+                        $checkEnd = $timeOfLeave->copy()->addMinutes(30);
+                        $checkDateTime = Conference::getCheckTimeSchedules($checkStart, $checkEnd);
+
+                        if($checkDateTime) {
+                            Notification::make()
+                                ->title('Danger')
+                                ->body('Date and time is taken.')
+                                ->danger()
+                                ->send();
+
+                            throw ValidationException::withMessages([
+                                'time' => 'Conflict detected.',
+                            ]);
+                        }
+
+                        $rate = Conference::getRateAmount((int)$data['package'], (int)$data['duration']);
+
+                        $conference = Conference::create([
+                            'package_id' => (int)$data['package'],
+                            'book_by' => auth()->user()->id,
+                            'start_at' => $timeOfArrival->copy(),
+                            'duration' => (int)$data['duration'],
+                            'event' => $data['event'],
+                            'members' => $data['members'],
+                            'host' => $data['host'],
+                            'contact_no' => $data['contact_no'],
+                            'status' => 'approve',
+                            'amount' => $rate
+                        ]);
+
+                        Notification::make()
+                            ->title('Success')
+                            ->body('Conference successfully booked.')
+                            ->success()
+                            ->send();
+
+                        return $conference;
+                    })
                     ->visible(auth()->user()->can('create conferences'))
             ])
             ->columns([
-                TableColumns\TextColumn::make('event'),
+                TableColumns\TextColumn::make('id')
+                    ->label('ID')
+                    ->visible(auth()->user()->hasRole('Super Administrator')),
                 TableColumns\TextColumn::make('host')
                     ->label('P.O.C'),
                 TableColumns\TextColumn::make('members')
                     ->label('Total Guests'),
                 TableColumns\TextColumn::make('start_at')
                     ->formatStateUsing(function($state, $record) {
-                        return \Carbon\Carbon::parse($record->start_at)->format(config('app.date_format'));
+                        return Carbon::parse($record->start_at)->format(config('app.date_format'));
                     })
                     ->description(function($state, $record) {
-                        return \Carbon\Carbon::parse($record->start_at)->format(config('app.time_format'));
+                        return Carbon::parse($record->start_at)->format(config('app.time_format'));
                     }),
                 TableColumns\TextColumn::make('duration')
                     ->label('End at')
                     ->formatStateUsing(function($state, $record) {
-                        return \Carbon\Carbon::parse($record->start_at)->addHours($record->duration)->format(config('app.date_format'));
+                        return Carbon::parse($record->start_at)->addHours($record->duration)->format(config('app.date_format'));
                     })
                     ->description(function($state, $record) {
-                        return \Carbon\Carbon::parse($record->start_at)->addHours($record->duration)->format(config('app.time_format'));
+                        return Carbon::parse($record->start_at)->addHours($record->duration)->format(config('app.time_format'));
                     }),
                 TableColumns\TextColumn::make('status')
                     ->badge()
