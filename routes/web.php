@@ -123,15 +123,6 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
 
     $card = Card::where('rfid', $uidResult)->first();
 
-    if($card) {
-        Cache::put('rfid-scanned-response', [
-            'status' => 'success',
-            'message' => $card->code . ' successfully scanned',
-            'card_id' => null,
-            'rfid' => $uidResult,
-        ], now()->addSeconds(5));
-    }
-
     if (!$card) {
         Cache::put('scanned_rfid', $uidResult, now()->addSeconds(5));
 
