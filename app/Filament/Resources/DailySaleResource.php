@@ -666,6 +666,9 @@ class DailySaleResource extends Resource
                             return $record;
                         })
                         ->modalSubmitAction(function (\Filament\Actions\StaticAction $action, $record, $livewire) {
+                            return $action->label('Submit');
+
+                            // test
                             if(!Setting::getValue('validate-by-card')) {
                                 return $action->label('Submit');
                             }
@@ -677,7 +680,14 @@ class DailySaleResource extends Resource
                                     return $record->id != $cardRfid;
                                 });
                         })
-                        ->modalWidth(MaxWidth::Medium),
+                        ->modalWidth(MaxWidth::Medium)
+                        ->visible(function() {
+                            if(Setting::getValue('validate-by-card')) {
+                                return false;
+                            }
+
+                            return true;
+                        }),
                     Tables\Actions\Action::make('change_pass')
                         ->label('Change Pass')
                         ->form([
