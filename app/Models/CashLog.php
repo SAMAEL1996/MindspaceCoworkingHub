@@ -43,4 +43,9 @@ class CashLog extends Model
     {
         return $this->items()->sum('out');
     }
+
+    public static function hasActiveCashier()
+    {
+        return self::where('status', true)->exists();
+    }
 }

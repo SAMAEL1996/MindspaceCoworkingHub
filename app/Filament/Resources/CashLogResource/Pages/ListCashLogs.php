@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CashLogResource\Pages;
 
 use App\Filament\Resources\CashLogResource;
+use App\Models\CashLog;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\MaxWidth;
@@ -34,29 +35,21 @@ class ListCashLogs extends ListRecords
                         'total_sales' => 0.00
                     ]);
 
-                    Session::put('cashier', $user);
-                    
                     return $cashHistory;
                 })
                 ->modalWidth(MaxWidth::Small)
                 ->visible(function() {
                     $user = auth()->user();
 
-                    if($user->hasRole('Super Administrator')) {
-                        return true;
-                    }
-
-                    if(session('cashier') || !session('on_shift')) {
+                    if(CashLog::hasActiveCashier()) {
                         return false;
                     }
 
-                    $latestCashHistory = $user->cashLogs()->latest()->first();
-
-                    if(!$latestCashHistory) {
-                        return true;
+                    if(!$user->staff?->hasActiveAttendance()) {
+                        return false;
                     }
-                    
-                    return !$latestCashHistory->status;
+
+                    return true;
                 }),
             Actions\Action::make('cash-out')
                 ->modalHeading('Cash Out')
@@ -76,8 +69,6 @@ class ListCashLogs extends ListRecords
 
                     $total = (double)$latestCashHistory->cash_in + (double)$credts - (double)$debits;
 
-                    Session::put('cashier', false);
-                    
                     $cashHistory = $latestCashHistory->update([
                         'cash_out' => $data['amount'],
                         'date_cash_out' => \Carbon\Carbon::now(),
@@ -91,17 +82,11 @@ class ListCashLogs extends ListRecords
                 ->visible(function() {
                     $user = auth()->user();
 
-                    if($user->hasRole('Super Administrator')) {
-                        return true;
+                    if(CashLog::hasActiveCashier()) {
+                        return Cashlog::where('status', true)->where('user_id', $user->id)->latest()->first()->exists();
                     }
 
-                    $latestCashHistory = $user->cashLogs()->latest()->first();
-                    
-                    if(!$latestCashHistory) {
-                        return false;
-                    }
-                    
-                    return $latestCashHistory->status;
+                    return false;
                 }),
         ];
     }

@@ -17,6 +17,11 @@ class Card extends Model
         'status',
     ];
 
+    public function staff()
+    {
+        return $this->hasOne(Staff::class, 'card_id', 'id');
+    }
+
     public static function getTypeSelectOptions()
     {
         return [

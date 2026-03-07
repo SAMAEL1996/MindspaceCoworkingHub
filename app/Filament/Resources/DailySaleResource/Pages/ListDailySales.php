@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DailySaleResource\Pages;
 
 use App\Filament\Resources\DailySaleResource;
+use App\Models\CashLog;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Forms\Components as FormComponents;
@@ -428,6 +429,15 @@ class ListDailySales extends ListRecords
                     $this->newMember = false;
 
                     return $dailyPass;
+                })
+                ->visible(function() {
+                    $user = auth()->user();
+    
+                    if($user->hasRole('Super Administrator')) {
+                        return true;
+                    }
+    
+                    return CashLog::where('status', true)->where('user_id', $user->id)->exists();
                 }),
 
 

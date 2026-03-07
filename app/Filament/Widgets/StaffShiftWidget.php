@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Setting;
 use Filament\Widgets\Widget;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -16,21 +17,8 @@ class StaffShiftWidget extends Widget
     {
         return 2;
     }
-
-    protected static bool $isLazy = false;
     
     public $hasShift;
-    public $timeCheck;
-    
-    public function mount()
-    {
-        $staff = auth()->user()->staff;
-        $attendance = $staff->attendances()->latest()->first();
-
-        if(Session::get('on_shift')) {
-            $this->timeCheck = \Carbon\Carbon::parse($attendance->check_in)->diffForHumans();
-        }
-    }
 
     public function startShift()
     {
@@ -41,14 +29,11 @@ class StaffShiftWidget extends Widget
             'check_in' => \Carbon\Carbon::now()
         ]);
 
-        Session::put('on_shift', true);
-
         Notification::make()
-            ->title('You are now started your shift!')
+            ->title('Success')
+            ->body('You are now started your shift!')
             ->success()
             ->send();
-
-        return redirect()->intended(Filament::getUrl());
     }
 
     public function endShift()
@@ -60,30 +45,37 @@ class StaffShiftWidget extends Widget
             'check_out' => \Carbon\Carbon::now()
         ]);
 
-        Session::put('on_shift', false);
-
         Notification::make()
-            ->title('You ended your shift!')
+            ->title('Success')
+            ->body('You ended your shift!')
             ->success()
             ->send();
+    }
 
-        $filename = $attendance->check_in_carbon->format('Y-m-d') . '-' . $attendance->check_out_carbon->format('Y-m-d') . '-staff_' . $attendance->staff_id . '.xlsx';
+    public function getTimeCheckProperty()
+    {
+        $staff = auth()->user()->staff;
+        $attendance = $staff->attendances()->latest()->first();
 
-        \App\Models\Report::create([
-            'staff_id' => $staff->id,
-            'attendance_id' => $attendance->id,
-            'date' => \Carbon\Carbon::now(),
-            'staff_sales' => $staff->dailySales()
-                                        ->where('time_out_staff_id', $staff->id)
-                                        ->whereBetween('created_at', [$attendance->check_in_carbon, $attendance->check_out_carbon])
-                                        ->sum('amount_paid'),
-            'total_sales' => $staff->dailySales()
-                                        ->whereBetween('created_at', [$attendance->check_in_carbon, $attendance->check_out_carbon])
-                                        ->sum('amount_paid'),
-            'filename' => $filename
-        ]);
+        if (!$attendance || $attendance->check_out) {
+            return null;
+        }
 
-        return redirect()->intended(Filament::getUrl());
+        return \Carbon\Carbon::parse($attendance->check_in)->diffForHumans();
+    }
+
+    public function getOnShiftProperty(): bool
+    {
+        $staff = auth()->user()->staff;
+
+        return $staff->attendances()
+            ->whereNull('check_out')
+            ->exists();
+    }
+
+    public function getValidateByCardProperty(): bool
+    {
+        return (bool) Setting::getValue('validate-by-card');
     }
 
     public function testlang()

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Card;
+use App\Models\CashLog;
 use App\Models\DailySale;
 use Illuminate\Support\Facades\Cache;
 use App\Models\UserLocation;
@@ -133,6 +134,54 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
         ], now()->addSeconds(5));
 
         return response()->json(['message' => 'Card successfully scanned'], 200);
+    }
+
+    if($card->type == 'Staff') {
+        $staff = $card->staff;
+        if($staff) {
+            $attendance = $staff->attendances()->whereNull('check_out')->latest()->first();
+            if($attendance) {
+                if(CashLog::where('status', true)->where('user_id', $staff->user->id)->exists()) {
+                    Cache::put('rfid-scanned-response', [
+                        'status' => 'danger',
+                        'message' => 'Enter cash out amount before ending shift!',
+                        'card_id' => $card->id,
+                        'rfid' => $uidResult,
+                    ], now()->addSeconds(5));
+
+                    return response()->json(['message' => 'Enter cash out amount before ending shift!'], 200);
+                }
+
+                // SIGNING OFF
+                $attendance->update([
+                    'check_out' => \Carbon\Carbon::now()
+                ]);
+
+                Cache::put('rfid-scanned-response', [
+                    'status' => 'success',
+                    'message' => $staff->user->name . ' successfully logout!',
+                    'card_id' => $card->id,
+                    'rfid' => $uidResult,
+                ], now()->addSeconds(5));
+
+                return response()->json(['message' => $staff->user->name . ' successfully logout'], 200);
+            } else {
+                // SIGNING ON
+                $attendance = \App\Models\Attendance::create([
+                    'staff_id' => $staff->id,
+                    'check_in' => \Carbon\Carbon::now()
+                ]);
+
+                Cache::put('rfid-scanned-response', [
+                    'status' => 'success',
+                    'message' => $staff->user->name . ' successfully login!',
+                    'card_id' => $card->id,
+                    'rfid' => $uidResult,
+                ], now()->addSeconds(5));
+
+                return response()->json(['message' => $staff->user->name . ' successfully login'], 200);
+            }
+        }
     }
 
     $dailySale = DailySale::where('card_id', $card->id)
