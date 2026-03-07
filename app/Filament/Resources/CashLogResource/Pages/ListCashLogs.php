@@ -83,7 +83,7 @@ class ListCashLogs extends ListRecords
                     $user = auth()->user();
 
                     if(CashLog::hasActiveCashier()) {
-                        return Cashlog::where('status', true)->where('user_id', $user->id)->latest()->first()->exists();
+                        return Cashlog::where('status', true)->where('user_id', $user->id)->latest()->exists();
                     }
 
                     return false;
