@@ -212,6 +212,14 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
     return response()->json(['message' => 'RFID not found.'], 404);
 });
 Route::get('/check-latest-rfid', function () {
+    if (! auth()->check()) {
+        return response()->json(['success' => false]);
+    }
+
+    $currentCashier = CashLog::getCurrentCashierUser();
+    if (! $currentCashier || auth()->id() !== $currentCashier->id) {
+        return response()->json(['success' => false]);
+    }
 
     $id = Cache::pull('latest_rfid_scan'); // get & delete
 
@@ -225,6 +233,14 @@ Route::get('/check-latest-rfid', function () {
     ]);
 });
 Route::post('/clear-rfid-cache', function () {
+    if (! auth()->check()) {
+        return response()->json(['success' => false], 403);
+    }
+
+    $currentCashier = CashLog::getCurrentCashierUser();
+    if (! $currentCashier || auth()->id() !== $currentCashier->id) {
+        return response()->json(['success' => false], 403);
+    }
 
     Cache::forget('latest_rfid_scan');
 
