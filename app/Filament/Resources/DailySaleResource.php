@@ -666,7 +666,7 @@ class DailySaleResource extends Resource
                             return $record;
                         })
                         ->modalSubmitAction(function (\Filament\Actions\StaticAction $action, $record, $livewire) {
-                            return $action->label('Submit');
+                            // return $action->label('Submit');
 
                             // test
                             if(!Setting::getValue('validate-by-card')) {
