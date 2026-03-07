@@ -15,9 +15,8 @@ class FilamentResponse extends Component
             $item = Cache::pull('rfid-scanned-response');
             $status = $item['status'];
 
-            dd($status);
-            if($status['card_id']) {
-                $card = Card::find($status['card_id']);
+            if($item['card_id']) {
+                $card = Card::find($item['card_id']);
 
                 Notification::make()
                     ->title('Success')
