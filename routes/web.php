@@ -127,13 +127,13 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
         Cache::put('scanned_rfid', $uidResult, now()->addSeconds(5));
 
         Cache::put('rfid-scanned-response', [
-            'status' => 'success',
-            'message' => 'Card successfully scanned',
+            'status' => 'warning',
+            'message' => 'Card is still available.',
             'card_id' => null,
             'rfid' => $uidResult,
         ], now()->addSeconds(5));
 
-        return response()->json(['message' => 'Card successfully scanned'], 200);
+        return response()->json(['message' => 'Card is still available.'], 200);
     }
 
     if($card->type == 'Staff') {
