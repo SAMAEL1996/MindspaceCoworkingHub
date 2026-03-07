@@ -43,7 +43,11 @@ class CardResource extends Resource
                     ->searchable(),
                 TableColumns\TextColumn::make('rfid')
                     ->label('RFID')
-                    ->searchable()
+                    ->sortable(),
+                TableColumns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn($state) => $state == 'Active' ? 'success' : 'warning')
                     ->sortable(),
             ])
             ->filters([])
