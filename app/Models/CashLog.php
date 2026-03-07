@@ -48,4 +48,9 @@ class CashLog extends Model
     {
         return self::where('status', true)->exists();
     }
+
+    public static function getCurrentCashierUser()
+    {
+        return self::where('status', true)->latest()->first()?->user;
+    }
 }

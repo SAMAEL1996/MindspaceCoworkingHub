@@ -3,14 +3,22 @@
 namespace App\Livewire;
 
 use App\Models\Card;
+use App\Models\CashLog;
 use Livewire\Component;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 
 class FilamentResponse extends Component
 {
     public function checkRfidScan()
     {
+        $currentCashier = CashLog::getCurrentCashierUser();
+
+        if (!$currentCashier || Auth::id() !== $currentCashier->id) {
+            return;
+        }
+
         if (Cache::has('rfid-scanned-response')) {
             $item = Cache::pull('rfid-scanned-response');
             $status = $item['status'];
