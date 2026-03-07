@@ -678,12 +678,12 @@ class DailySaleResource extends Resource
                                 });
                         })
                         ->modalWidth(MaxWidth::Medium)
-                        ->hidden(function() {
-                            if(!Setting::getValue('validate-by-card')) {
-                                return false;
+                        ->extraAttributes(function () {
+                            if (! Setting::getValue('validate-by-card')) {
+                                return [];
                             }
 
-                            return true;
+                            return ['style' => 'display: none;'];
                         }),
                     Tables\Actions\Action::make('change_pass')
                         ->label('Change Pass')
