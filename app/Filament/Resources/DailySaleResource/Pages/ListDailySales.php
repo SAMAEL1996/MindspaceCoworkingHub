@@ -31,12 +31,14 @@ class ListDailySales extends ListRecords
     public $newMember = false;
 
     public $rfidScanId = null;
+    public $isRfidMountingEndTime = false;
     protected $listeners = [
         'openEndTimeModal',
     ];
 
     public function openEndTimeModal($dailySaleId)
     {
+        $this->isRfidMountingEndTime = true;
         $this->rfidScanId = $dailySaleId;
 
         $this->mountTableAction('endTime', $dailySaleId);
@@ -49,6 +51,7 @@ class ListDailySales extends ListRecords
         parent::unmountTableAction($shouldCancelParentActions, $shouldCloseModal);
 
         $this->rfidScanId = null;
+        $this->isRfidMountingEndTime = false;
     }
 
     protected function getHeaderActions(): array
