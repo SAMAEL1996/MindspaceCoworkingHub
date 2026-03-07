@@ -666,9 +666,6 @@ class DailySaleResource extends Resource
                             return $record;
                         })
                         ->modalSubmitAction(function (\Filament\Actions\StaticAction $action, $record, $livewire) {
-                            // return $action->label('Submit');
-
-                            // test
                             if(!Setting::getValue('validate-by-card')) {
                                 return $action->label('Submit');
                             }
@@ -681,8 +678,8 @@ class DailySaleResource extends Resource
                                 });
                         })
                         ->modalWidth(MaxWidth::Medium)
-                        ->visible(function() {
-                            if(Setting::getValue('validate-by-card')) {
+                        ->hidden(function() {
+                            if(!Setting::getValue('validate-by-card')) {
                                 return false;
                             }
 
