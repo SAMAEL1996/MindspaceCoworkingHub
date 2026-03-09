@@ -120,8 +120,8 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
 
         $data = [
             'message' => 'No UID provided.',
-            'user' => null,
-            'id' => null
+            'user' => '',
+            'id' => ''
         ];
         return response()->json($data, 400);
     }
@@ -140,8 +140,8 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
 
         $data = [
             'message' => 'Card is still available.',
-            'user' => 'i love you',
-            'id' => null
+            'user' => 'No user found',
+            'id' => ''
         ];
         return response()->json($data, 200);
     }
@@ -241,7 +241,7 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
 
     $data = [
         'message' => 'RFID not found.',
-        'user' => null,
+        'user' => '',
         'id' => $card->code
     ];
     return response()->json(['message' => 'RFID not found.', 'user' => null], 404);
