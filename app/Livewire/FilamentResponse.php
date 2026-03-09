@@ -15,9 +15,14 @@ class FilamentResponse extends Component
     {
         $currentCashier = CashLog::getCurrentCashierUser();
 
-        if (!$currentCashier || Auth::id() !== $currentCashier->id) {
+        // FOR ADMIN TEST
+        if(!Auth::user()->hasRole('Super Administrator')) {
             return;
         }
+        // FOR STAFF
+        // if (!$currentCashier || Auth::id() !== $currentCashier->id) {
+        //     return;
+        // }
 
         if (Cache::has('rfid-scanned-response')) {
             $item = Cache::pull('rfid-scanned-response');
