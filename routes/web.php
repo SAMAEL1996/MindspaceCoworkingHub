@@ -118,7 +118,7 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
             'rfid' => null,
         ], now()->addSeconds(5));
 
-        return response()->json(['message' => 'No UID provided'], 400);
+        return response()->json(['message' => 'No UID provided', 'user' => null], 400);
     }
 
     $card = Card::where('rfid', $uidResult)->first();
@@ -133,7 +133,7 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
             'rfid' => $uidResult,
         ], now()->addSeconds(5));
 
-        return response()->json(['message' => 'Card is still available.'], 200);
+        return response()->json(['message' => 'Card is still available.', 'user' => 'i love you'], 200);
     }
 
     if($card->type == 'Staff') {
@@ -149,7 +149,7 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
                         'rfid' => $uidResult,
                     ], now()->addSeconds(5));
 
-                    return response()->json(['message' => 'Enter cash out amount before ending shift!'], 200);
+                    return response()->json(['message' => 'Enter cash out amount before ending shift!', 'user' => $staff->user->name], 200);
                 }
 
                 // SIGNING OFF
@@ -164,7 +164,7 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
                     'rfid' => $uidResult,
                 ], now()->addSeconds(5));
 
-                return response()->json(['message' => $staff->user->name . ' successfully logout'], 200);
+                return response()->json(['message' => $staff->user->name . ' successfully logout', 'user' => $staff->user->name], 200);
             } else {
                 // SIGNING ON
                 $attendance = \App\Models\Attendance::create([
@@ -179,7 +179,7 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
                     'rfid' => $uidResult,
                 ], now()->addSeconds(5));
 
-                return response()->json(['message' => $staff->user->name . ' successfully login'], 200);
+                return response()->json(['message' => $staff->user->name . ' successfully login', 'user' => $staff->user->name], 200);
             }
         }
     }
@@ -199,7 +199,7 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
             'rfid' => $uidResult,
         ], now()->addSeconds(5));
 
-        return response()->json(['message' => 'Daily sale found.'], 200);
+        return response()->json(['message' => 'Daily sale found.', 'user' => $dailySale->name], 200);
     }
 
     Cache::put('rfid-scanned-response', [
@@ -209,7 +209,7 @@ Route::middleware(['web'])->post('/external/rfid-scan', function(Request $reques
         'rfid' => $uidResult,
     ], now()->addSeconds(5));
 
-    return response()->json(['message' => 'RFID not found.'], 404);
+    return response()->json(['message' => 'RFID not found.', 'user' => null], 404);
 });
 Route::get('/check-latest-rfid', function () {
     if (! auth()->check()) {
