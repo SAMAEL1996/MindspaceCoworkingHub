@@ -76,12 +76,12 @@ class MonthlyUser extends Model
 
     public function getDateStartCarbonAttribute()
     {
-        return Carbon::parse($this->start_at);
+        return Carbon::parse($this->date_start);
     }
 
     public function getDateFinishCarbonAttribute()
     {
-        return Carbon::parse($this->end_at)->addDay();
+        return Carbon::parse($this->date_finish)->addDay();
     }
 
     public function sendWelcomeMessage()

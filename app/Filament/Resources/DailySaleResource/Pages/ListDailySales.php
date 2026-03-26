@@ -83,6 +83,10 @@ class ListDailySales extends ListRecords
 
                                                 $set('selected_option', []);
                                                 $set('search_result_options', []);
+                                                $set('selected_guest_name', null);
+                                                $set('selected_guest_meta', null);
+                                                $set('selected_guest_meta_label', null);
+                                                $set('show_selected_guest_details', false);
 
                                                 if(!$searchUser) {
                                                     return;
@@ -121,43 +125,82 @@ class ListDailySales extends ListRecords
                                                 $set('card_id', null);
                                             })
                                     ]),
-                                FormComponents\Radio::make('selected_option')
-                                    ->label('Select Guest')
-                                    ->required()
-                                    ->options(fn ($get) => collect($get('search_result_options'))->mapWithKeys(fn ($option, $key) => [$key => $option['label']]))
-                                    ->descriptions(fn ($get) => collect($get('search_result_options'))->mapWithKeys(fn ($option, $key) => [$key => $option['description'] ?? null]))
+                                FormComponents\Grid::make(2)
+                                    ->schema([
+                                        FormComponents\Radio::make('selected_option')
+                                            ->label('Select Guest')
+                                            ->required()
+                                            ->options(fn ($get) => collect($get('search_result_options'))->mapWithKeys(fn ($option, $key) => [$key => $option['label']]))
+                                            ->descriptions(fn ($get) => collect($get('search_result_options'))->mapWithKeys(fn ($option, $key) => [$key => $option['description'] ?? null]))
+                                            ->visible(fn ($get) => count($get('search_result_options') ?? []) > 0)
+                                            ->reactive()
+                                            ->live(debounce: 300)
+                                            ->afterStateUpdated(function($state, $set, $get) {
+                                                $this->checkInModel = null;
+                                                $set('card_id', null);
+                                                $set('selected_guest_name', null);
+                                                $set('selected_guest_meta', null);
+                                                $set('selected_guest_meta_label', null);
+                                                $set('show_selected_guest_details', false);
+
+                                                if(!in_array($state, ['new_daily', 'new_flexi', 'new_monthly'])) {
+                                                    $arr = explode('-', $state);
+                                                    $checkInType = $arr[0];
+                                                    $checkInId = $arr[1];
+
+                                                    switch($checkInType) {
+                                                        case 'monthly':
+                                                            $this->checkInModel = MonthlyUser::find($checkInId);
+
+                                                            if($this->checkInModel) {
+                                                                $set('card_id', $this->checkInModel->card_id);
+                                                                $set('selected_guest_name', $this->checkInModel->name);
+                                                                $set('selected_guest_meta_label', 'Date Finish');
+                                                                $set('selected_guest_meta', optional($this->checkInModel->date_finish_carbon)->format('F d, Y'));
+                                                                $set('show_selected_guest_details', true);
+                                                            }
+                                                            break;
+
+                                                        case 'flexi':
+                                                            $this->checkInModel = FlexiUser::find($checkInId);
+
+                                                            if($this->checkInModel) {
+                                                                $set('selected_guest_name', $this->checkInModel->name);
+                                                                $set('selected_guest_meta_label', 'Remaining Time');
+                                                                $set('selected_guest_meta', $this->checkInModel->remaining_time);
+                                                                $set('show_selected_guest_details', true);
+                                                            }
+                                                            break;
+
+                                                        default:
+                                                    }
+                                                }
+
+                                                if(in_array($state, ['new_flexi', 'new_monthly'])) {
+                                                    $this->newMember = true;
+                                                } else {
+                                                    $this->newMember = false;
+                                                }
+                                            })
+                                            ->columnSpan(1),
+                                        FormComponents\Fieldset::make('Guest Details')
+                                            ->schema([
+                                                FormComponents\Placeholder::make('selected_guest_name_display')
+                                                    ->label('Name')
+                                                    ->content(fn ($get) => $get('selected_guest_name'))
+                                                    ->helperText(fn ($get) => str_starts_with((string) $get('selected_option'), 'flexi-') ? 'Flexi User' : (str_starts_with((string) $get('selected_option'), 'monthly-') ? 'Monthly User' : null)),
+                                                FormComponents\Placeholder::make('selected_guest_meta_display')
+                                                    ->label(fn ($get) => $get('selected_guest_meta_label') ?: 'Details')
+                                                    ->content(fn ($get) => $get('selected_guest_meta'))
+                                                    ->helperText(fn ($get) => str_starts_with((string) $get('selected_option'), 'monthly-')
+                                                        ? optional($this->checkInModel?->date_finish_carbon)->diffForHumans()
+                                                        : null),
+                                            ])
+                                            ->columns(1)
+                                            ->columnSpan(1)
+                                            ->visible(fn ($get) => (bool) $get('show_selected_guest_details')),
+                                    ])
                                     ->visible(fn ($get) => count($get('search_result_options') ?? []) > 0)
-                                    ->reactive()
-                                    ->live(debounce: 300)
-                                    ->afterStateUpdated(function($state, $set, $get) {
-                                        $this->checkInModel = null;
-                                        $set('card_id', null);
-
-                                        if(!in_array($state, ['new_daily', 'new_flexi', 'new_monthly'])) {
-                                            $arr = explode('-', $state);
-                                            $checkInType = $arr[0];
-                                            $checkInId = $arr[1];
-
-                                            switch($checkInType) {
-                                                case 'monthly':
-                                                    $this->checkInModel = MonthlyUser::find($checkInId);
-                                                    $set('card_id', $this->checkInModel->card_id);
-                                                    break;
-
-                                                case 'flexi':
-                                                    $this->checkInModel = FlexiUser::find($checkInId);
-                                                    break;
-
-                                                default:
-                                            }
-                                        }
-
-                                        if(in_array($state, ['new_flexi', 'new_monthly'])) {
-                                            $this->newMember = true;
-                                        } else {
-                                            $this->newMember = false;
-                                        }
-                                    })
                             ]),
                         FormComponents\Wizard\Step::make('Detail')
                             ->schema([
