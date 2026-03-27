@@ -155,7 +155,7 @@ class ListDailySales extends ListRecords
                                                             if($this->checkInModel) {
                                                                 $set('card_id', $this->checkInModel->card_id);
                                                                 $set('selected_guest_name', $this->checkInModel->name);
-                                                                $set('selected_guest_meta_label', 'Date Finish');
+                                                                $set('selected_guest_meta_label', 'Expiry');
                                                                 $set('selected_guest_meta', optional($this->checkInModel->date_finish_carbon)->format('F d, Y'));
                                                                 $set('show_selected_guest_details', true);
                                                             }
@@ -191,7 +191,18 @@ class ListDailySales extends ListRecords
                                                     ->helperText(fn ($get) => str_starts_with((string) $get('selected_option'), 'flexi-') ? 'Flexi User' : (str_starts_with((string) $get('selected_option'), 'monthly-') ? 'Monthly User' : null)),
                                                 FormComponents\Placeholder::make('selected_guest_meta_display')
                                                     ->label(fn ($get) => $get('selected_guest_meta_label') ?: 'Details')
-                                                    ->content(fn ($get) => $get('selected_guest_meta'))
+                                                    ->content(function ($get) {
+                                                        $content = $get('selected_guest_meta');
+
+                                                        if (
+                                                            str_starts_with((string) $get('selected_option'), 'flexi-')
+                                                            && (($this->checkInModel?->remaining ?? 0) < 600)
+                                                        ) {
+                                                            return new HtmlString('<span style="color: #dc2626 !important;">' . e($content) . '</span>');
+                                                        }
+
+                                                        return $content;
+                                                    })
                                                     ->helperText(fn ($get) => str_starts_with((string) $get('selected_option'), 'monthly-')
                                                         ? optional($this->checkInModel?->date_finish_carbon)->diffForHumans()
                                                         : null),
