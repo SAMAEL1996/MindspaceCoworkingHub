@@ -77,67 +77,6 @@ class Index extends Component implements HasForms, HasTable, HasActions
     {
         return $table
             ->query($this->getTableQuery())
-            ->headerActions([
-                TableActions\Action::make('add')
-                    ->label('Book')
-                    ->icon('heroicon-o-plus-circle')
-                    ->modalWidth(MaxWidth::ThreeExtraLarge)
-                    ->modalHeading('Book Meeting Room')
-                    ->form(Conference::getForm())
-                    ->action(function($data) {
-                        $timeOfArrival = Carbon::parse($data['date'] . ' ' . $data['time']);
-                        if($timeOfArrival->copy()->subHour()->isPast()) {
-                            Notification::make()
-                                ->title('Danger')
-                                ->body('Date is already past.')
-                                ->danger()
-                                ->send();
-
-                            return false;
-                        }
-                        $timeOfLeave = $timeOfArrival->copy()->addHours((int)$data['duration']);
-
-                        $checkStart = $timeOfArrival->copy()->subMinutes(30);
-                        $checkEnd = $timeOfLeave->copy()->addMinutes(30);
-                        $checkDateTime = Conference::getCheckTimeSchedules($checkStart, $checkEnd);
-
-                        if($checkDateTime) {
-                            Notification::make()
-                                ->title('Danger')
-                                ->body('Date and time is taken.')
-                                ->danger()
-                                ->send();
-
-                            throw ValidationException::withMessages([
-                                'time' => 'Conflict detected.',
-                            ]);
-                        }
-
-                        $rate = Conference::getRateAmount((int)$data['package'], (int)$data['duration']);
-
-                        $conference = Conference::create([
-                            'package_id' => (int)$data['package'],
-                            'book_by' => auth()->user()->id,
-                            'start_at' => $timeOfArrival->copy(),
-                            'duration' => (int)$data['duration'],
-                            'event' => $data['event'],
-                            'members' => $data['members'],
-                            'host' => $data['host'],
-                            'contact_no' => $data['contact_no'],
-                            'status' => 'approve',
-                            'amount' => $rate
-                        ]);
-
-                        Notification::make()
-                            ->title('Success')
-                            ->body('Conference successfully booked.')
-                            ->success()
-                            ->send();
-
-                        return $conference;
-                    })
-                    ->visible(auth()->user()->can('create conferences'))
-            ])
             ->columns([
                 TableColumns\TextColumn::make('id')
                     ->label('ID')
@@ -194,3 +133,5 @@ class Index extends Component implements HasForms, HasTable, HasActions
         return view('livewire.conference.index');
     }
 }
+
+

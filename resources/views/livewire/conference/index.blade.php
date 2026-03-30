@@ -1,5 +1,11 @@
 <div>
-    <div class="w-100 flex justify-end mb-5">
+    <div class="w-100 flex justify-end mb-5 gap-3">
+        @can('create conferences')
+            <x-filament::button :href="\App\Filament\Resources\ConferenceResource::getUrl('create')" tag="a">
+                Book
+            </x-filament::button>
+        @endcan
+
         @if($viewList)
             <x-filament::button wire:click="changeView('list')" outlined>
                 View Calendar
@@ -14,21 +20,20 @@
     @if($viewList)
         <div class="fi-tabs flex max-w-full gap-x-1 overflow-x-auto mx-auto py-5 shadow-sm" role="tablist">
             <x-filament::tabs label="Content tabs">
-                
-            <x-filament::tabs.item
+                <x-filament::tabs.item
                     :active="$activeTab === 'upcoming'"
                     wire:click="setActiveTab('upcoming')"
                 >
                     Upcoming
                 </x-filament::tabs.item>
-                
+
                 <x-filament::tabs.item
                     :active="$activeTab === 'pending'"
                     wire:click="setActiveTab('pending')"
                 >
                     Pending
                 </x-filament::tabs.item>
-                
+
                 <x-filament::tabs.item
                     :active="$activeTab === 'past'"
                     wire:click="setActiveTab('past')"
@@ -42,7 +47,6 @@
                 >
                     All
                 </x-filament::tabs.item>
-                
             </x-filament::tabs>
         </div>
         {{ $this->table }}

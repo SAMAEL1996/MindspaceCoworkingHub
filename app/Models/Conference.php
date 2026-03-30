@@ -80,12 +80,27 @@ class Conference extends Model
             $start = $schedule->start_at_carbon;
             $end = $schedule->end_at_carbon;
 
-            if ($start->between($checkStart, $checkEnd) || $end->between($checkStart, $checkEnd)) {
+            if ($start->lt($checkEnd) && $end->gt($checkStart)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    public static function resolveScheduleStartTimes(array $data): array
+    {
+        $dates = !empty($data['recurring'])
+            ? ($data['recurring_dates'] ?? [])
+            : [$data['date'] ?? null];
+
+        return collect($dates)
+            ->filter()
+            ->map(fn ($date) => Carbon::parse($date . ' ' . $data['time']))
+            ->unique(fn (Carbon $dateTime) => $dateTime->format('Y-m-d H:i'))
+            ->sortBy(fn (Carbon $dateTime) => $dateTime->timestamp)
+            ->values()
+            ->all();
     }
 
     public function additionalCharges() {
@@ -216,14 +231,36 @@ class Conference extends Model
                 ->numeric()
                 ->minValue(1)
                 ->required(),
+            FormComponents\Toggle::make('recurring')
+                ->label('Recurring Dates')
+                ->live(),
             FormComponents\Fieldset::make('Schedule')
                 ->schema([
                     FormComponents\DatePicker::make('date')
                         ->label('Date')
-                        ->required()
+                        ->required(fn ($get) => ! $get('recurring'))
                         ->displayFormat('d F Y')
                         ->timezone('Asia/Manila')
+                        ->visible(fn ($get) => ! $get('recurring'))
                         ->native(false),
+                    FormComponents\ViewField::make('recurring_dates')
+                        ->label('Recurring Dates')
+                        ->view('forms.components.conference-booking.recurring-dates-calendar')
+                        ->visible(fn ($get) => (bool) $get('recurring'))
+                        ->dehydrated(true)
+                        ->default([])
+                        ->rules([
+                            fn ($get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                if (! $get('recurring')) {
+                                    return;
+                                }
+
+                                if (! is_array($value) || blank($value)) {
+                                    $fail('Please select at least one recurring date.');
+                                }
+                            },
+                        ])
+                        ->columnSpanFull(),
                     FormComponents\Select::make('time')
                         ->label('Time')
                         ->required()
@@ -257,7 +294,8 @@ class Conference extends Model
                 ->columnSpan('1')
                 ->extraAttributes([
                     'class' => 'flex justify-center items-center space-x-4',
-                ])
+                ]),
+
         ];
     }
 
@@ -508,3 +546,7 @@ class Conference extends Model
         ];
     }
 }
+
+
+
+
