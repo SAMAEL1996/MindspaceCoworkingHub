@@ -68,7 +68,7 @@ class CreateConference extends CreateRecord
             $this->halt();
         }
 
-        $rate = Conference::getRateAmount((int) $data['package'], (int) $data['duration']);
+        $rate = $data['total_amount'];
 
         $conferences = collect($scheduleStartTimes)
             ->map(function (Carbon $timeOfArrival) use ($data, $rate) {

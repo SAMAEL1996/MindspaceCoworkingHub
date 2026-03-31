@@ -242,7 +242,8 @@ class Conference extends Model
                         ->displayFormat('d F Y')
                         ->timezone('Asia/Manila')
                         ->visible(fn ($get) => ! $get('recurring'))
-                        ->native(false),
+                        ->native(false)
+                        ->placeholder('Select date'),
                     FormComponents\ViewField::make('recurring_dates')
                         ->label('Recurring Dates')
                         ->view('forms.components.conference-booking.recurring-dates-calendar')
@@ -277,13 +278,54 @@ class Conference extends Model
                             $rate = Conference::getRateAmount((int)$get('package'), (int)$state);
 
                             $set('total_amount', $rate);
-                        }),
+                        })
+                        ->placeholder('in hours'),
                 ])
                 ->columns(3)
                 ->columnSpan('full'),
-            FormComponents\TextInput::make('total_amount')
-                ->label('TOTAL AMOUNT TO PAID')
-                ->disabled()
+            FormComponents\Grid::make(2)
+                ->schema([
+                    FormComponents\TextInput::make('total_amount')
+                        ->label('TOTAL AMOUNT TO PAID')
+                        ->disabled()
+                        ->dehydrated()
+                        ->columnSpan('1')
+                        ->extraAttributes([
+                            'class' => 'flex justify-center items-center space-x-4',
+                        ])
+                        ->live(),
+                    FormComponents\Grid::make(3)
+                        ->schema([
+                            FormComponents\Toggle::make('apply_discount')
+                                ->label('Apply Discount')
+                                ->live()
+                                ->afterStateUpdated(function($state, $set, $get) {
+                                    if(!$state) {
+                                        $rate = Conference::getRateAmount((int)$get('package'), (int)$get('duration'));
+                                        $set('total_amount', $rate);
+                                        $set('discount', 0);
+                                    }
+                                })
+                                ->inline(false),
+                            FormComponents\TextInput::make('discount')
+                                ->label('Discount')
+                                ->minValue(0)
+                                ->numeric()
+                                ->visible(fn($get) => $get('apply_discount'))
+                                ->afterStateUpdated(function($state, $set, $get) {
+                                    $rate = Conference::getRateAmount((int)$get('package'), (int)$get('duration'));
+
+                                    $discount = (float) $state;
+                                    $discountValue = ($rate * $discount) / 100;
+                                    $total = $rate - $discountValue;
+
+                                    $set('total_amount', $total);
+                                })
+                                ->live()
+                                ->columnSpan(2)
+                        ])
+                        ->columnSpan(1)
+                ])
                 ->visible(function($get) {
                     if($get('package') && $get('duration')) {
                         return true;
@@ -291,10 +333,6 @@ class Conference extends Model
 
                     return false;
                 })
-                ->columnSpan('1')
-                ->extraAttributes([
-                    'class' => 'flex justify-center items-center space-x-4',
-                ]),
 
         ];
     }
