@@ -3,6 +3,7 @@
 use App\Models\Card;
 use App\Models\CashLog;
 use App\Models\DailySale;
+use App\Models\File;
 use Illuminate\Support\Facades\Cache;
 use App\Models\UserLocation;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,7 @@ use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Stevebauman\Location\Facades\Location;
 
 /*
@@ -68,6 +70,13 @@ Route::post('/save-location', function (Request $request) {
 
     return response()->json(['success' => true]);
 })->middleware('auth');
+
+Route::middleware('auth')->get('/files/{file}/download', function (File $file) {
+    abort_unless(auth()->user()?->hasRole('Super Administrator'), 403);
+    abort_unless($file->isDownloadable(), 404);
+
+    return Storage::disk('local')->download($file->path, $file->original_name);
+})->name('files.download');
 
 Route::get('/flexi', function() {
     $flexi = null;

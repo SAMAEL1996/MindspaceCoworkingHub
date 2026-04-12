@@ -144,6 +144,7 @@ class AdminPanelProvider extends PanelProvider
                                 ...Resources\ExpenseResource::getNavigationItems(),
                                 ...Resources\MaintenanceResource::getNavigationItems(),
                                 ...Resources\RoleResource::getNavigationItems(),
+                                ...Resources\FileResource::getNavigationItems(),
                                 ...Resources\PermissionResource::getNavigationItems(),
                             ]),
                         NavigationGroup::make()
