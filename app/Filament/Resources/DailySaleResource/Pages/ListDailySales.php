@@ -288,7 +288,7 @@ class ListDailySales extends ListRecords
                                             ->disabled()
                                             ->dehydrated(),
                                         FormComponents\TimePicker::make('time')
-                                            ->default(\Carbon\Carbon::now()->addMinutes(10))
+                                            ->default(\Carbon\Carbon::now()->addMinutes(15))
                                             ->native(false)
                                             ->displayFormat('h:i A')
                                             ->seconds(false)
