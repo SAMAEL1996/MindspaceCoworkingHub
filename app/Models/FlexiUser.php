@@ -326,7 +326,6 @@ class FlexiUser extends Model
                         ->label('Amount Paid')
                         ->numeric()
                         ->minValue(1)
-                        ->maxValue(1500)
                         ->required()
                         ->default(1500)
                         ->helperText('Flexi Pass Rate: PHP 1,500.00'),

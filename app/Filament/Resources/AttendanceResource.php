@@ -78,7 +78,7 @@ class AttendanceResource extends Resource
                         return $record->check_in_carbon->format(config('app.date_format'));
                     }),
                 TableColumns\TextColumn::make('check_out')
-                    ->label('Check In')
+                    ->label('Check Out')
                     ->formatStateUsing(function($state, $record) {
                         return $record->check_out ? $record->check_out_carbon->format(config('app.time_format')) : null;
                     })
