@@ -405,7 +405,7 @@ class ListDailySales extends ListRecords
                         'description' => 'Daily',
                         'apply_discount' => $applyDiscount,
                         'discount' => $discount,
-                        'time_in' => Carbon::now()->subMinutes(15),
+                        'time_in' => Carbon::now()->addMinutes(15),
                         'status' => true,
                         'is_flexi' => false,
                         'is_monthly' => false
