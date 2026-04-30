@@ -13,7 +13,7 @@ class UpdateRecord extends Seeder
     public function run(): void
     {
         \DB::table('activity_log')
-            ->where('subject_type', 'App\Models\SaleReport')
+            ->whereIn('subject_type', ['App\Models\SaleReport', 'App\Models\Sale'])
             ->delete();
     }
 }
