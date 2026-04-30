@@ -12,9 +12,8 @@ class UpdateRecord extends Seeder
      */
     public function run(): void
     {
-        $sales = \App\Models\DailySale::all();
-        foreach($sales as $sale) {
-            $sale->computeAmount();
-        }
+        \DB::table('activity_log')
+            ->where('subject_type', 'App\Models\SaleReport')
+            ->delete();
     }
 }
