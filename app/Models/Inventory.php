@@ -7,10 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUid;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Appstract\Meta\Metable;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Inventory extends Model
 {
-    use HasUid, SoftDeletes, Metable;
+    use HasUid, SoftDeletes, Metable, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults();
+    }
     
     protected $fillable = [
         'uid',

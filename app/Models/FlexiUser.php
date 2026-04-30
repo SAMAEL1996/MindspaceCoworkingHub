@@ -10,10 +10,17 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Filament\Forms\Components as FormComponents;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class FlexiUser extends Model
 {
-    use HasFactory, HasUid;
+    use HasFactory, HasUid, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults();
+    }
 
     public static function boot() {
         parent::boot();

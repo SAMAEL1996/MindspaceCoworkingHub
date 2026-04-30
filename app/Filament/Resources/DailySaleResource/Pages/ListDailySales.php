@@ -388,7 +388,7 @@ class ListDailySales extends ListRecords
                     $cardId = $data['card_id'];
 
                     $description = 'Daily';
-                    $timeIn = Carbon::parse($data['date'] . ' ' . $data['time']);
+                    $now = Carbon::now();
 
                     $applyDiscount = false;
                     $discount = 0;
@@ -405,7 +405,7 @@ class ListDailySales extends ListRecords
                         'description' => 'Daily',
                         'apply_discount' => $applyDiscount,
                         'discount' => $discount,
-                        'time_in' => $timeIn,
+                        'time_in' => Carbon::now()->subMinutes(15),
                         'status' => true,
                         'is_flexi' => false,
                         'is_monthly' => false
@@ -417,8 +417,10 @@ class ListDailySales extends ListRecords
                             $this->checkInModel->card_id = $data['card_id'];
 
                             $saleData['is_flexi'] = true;
+                            $saleData['description'] = 'Flexi';
                         } else {
                             $saleData['is_monthly'] = true;
+                            $saleData['description'] = 'Monthly';
                         }
                         $this->checkInModel->save();
 
@@ -444,6 +446,7 @@ class ListDailySales extends ListRecords
                                     'mode_of_payment' => $data['mode_of_payment']
                                 ]);
                                 $saleData['is_flexi'] = true;
+                                $saleData['description'] = 'Flexi';
                             } else {
                                 // FOR NEW MONTHLY
                                 $model = MonthlyUser::create([
@@ -460,6 +463,7 @@ class ListDailySales extends ListRecords
                                     'mode_of_payment' => $data['mode_of_payment']
                                 ]);
                                 $saleData['is_monthly'] = true;
+                                $saleData['description'] = 'Monthly';
                             }
 
                             $saleData['amount_paid'] = $data['amount'];

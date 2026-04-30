@@ -17,3 +17,5 @@ yarn-error.log
 /.idea
 /.vscode
 composer.lock
+/public/js/filament/
+/public/css/filament/
