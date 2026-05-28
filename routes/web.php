@@ -306,9 +306,7 @@ Route::get('/send-reminder', function() {
     $now = \Carbon\Carbon::now();
     $apikey = config('app.semaphore_key');
 
-    $content = "Please be advised that due to Meralco's pole relocation activity scheduled form May 28, 11:00 PM to May 29, 4:00 AM, 
-        Mindspace will temporarily close starting at 10:00 PM today and will resume operations at 6:00 AM the next day, May 29. 
-        Thank you for your understanding!";
+    $content = "Please be advised that due to Meralco's pole relocation activity scheduled form May 28, 11:00 PM to May 29, 4:00 AM, Mindspace will temporarily close starting at 10:00 PM today and will resume operations at 6:00 AM the next day, May 29. Thank you for your understanding!";
 
     // $monthlyUsers = \App\Models\MonthlyUser::whereNotNull('card_id')->where('is_expired', true)->get();
     // foreach($monthlyUsers as $monthly)
