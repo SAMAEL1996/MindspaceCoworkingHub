@@ -215,8 +215,8 @@
     </section>
 
     <!--
-        REVIEWS
-    -->
+                REVIEWS
+            -->
     <section class="wrapper bg-soft-primary">
         <div class="container py-7 py-md-8">
             <div class="row">
@@ -339,16 +339,36 @@
                                 <span class="ratings five mb-3"></span>
                                 <blockquote class="icon mb-0">
                                     <p>
-                                        “Finally found my co-working space! The workspace is comfortable, and the amenities
-                                        are great!”
+                                        “Finally found a coworking space near me as a struggling wfh corporate girlie! highly recommend ⭐️⭐️⭐️⭐️⭐️”
                                     </p>
                                     <div class="blockquote-details">
                                         <span class="avatar bg-pale-primary text-primary w-12 h-12">
-                                            <span>MP</span>
+                                            <span>AJ</span>
                                         </span>
                                         <!--<img class="rounded-circle w-12" src="./assets/img/avatars/te1.jpg" srcset="./assets/img/avatars/te1@2x.jpg 2x" alt="" />-->
                                         <div class="info">
-                                            <h5 class="mb-1">Michael Planas</h5>
+                                            <h5 class="mb-1">Angelika Jarin</h5>
+                                        </div>
+                                    </div>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item col-md-6 col-xl-4">
+                        <div class="card shadow-lg">
+                            <div class="card-body">
+                                <span class="ratings five mb-3"></span>
+                                <blockquote class="icon mb-0">
+                                    <p>
+                                        “Life-saving co-working space. Fast net and cozy place to work in.”
+                                    </p>
+                                    <div class="blockquote-details">
+                                        <span class="avatar bg-pale-primary text-primary w-12 h-12">
+                                            <span>HB</span>
+                                        </span>
+                                        <!--<img class="rounded-circle w-12" src="./assets/img/avatars/te1.jpg" srcset="./assets/img/avatars/te1@2x.jpg 2x" alt="" />-->
+                                        <div class="info">
+                                            <h5 class="mb-1">Hernan Borromeo</h5>
                                         </div>
                                     </div>
                                 </blockquote>
@@ -361,8 +381,8 @@
     </section>
 
     <!--
-        FAQ
-    -->
+                FAQ
+            -->
     <section class="wrapper bg-soft-primary">
         <div class="container py-7 py-md-8">
             <div class="row">
@@ -398,8 +418,10 @@
                             <div id="accordion-collapse-3-2" class="collapse" aria-labelledby="accordion-heading-3-2"
                                 data-bs-target="#accordion-3">
                                 <div class="card-body">
-                                    <p>We are located at 3rd floor Titan Bldg., The Promenade South, Brgy. Salawag, Dasmariñas Cavite.</p>
-                                    <p>Google Maps Pin: Mindspace Coworking Hub</p>
+                                    <p>We are located at 3rd floor Titan Bldg., The Promenade South, Brgy. Salawag,
+                                        Dasmariñas Cavite.</p>
+                                    <p>Google Maps Pin: <a href="https://maps.app.goo.gl/cNRnCpMjsgvkwLCY9"
+                                            target="_blank">Mindspace Coworking Hub</a></p>
                                 </div>
                             </div>
                         </div>
@@ -412,11 +434,29 @@
                             <div id="accordion-collapse-3-3" class="collapse" aria-labelledby="accordion-heading-3-3"
                                 data-bs-target="#accordion-3">
                                 <div class="card-body">
-                                    <p>
-                                        <a href="#" data-glightbox="title: Daily Pass;" data-gallery="g1">
-                                            <img src="{{ asset('img/rates/daily_pass.jpg') }}" alt="Daily Pass">
-                                        </a>
-                                    </p>
+                                    <div class="row mb-3 gx-md-6 gy-6 isotope">
+                                        <div class="project item col-md-12 col-xl-6 drinks events">
+                                            <figure class="overlay overlay-1 rounded"><a
+                                                    href="{{ asset('img/rates/daily_pass.jpg') }}" data-glightbox
+                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/daily_pass.jpg') }}"
+                                                        alt="" /></a>
+                                                <figcaption>
+                                                    <h5 class="from-top mb-0">Daily Pass</h5>
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <!-- /.project -->
+                                        <div class="project item col-md-12 col-xl-6 events">
+                                            <figure class="overlay overlay-1 rounded"><a
+                                                    href="{{ asset('img/rates/longterm_pass.jpg') }}" data-glightbox
+                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/longterm_pass.jpg') }}"
+                                                        alt="" /></a>
+                                                <figcaption>
+                                                    <h5 class="from-top mb-0">Longterm Pass</h5>
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -429,11 +469,51 @@
                             <div id="accordion-collapse-3-4" class="collapse" aria-labelledby="accordion-heading-3-4"
                                 data-bs-target="#accordion-3">
                                 <div class="card-body">
-                                    <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum
-                                        massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum.
-                                        Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis
-                                        natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed
-                                        odio dui. Cras justo odio, dapibus ac facilisis.</p>
+                                    <p>Yes, we have a meeting room. Here’s our rates and inclusions:</p>
+                                    <div class="row mb-3 gx-md-6 gy-6 isotope">
+                                        <div class="project item col-md-12 col-xl-6 drinks events">
+                                            <figure class="overlay overlay-1 rounded"><a
+                                                    href="{{ asset('img/rates/meeting_room_ads.jpg') }}" data-glightbox
+                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/meeting_room_ads.jpg') }}"
+                                                        alt="" /></a>
+                                                <figcaption>
+                                                    <h5 class="from-top mb-0">Meeting Room</h5>
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <!-- /.project -->
+                                        <div class="project item col-md-12 col-xl-6 events">
+                                            <figure class="overlay overlay-1 rounded"><a
+                                                    href="{{ asset('img/rates/meeting_room_inclusions.jpg') }}" data-glightbox
+                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/meeting_room_inclusions.jpg') }}"
+                                                        alt="" /></a>
+                                                <figcaption>
+                                                    <h5 class="from-top mb-0">Meeting Room</h5>
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <div class="project item col-md-12 col-xl-6 drinks events">
+                                            <figure class="overlay overlay-1 rounded"><a
+                                                    href="{{ asset('img/rates/meeting_room_rates_1.jpg') }}" data-glightbox
+                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/meeting_room_rates_1.jpg') }}"
+                                                        alt="" /></a>
+                                                <figcaption>
+                                                    <h5 class="from-top mb-0">Meeting Room Rates</h5>
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                        <!-- /.project -->
+                                        <div class="project item col-md-12 col-xl-6 events">
+                                            <figure class="overlay overlay-1 rounded"><a
+                                                    href="{{ asset('img/rates/meeting_room_rates_2.jpg') }}" data-glightbox
+                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/meeting_room_rates_2.jpg') }}"
+                                                        alt="" /></a>
+                                                <figcaption>
+                                                    <h5 class="from-top mb-0">Meeting Room Rates</h5>
+                                                </figcaption>
+                                            </figure>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

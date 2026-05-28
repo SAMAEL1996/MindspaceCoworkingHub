@@ -97,6 +97,24 @@ Route::post('/flexi', function(Request $request) {
     return redirect()->route('flexi.remaining-time', ['user' => $flexi->uid]);
 })->name('flexi.remaining-time');
 
+Route::get('/daily', function() {
+    $code = null;
+    $time = [];
+    $error = false;
+
+    return view('frontend.daily.show', compact('code', 'time', 'error'));
+})->name('daily.time-consume');
+
+Route::post('/daily', function(Request $request) {
+    $request->validate([
+        'contact' => ['required', 'regex:/^09\d{9}$/', 'size:11'],
+    ]);
+
+    $flexi = \App\Models\FlexiUser::where('contact_no', request('contact'))->where('status', true)->latest()->first();
+
+    return redirect()->route('daily.time-consume', ['user' => $flexi->uid]);
+})->name('daily.time-consume');
+
 // Route::get('/external/rfid-scan', function(Request $request) {
 //     $uidResult = $request->input('UIDresult');
 
@@ -282,4 +300,37 @@ Route::post('/clear-rfid-cache', function () {
     return response()->json([
         'success' => true,
     ]);
+});
+
+Route::get('/send-reminder', function() {
+    $now = \Carbon\Carbon::now();
+    $apikey = config('app.semaphore_key');
+
+    $content = "Please be advised that due to Meralco's pole relocation activity scheduled form May 28, 11:00 PM to May 29, 4:00 AM, 
+        Mindspace will temporarily close starting at 10:00 PM today and will resume operations at 6:00 AM the next day, May 29. 
+        Thank you for your understanding!";
+
+    // $monthlyUsers = \App\Models\MonthlyUser::whereNotNull('card_id')->where('is_expired', true)->get();
+    // foreach($monthlyUsers as $monthly)
+    // {
+        $params = [
+            'apikey' => $apikey,
+            'number' => '09159473345',
+            // 'number' => $monthly->contact_no,
+            'message' => $content,
+        ];
+
+        try {
+            $client = new \GuzzleHttp\Client();
+            $request = new \GuzzleHttp\Psr7\Request('POST', "https://api.semaphore.co/api/v4/messages?" . http_build_query($params));
+            $res = $client->sendAsync($request)->wait();
+        } catch (\Exception $e) {
+            // \Log::error($monthly->name.' send sms error on '.$now->copy()->format(config('app.date_time_carbon')) . ' with message: '. $e->getMessage());
+        }
+
+        // activity()
+        //     ->inLog('notifications')
+        //     ->performedOn($monthly)
+        //     ->log('<b>SMS Notification</b> <br>'.$content);
+    // }
 });
