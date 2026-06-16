@@ -64,6 +64,8 @@ class FlexiUser extends Model
         'status',
         'paid',
         'amount',
+        'remaining',
+        'mode_of_payment',
     ];
 
     protected $appends = [

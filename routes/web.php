@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 use Stevebauman\Location\Facades\Location;
+use App\Http\Controllers\TimeTrackController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,7 +27,7 @@ use Stevebauman\Location\Facades\Location;
 Route::get('/', function () {
     // return view('frontend.dashboard.index');
     return redirect()->to(Filament::getUrl());
-});
+})->name('home');
 
 Route::get('/test-index', function () {
     return view('frontend.dashboard.index');
@@ -35,6 +36,11 @@ Route::get('/test-index', function () {
 Route::get('/test', function () {
     abort(500);
 });
+
+// TIME TRACK
+Route::get('daily', [TimeTrackController::class, 'daily'])->name('time-track.daily');
+Route::get('flexi', [TimeTrackController::class, 'flexi'])->name('time-track.flexi');
+Route::get('monthly', [TimeTrackController::class, 'monthly'])->name('time-track.monthly');
 
 Route::get('/book-conference', \App\Filament\Pages\BookConference::class)->name('book-conference.index');
 Route::get('/book-conference/success', \App\Filament\Pages\SuccessBooking::class)->name('book-conference.success');
@@ -68,52 +74,6 @@ Route::post('/save-location', function (Request $request) {
 
     return response()->json(['success' => true]);
 })->middleware('auth');
-
-Route::get('/flexi', function() {
-    $flexi = null;
-    $time = [];
-    $error = false;
-    
-    if(request()->has('user')) {
-        $flexi = \App\Models\FlexiUser::where('uid', request('user'))->first();
-
-        if($flexi) {
-            $time = $flexi->getRemainingTimeArray();
-        } else {
-            $error = true;
-        }
-    }
-
-    return view('frontend.flexi.show', compact('flexi', 'time', 'error'));
-})->name('flexi.remaining-time');
-
-Route::post('/flexi', function(Request $request) {
-    $request->validate([
-        'contact' => ['required', 'regex:/^09\d{9}$/', 'size:11'],
-    ]);
-
-    $flexi = \App\Models\FlexiUser::where('contact_no', request('contact'))->where('status', true)->latest()->first();
-
-    return redirect()->route('flexi.remaining-time', ['user' => $flexi->uid]);
-})->name('flexi.remaining-time');
-
-Route::get('/daily', function() {
-    $code = null;
-    $time = [];
-    $error = false;
-
-    return view('frontend.daily.show', compact('code', 'time', 'error'));
-})->name('daily.time-consume');
-
-Route::post('/daily', function(Request $request) {
-    $request->validate([
-        'contact' => ['required', 'regex:/^09\d{9}$/', 'size:11'],
-    ]);
-
-    $flexi = \App\Models\FlexiUser::where('contact_no', request('contact'))->where('status', true)->latest()->first();
-
-    return redirect()->route('daily.time-consume', ['user' => $flexi->uid]);
-})->name('daily.time-consume');
 
 // Route::get('/external/rfid-scan', function(Request $request) {
 //     $uidResult = $request->input('UIDresult');
@@ -302,7 +262,8 @@ Route::post('/clear-rfid-cache', function () {
     ]);
 });
 
-Route::get('/send-reminder', function() {
+Route::get('/send-test-reminder', function() {
+    abort(500);
     $now = \Carbon\Carbon::now();
     $apikey = config('app.semaphore_key');
 

@@ -4,11 +4,36 @@
             <h1 class="display-2 mb-3">Welcome Mindspacer!</h1>
             <p class="lead px-lg-7 px-xl-7 px-xxl-6 pb-4">Please enter your Mindspace ID number.</p>
             <div class="form-floating mb-4">
-                <input id="form_name" type="text" class="form-control" required wire:model="code" placeholder="MS-D-000">
+                <input
+                    id="form_name"
+                    type="text"
+                    class="form-control"
+                    required
+                    wire:model="code"
+                    placeholder="MS-D-0**"
+                    maxlength="8"
+                    autocomplete="off"
+                    spellcheck="false"
+                    pattern="MS-D-0[0-9]{2}"
+                    title="Use the format MS-D-0**"
+                    style="text-transform: uppercase;"
+                    onfocus="if (!this.value) { this.value = 'MS-D-0'; }"
+                    oninput="
+                        const prefix = 'MS-D-0';
+                        const upperValue = this.value.toUpperCase();
+                        let suffix = upperValue.startsWith(prefix)
+                            ? upperValue.slice(prefix.length)
+                            : upperValue.replace(/[^A-Z0-9]/g, '').replace(/^MSD0?/, '');
+
+                        suffix = suffix.replace(/\D/g, '').slice(0, 2);
+                        this.value = prefix + suffix;
+                    "
+                >
                 <label for="form_name">ID No.</label>
                 @error('code')
                     <div class="fst-italic text-danger"> {{ $message }} </div>
                 @enderror
+                <div class="fst-italic text-muted"> Format: MS-D-0** </div>
             </div>
             <div class="col-12 text-center">
                 <button wire:click="checkTime" class="btn btn-primary rounded-pill btn-send mb-3" wire:loading.attr="disabled">Check Time</button>

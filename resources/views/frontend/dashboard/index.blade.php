@@ -70,7 +70,7 @@
                         </div>
                     </div>
                     <div class="col-lg-6 image-wrapper bg-image bg-cover rounded d-none d-md-block"
-                        data-image-src="https://ik.imagekit.io/wow2navhj/Mindspace/studying-04.jpg?updatedAt=1752539053018"
+                        data-image-src="https://ik.imagekit.io/wow2navhj/Mindspace/studying-04-v3.jpg?updatedAt=1781399089151"
                         data-cues="fadeIn">
                     </div>
                 </div>
@@ -183,7 +183,7 @@
                                         class="uil uil-bullseye"></i></span></span>
                         </div>
                         <div>
-                            <h4 class="mb-1"><a href="" class="hover more">Daily Pass</a></h4>
+                            <h4 class="mb-1"><a href="{{ route('time-track.daily') }}" class="hover more">Daily Pass</a></h4>
                             <p class="mb-0">Track how many hours you’ve used today and see if you’re close to your limit.
                             </p>
                         </div>
@@ -194,7 +194,7 @@
                                         class="uil uil-bullseye"></i></span></span>
                         </div>
                         <div>
-                            <h4 class="mb-1"><a href="{{ route('flexi.remaining-time') }}" class="hover more">Flexi
+                            <h4 class="mb-1"><a href="{{ route('time-track.daily') }}" class="hover more">Flexi
                                     Pass</a></h4>
                             <p class="mb-0">View your remaining hours, usage history, and expiration-free balance.</p>
                         </div>
@@ -205,7 +205,7 @@
                                         class="uil uil-bullseye"></i></span></span>
                         </div>
                         <div>
-                            <h4 class="mb-1"><a href="" class="hover more">Monthly Pass</a></h4>
+                            <h4 class="mb-1"><a href="{{ route('time-track.monthly') }}" class="hover more">Monthly Pass</a></h4>
                             <p class="mb-0">Track your daily visits and get a summary of your access history.</p>
                         </div>
                     </div>

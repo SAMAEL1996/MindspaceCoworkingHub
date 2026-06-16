@@ -3,14 +3,22 @@
         <div class="row gx-lg-0 gy-6">
             <div class="col-lg-4">
                 <div class="widget">
-                    <img class="mb-4" src="{{ asset('img/mindspace_light_banner_no_bg.png') }}" srcset="{{ asset('img/mindspace_light_banner_no_bg.png') }} 2x" style="width: 300px; height: 80px" alt="Mindspace Coworking Hub" />
+                    <a href="{{ route('home') }}">
+                        <img 
+                            class="mb-4" 
+                            src="{{ asset('img/mindspace_light_banner_no_bg.png') }}" 
+                            srcset="{{ asset('img/mindspace_light_banner_no_bg.png') }} 2x" 
+                            style="width: 300px; height: 80px" 
+                            alt="Mindspace Coworking Hub" 
+                        />
+                    </a>
                     <p class="lead mb-0">"Revamped meeting rooms, 24/7 access, and comfortable seating—your perfect work and meeting space anytime inspiration strikes."</p>
                 </div>
                 <!-- /.widget -->
             </div>
             <!-- /column -->
             <div class="col-lg-3 offset-lg-2">
-                <div class="widget">
+                <div class="widget" hidden>
                     <div class="d-flex flex-row">
                         <div>
                             <div class="icon text-primary fs-28 me-4 mt-n1"> <i class="uil uil-phone-volume"></i> </div>
