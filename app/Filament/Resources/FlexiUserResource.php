@@ -75,7 +75,11 @@ class FlexiUserResource extends Resource
                     ->formatStateUsing(function($record) {
                         return $record->remaining_time;
                     })
-                    ->sortable(),
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query
+                            ->reorder()
+                            ->orderBy('remaining', $direction);
+                    }),
                 TableColumns\TextColumn::make('expired_at')
                     ->label('Expired At')
                     ->formatStateUsing(function($record, $state) {
@@ -86,6 +90,16 @@ class FlexiUserResource extends Resource
                     })
                     ->sortable()
                     ->placeholder('No expiry'),
+                TableColumns\TextColumn::make('updated_at')
+                    ->label('Updated At')
+                    ->formatStateUsing(function ($record, $state) {
+                        return $state ? $record->updated_at->format(config('app.date_format')) : null;
+                    })
+                    ->description(function ($record, $state) {
+                        return $state ? $record->updated_at->format(config('app.time_format')) : null;
+                    })
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TableColumns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -107,8 +121,56 @@ class FlexiUserResource extends Resource
                     })
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('updated_at')
+                    ->label('Updated At')
+                    ->form([
+                        FormComponents\Fieldset::make('Updated At')
+                            ->schema([
+                                FormComponents\DatePicker::make('from')->label('From'),
+                                FormComponents\DatePicker::make('to')->label('To'),
+                            ]),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['from'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('updated_at', '>=', $date))
+                        ->when($data['to'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('updated_at', '<=', $date))),
+                Tables\Filters\Filter::make('start_at')
+                    ->label('Date Start')
+                    ->form([
+                        FormComponents\Fieldset::make('Date Start')
+                            ->schema([
+                                FormComponents\DatePicker::make('from')->label('From'),
+                                FormComponents\DatePicker::make('to')->label('To'),
+                            ]),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['from'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('start_at', '>=', $date))
+                        ->when($data['to'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('start_at', '<=', $date))),
+                Tables\Filters\Filter::make('expired_at')
+                    ->label('Expired At')
+                    ->form([
+                        FormComponents\Fieldset::make('Expired At')
+                            ->schema([
+                                FormComponents\DatePicker::make('from')->label('From'),
+                                FormComponents\DatePicker::make('to')->label('To'),
+                            ]),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['from'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('expired_at', '>=', $date))
+                        ->when($data['to'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('expired_at', '<=', $date))),
+                Tables\Filters\Filter::make('created_at')
+                    ->label('Created At')
+                    ->form([
+                        FormComponents\Fieldset::make('Created At')
+                            ->schema([
+                                FormComponents\DatePicker::make('from')->label('From'),
+                                FormComponents\DatePicker::make('to')->label('To'),
+                            ]),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['from'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date))
+                        ->when($data['to'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date))),
             ])
+            ->filtersTriggerAction(fn(Tables\Actions\Action $action) => $action->button()->label('Filters'))
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make()
