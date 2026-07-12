@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Session;
 use Stevebauman\Location\Facades\Location;
 use App\Http\Controllers\TimeTrackController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 /*
 |--------------------------------------------------------------------------
@@ -292,4 +294,26 @@ Route::get('/send-test-reminder', function() {
         //     ->performedOn($monthly)
         //     ->log('<b>SMS Notification</b> <br>'.$content);
     // }
+});
+
+// FOR PORTFOLIO
+Route::get('external/sign-in', function() {
+    $token = request('token');
+
+    if ($token) {
+        $user = \App\Models\User::where('email', 'teststaff@mindspace.com')->first();
+
+        if ($user) {
+            $envToken = config('portfolio.token');
+            $md5Token = md5("{$user->email}:{$envToken}");
+
+            if ($md5Token == $token) {
+                Auth::login($user);
+
+                return Redirect::to(filament()->getPanel('admin')->getUrl());
+            }
+        }
+    }
+
+    abort(404);
 });
