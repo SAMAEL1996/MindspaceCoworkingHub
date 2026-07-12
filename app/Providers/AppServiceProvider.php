@@ -12,6 +12,7 @@ use App\Filament\Pages\Profile;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Livewire\Livewire;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Super Administrator') ? true : null;
+        });
+
         // FilamentView::registerRenderHook(
         //     PanelsRenderHook::USER_MENU_BEFORE,
         //     fn (): string => 'Logged In As:  '. filament()->auth()->user()->name,
