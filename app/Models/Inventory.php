@@ -12,7 +12,7 @@ use Spatie\Activitylog\LogOptions;
 
 class Inventory extends Model
 {
-    use HasUid, SoftDeletes, Metable, LogsActivity;
+    use HasFactory, HasUid, SoftDeletes, Metable, LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {

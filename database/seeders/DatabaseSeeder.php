@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             CardSeeder::class,
             StaffSeeder::class,
+            FactorySeeder::class,
         ]);
     }
 }

@@ -8,7 +8,7 @@ use App\Traits\HasUid;
 
 class Maintenance extends Model
 {
-    use HasUid;
+    use HasFactory, HasUid;
 
     protected $fillable = [
         'title',

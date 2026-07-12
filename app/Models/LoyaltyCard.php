@@ -8,7 +8,7 @@ use App\Traits\HasUid;
 
 class LoyaltyCard extends Model
 {
-    use HasUid;
+    use HasFactory, HasUid;
 
     protected $fillable = [
         'uid',

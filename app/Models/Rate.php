@@ -10,7 +10,7 @@ use Spatie\Activitylog\LogOptions;
 
 class Rate extends Model
 {
-    use HasUid, LogsActivity;
+    use HasFactory, HasUid, LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {
