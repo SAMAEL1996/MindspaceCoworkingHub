@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DailySale extends Model
 {
-    use HasFactory, HasUid, Metable;
+    use HasFactory, HasUid, Metable, SoftDeletes;
 
     public static function boot() {
         parent::boot();
