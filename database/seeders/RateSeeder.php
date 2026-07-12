@@ -12,7 +12,7 @@ class RateSeeder extends Seeder
      */
     public function run(): void
     {
-        $data1 = [
+        $data = [
             [
                 'type' => 'Daily',
                 'name' => 'Hourly Pass',
@@ -68,10 +68,7 @@ class RateSeeder extends Seeder
                 'validity' => 30,
                 'price' => 5500,
                 'status' => true
-            ]
-        ];
-
-        $data2 = [
+            ],
             [
                 'type' => 'Conference',
                 'name' => 'Package 1 - 3hrs',
@@ -138,7 +135,7 @@ class RateSeeder extends Seeder
             ],
         ];
 
-        foreach($data2 as $item) {
+        foreach($data as $item) {
             $rate = \App\Models\Rate::firstOrCreate(
                 ['name' => $item['name']],
                 [
