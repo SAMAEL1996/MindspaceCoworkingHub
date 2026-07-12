@@ -9,7 +9,7 @@ use App\Traits\HasUid;
 use Filament\Forms\Components as FormComponents;
 use Filament\Infolists\Components as InfolistComponents;
 use Carbon\Carbon;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
 class Conference extends Model

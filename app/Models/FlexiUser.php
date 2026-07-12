@@ -10,7 +10,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Filament\Forms\Components as FormComponents;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
 class FlexiUser extends Model

@@ -9,7 +9,7 @@ use App\Traits\HasUid;
 use Filament\Forms\Components as FormComponents;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request as GuzzleRequest;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
 class MonthlyUser extends Model
