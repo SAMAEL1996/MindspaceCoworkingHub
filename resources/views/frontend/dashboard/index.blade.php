@@ -184,7 +184,7 @@
                         </div>
                         <div>
                             <h4 class="mb-1"><a href="{{ route('time-track.daily') }}" class="hover more">Daily Pass</a></h4>
-                            <p class="mb-0">Track how many hours you’ve used today and see if you’re close to your limit.
+                            <p class="mb-0">Track how many hours you’ve used today and see if you’re close to your limit. <span class="text-danger fst-italic">*unavailable</span>
                             </p>
                         </div>
                     </div>
@@ -205,8 +205,8 @@
                                         class="uil uil-bullseye"></i></span></span>
                         </div>
                         <div>
-                            <h4 class="mb-1"><a href="{{ route('time-track.monthly') }}" class="hover more">Monthly Pass</a></h4>
-                            <p class="mb-0">Track your daily visits and get a summary of your access history.</p>
+                            <h4 class="mb-1"><a href="Javascript:void(0);" class="hover more">Monthly Pass</a></h4>
+                            <p class="mb-0">Track your daily visits and get a summary of your access history. <span class="text-danger fst-italic">*unavailable</span></p>
                         </div>
                     </div>
                 </div>

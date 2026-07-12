@@ -27,8 +27,8 @@ use Illuminate\Support\Facades\Redirect;
 */
 
 Route::get('/', function () {
-    // return view('frontend.dashboard.index');
-    return redirect()->to(Filament::getUrl());
+    return view('frontend.dashboard.index');
+    // return redirect()->to(Filament::getUrl());
 })->name('home');
 
 Route::get('/test-index', function () {
