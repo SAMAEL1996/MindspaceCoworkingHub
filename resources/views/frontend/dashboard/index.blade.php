@@ -194,7 +194,7 @@
                                         class="uil uil-bullseye"></i></span></span>
                         </div>
                         <div>
-                            <h4 class="mb-1"><a href="{{ route('time-track.daily') }}" class="hover more">Flexi
+                            <h4 class="mb-1"><a href="{{ route('time-track.flexi') }}" class="hover more">Flexi
                                     Pass</a></h4>
                             <p class="mb-0">View your remaining hours, usage history, and expiration-free balance.</p>
                         </div>
