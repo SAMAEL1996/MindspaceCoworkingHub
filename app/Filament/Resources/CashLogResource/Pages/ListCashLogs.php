@@ -4,11 +4,13 @@ namespace App\Filament\Resources\CashLogResource\Pages;
 
 use App\Filament\Resources\CashLogResource;
 use App\Models\CashLog;
+use App\Models\CashLogMoneyCalculator;
+use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components as FormComponents;
-use Illuminate\Support\Facades\Session;
 
 class ListCashLogs extends ListRecords
 {
@@ -19,33 +21,30 @@ class ListCashLogs extends ListRecords
         return [
             Actions\Action::make('cash-in')
                 ->modalHeading('Cash In')
-                ->form([
-                    FormComponents\TextInput::make('amount')
-                        ->label('Amount')
-                        ->required()
-                        ->numeric()
-                        ->minValue(0),
-                ])
-                ->action(function($data) {
+                ->form($this->getMoneyCalculatorFormSchema())
+                ->action(function (array $data) {
                     $user = auth()->user();
+                    $amount = CashLogMoneyCalculator::calculateAmount($data);
 
-                    $cashHistory = $user->cashLogs()->create([
-                        'cash_in' => $data['amount'],
-                        'date_cash_in' => \Carbon\Carbon::now(),
-                        'total_sales' => 0.00
+                    $cashLog = $user->cashLogs()->create([
+                        'cash_in' => $amount,
+                        'date_cash_in' => Carbon::now(),
+                        'total_sales' => 0.00,
                     ]);
 
-                    return $cashHistory;
+                    CashLogMoneyCalculator::storeForCashLog($cashLog, 'cash_in', $data);
+
+                    return $cashLog;
                 })
-                ->modalWidth(MaxWidth::Small)
-                ->visible(function() {
+                ->modalWidth(MaxWidth::Large)
+                ->visible(function () {
                     $user = auth()->user();
 
-                    if(CashLog::hasActiveCashier()) {
+                    if (CashLog::hasActiveCashier()) {
                         return false;
                     }
 
-                    if(!$user->staff?->hasActiveAttendance()) {
+                    if (! $user->staff?->hasActiveAttendance()) {
                         return false;
                     }
 
@@ -53,42 +52,71 @@ class ListCashLogs extends ListRecords
                 }),
             Actions\Action::make('cash-out')
                 ->modalHeading('Cash Out')
-                ->form([
-                    FormComponents\TextInput::make('amount')
-                        ->label('Amount')
-                        ->required()
-                        ->numeric()
-                        ->minValue(0),
-                ])
-                ->action(function($data) {
+                ->form($this->getMoneyCalculatorFormSchema())
+                ->action(function (array $data) {
                     $user = auth()->user();
+                    $amount = CashLogMoneyCalculator::calculateAmount($data);
 
                     $latestCashHistory = $user->cashLogs()->latest()->first();
                     $debits = $latestCashHistory->items()->where('in', 0.00)->sum('out');
                     $credts = $latestCashHistory->items()->where('out', 0.00)->sum('in');
 
-                    $total = (double)$latestCashHistory->cash_in + (double)$credts - (double)$debits;
+                    $total = (double) $latestCashHistory->cash_in + (double) $credts - (double) $debits;
 
-                    $cashHistory = $latestCashHistory->update([
-                        'cash_out' => $data['amount'],
-                        'date_cash_out' => \Carbon\Carbon::now(),
-                        'total_sales' =>  $data['amount'] - $total,
-                        'status' => false
+                    $latestCashHistory->update([
+                        'cash_out' => $amount,
+                        'date_cash_out' => Carbon::now(),
+                        'total_sales' => $amount - $total,
+                        'status' => false,
                     ]);
 
-                    return $cashHistory;
+                    CashLogMoneyCalculator::storeForCashLog($latestCashHistory, 'cash_out', $data);
+
+                    return $latestCashHistory;
                 })
-                ->modalWidth(MaxWidth::Small)
-                ->visible(function() {
+                ->modalWidth(MaxWidth::Large)
+                ->visible(function () {
                     $user = auth()->user();
 
-                    if(CashLog::hasActiveCashier()) {
-                        return Cashlog::where('status', true)->where('user_id', $user->id)->latest()->exists();
+                    if (CashLog::hasActiveCashier()) {
+                        return CashLog::where('status', true)->where('user_id', $user->id)->latest()->exists();
                     }
 
                     return false;
                 }),
         ];
+    }
+
+    protected function getMoneyCalculatorFormSchema(): array
+    {
+        $sections = [];
+
+        foreach (CashLogMoneyCalculator::formGroups() as $section => $fields) {
+            $inputs = [];
+
+            foreach ($fields as $field => $definition) {
+                $inputs[] = $this->getMoneyCalculatorInput($field, $definition['label']);
+            }
+
+            $sections[] = FormComponents\Section::make($section)
+                ->schema([
+                    FormComponents\Grid::make(2)
+                        ->schema($inputs),
+                ]);
+        }
+
+        return $sections;
+    }
+
+    protected function getMoneyCalculatorInput(string $name, string $label): TextInput
+    {
+        return FormComponents\TextInput::make($name)
+            ->label($label)
+            ->required()
+            ->numeric()
+            ->default(0)
+            ->step(1)
+            ->minValue(0);
     }
 
     public function getBreadcrumbs(): array

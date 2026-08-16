@@ -41,6 +41,11 @@ class CashLog extends Model
         return $this->hasMany(\App\Models\CashLogItem::class, 'cash_log_id');
     }
 
+    public function moneyCalculators()
+    {
+        return $this->hasMany(\App\Models\CashLogMoneyCalculator::class, 'cash_log_id');
+    }
+
     public function getCreditAttribute()
     {
         return $this->items()->sum('in');
