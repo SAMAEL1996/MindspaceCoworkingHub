@@ -7,10 +7,13 @@ use App\Models\CashLog;
 use App\Models\CashLogMoneyCalculator;
 use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components as FormComponents;
+use Illuminate\Support\HtmlString;
 
 class ListCashLogs extends ListRecords
 {
@@ -36,7 +39,7 @@ class ListCashLogs extends ListRecords
 
                     return $cashLog;
                 })
-                ->modalWidth(MaxWidth::Large)
+                ->modalWidth(MaxWidth::SevenExtraLarge)
                 ->visible(function () {
                     $user = auth()->user();
 
@@ -74,7 +77,7 @@ class ListCashLogs extends ListRecords
 
                     return $latestCashHistory;
                 })
-                ->modalWidth(MaxWidth::Large)
+                ->modalWidth(MaxWidth::SevenExtraLarge)
                 ->visible(function () {
                     $user = auth()->user();
 
@@ -99,13 +102,32 @@ class ListCashLogs extends ListRecords
             }
 
             $sections[] = FormComponents\Section::make($section)
+                ->columnSpan(1)
                 ->schema([
                     FormComponents\Grid::make(2)
                         ->schema($inputs),
                 ]);
         }
 
-        return $sections;
+        return [
+            FormComponents\Hidden::make('calculated_total')
+                ->default(0)
+                ->dehydrated(false),
+            FormComponents\Grid::make([
+                'default' => 1,
+                'xl' => 2,
+            ])
+                ->schema($sections),
+            FormComponents\Placeholder::make('calculated_total_display')
+                ->hiddenLabel()
+                ->columnSpanFull()
+                ->content(fn (Get $get): HtmlString => new HtmlString(
+                    $this->getMoneyCalculatorTotalMarkup((float) ($get('calculated_total') ?? 0))
+                ))
+                ->extraAttributes([
+                    'class' => 'mx-auto w-full max-w-xl pt-2',
+                ]),
+        ];
     }
 
     protected function getMoneyCalculatorInput(string $name, string $label): TextInput
@@ -115,8 +137,41 @@ class ListCashLogs extends ListRecords
             ->required()
             ->numeric()
             ->default(0)
+            ->live(debounce: 300)
+            ->afterStateHydrated(fn (Get $get, Set $set) => $this->syncMoneyCalculatorTotal($get, $set))
+            ->afterStateUpdated(fn (Get $get, Set $set) => $this->syncMoneyCalculatorTotal($get, $set))
             ->step(1)
             ->minValue(0);
+    }
+
+    protected function calculateMoneyCalculatorTotal(Get $get): float
+    {
+        $data = [];
+
+        foreach (CashLogMoneyCalculator::formGroups() as $fields) {
+            foreach (array_keys($fields) as $field) {
+                $data[$field] = $get($field);
+            }
+        }
+
+        return CashLogMoneyCalculator::calculateAmount($data);
+    }
+
+    protected function syncMoneyCalculatorTotal(Get $get, Set $set): void
+    {
+        $set('calculated_total', $this->calculateMoneyCalculatorTotal($get));
+    }
+
+    protected function getMoneyCalculatorTotalMarkup(float $total): string
+    {
+        $formattedTotal = number_format($total, 2);
+
+        return <<<HTML
+            <div class="flex w-full flex-col items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 px-6 py-5 text-center shadow-sm dark:border-white/10 dark:bg-white/5">
+                <div class="text-xs font-semibold uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Total Amount</div>
+                <div class="mt-2 text-4xl font-bold tracking-tight text-gray-950 dark:text-white">PHP {$formattedTotal}</div>
+            </div>
+        HTML;
     }
 
     public function getBreadcrumbs(): array
