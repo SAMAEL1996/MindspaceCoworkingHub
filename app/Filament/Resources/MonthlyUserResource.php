@@ -100,6 +100,10 @@ class MonthlyUserResource extends Resource
                             return redirect()->to(MonthlyUserResource::getUrl('index'));
                         })
                         ->visible(function($record) {
+                            if(!auth()->user()->hasRole('Super Administrator')) {
+                                return false;
+                            }
+
                             return $record->is_expired ? false : true;
                         }),
                     Tables\Actions\Action::make('Send Reminder')
@@ -135,7 +139,10 @@ class MonthlyUserResource extends Resource
                         }),
                     Tables\Actions\EditAction::make()
                         ->visible(auth()->user()->hasRole('Super Administrator')),
-                    Tables\Actions\Action::make('Re-new Pass')
+                    Tables\Actions\Action::make('renew-pass')
+                        ->label('Renew Pass')
+                        ->color('warning')
+                        ->icon('heroicon-o-arrow-path')
                         ->form([
                             FormComponents\Select::make('rate_id')
                                 ->label('Package')
