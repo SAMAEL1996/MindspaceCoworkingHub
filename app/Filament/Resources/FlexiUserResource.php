@@ -16,6 +16,11 @@ use Filament\Tables\Columns as TableColumns;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components as FormComponents;
 use Filament\Support\Enums\MaxWidth;
+use Carbon\Carbon;
+use App\Filament\Resources\DailySaleResource;
+use App\Models\DailySale;
+use App\Models\Card;
+use App\Models\CashLog;
 
 class FlexiUserResource extends Resource
 {
@@ -57,6 +62,7 @@ class FlexiUserResource extends Resource
                         return $state ? $record->card->code : null;
                     }),
                 TableColumns\TextColumn::make('name')
+                    ->wrap()
                     ->searchable(),
                 TableColumns\TextColumn::make('contact_no')
                     ->label('Contact')
@@ -175,7 +181,10 @@ class FlexiUserResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make()
                         ->visible(auth()->user()->hasRole('Super Administrator')),
-                    Tables\Actions\Action::make('Renew Pass')
+                    Tables\Actions\Action::make('renew-pass')
+                        ->label('Renew Pass')
+                        ->color('warning')
+                        ->icon('heroicon-o-arrow-path')
                         ->form([
                             FormComponents\Select::make('rate_id')
                                 ->label('Package')
@@ -260,6 +269,74 @@ class FlexiUserResource extends Resource
                         })
                         ->visible(function($record) {
                             return $record->status ? true : false;
+                        }),
+                    Tables\Actions\Action::make('check-in')
+                        ->label('Guest Check In')
+                        ->color('info')
+                        ->icon('heroicon-o-check-badge')
+                        ->modalHeading('Check In Flexi')
+                        ->modalDescription(fn($record) => $record->name)
+                        ->modalWidth(MaxWidth::Medium)
+                        ->form([
+                            FormComponents\Select::make('card_id')
+                                ->label('Card ID')
+                                ->native(false)
+                                ->placeholder('Select Card ID')
+                                ->searchable()
+                                ->options(function() {
+                                    $takenIds = DailySale::whereNull('time_out')->pluck('card_id')->toArray();
+
+                                    return Card::whereNotIn('id', $takenIds)->where('type', 'Daily')->pluck('code', 'id');
+                                }),
+                        ])
+                        ->action(function($record, $data) {
+                            $user = auth()->user();
+                            $staff = $user->staff;
+                            $now = Carbon::now();
+
+                            // daily sale data
+                            $saleData = [
+                                'date' => $now->copy(),
+                                'time_in_staff_id' => $staff->id,
+                                'card_id' => $data['card_id'],
+                                'name' => $record->name,
+                                'description' => 'Flexi',
+                                'apply_discount' => true,
+                                'discount' => 100,
+                                'time_in' => $now->copy()->addMinutes(15),
+                                'status' => true,
+                                'is_flexi' => true,
+                                'is_monthly' => false
+                            ];
+
+                            // create daily sale record
+                            $dailyPass = \App\Models\DailySale::create($saleData);
+
+                            $record->update([
+                                'card_id' => $data['card_id'],
+                                'is_active' => true
+                            ]);
+
+                            Notification::make()
+                                ->title('Success')
+                                ->body("Monthly user successfully checked in.")
+                                ->success()
+                                ->send();
+
+                            return redirect()->to(DailySaleResource::getUrl('index'));
+                        })
+                        ->visible(function($record) {
+                            $user = auth()->user();
+            
+                            if($user->hasRole('Super Administrator')) {
+                                return true;
+                            }
+
+                            if($record->is_active) {
+                                return false;
+                            }
+            
+                            return CashLog::where('status', true)->where('user_id', $user->id)->exists();
                         }),
                 ])
                 ->icon('heroicon-o-ellipsis-horizontal')

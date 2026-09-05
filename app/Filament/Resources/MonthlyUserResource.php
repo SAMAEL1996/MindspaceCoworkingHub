@@ -18,6 +18,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Filament\Forms\Components as FormComponents;
 use Filament\Support\Enums\MaxWidth;
+use Carbon\Carbon;
+use App\Filament\Resources\DailySaleResource;
+use App\Models\CashLog;
 
 class MonthlyUserResource extends Resource
 {
@@ -49,6 +52,7 @@ class MonthlyUserResource extends Resource
                     })
                     ->searchable(),
                 TableColumns\TextColumn::make('name')
+                    ->wrap()
                     ->searchable(),
                 TableColumns\TextColumn::make('contact_no')
                     ->label('Contact'),
@@ -215,6 +219,59 @@ class MonthlyUserResource extends Resource
                                 ->send();
 
                             return redirect()->to(MonthlyUserResource::getUrl('index'));
+                        }),
+                    Tables\Actions\Action::make('check-in')
+                        ->label('Guest Check In')
+                        ->color('info')
+                        ->icon('heroicon-o-check-badge')
+                        ->modalHeading('Check In Monthly')
+                        ->modalDescription(fn($record) => $record->name)
+                        ->requiresConfirmation()
+                        ->action(function($record) {
+                            $user = auth()->user();
+                            $staff = $user->staff;
+                            $now = Carbon::now();
+
+                            // daily sale data
+                            $saleData = [
+                                'date' => $now->copy(),
+                                'time_in_staff_id' => $staff->id,
+                                'card_id' => $record->card_id,
+                                'name' => $record->name,
+                                'description' => 'Monthly',
+                                'apply_discount' => true,
+                                'discount' => 100,
+                                'time_in' => $now->copy()->addMinutes(15),
+                                'status' => true,
+                                'is_flexi' => false,
+                                'is_monthly' => true
+                            ];
+
+                            // create daily sale record
+                            $dailyPass = \App\Models\DailySale::create($saleData);
+
+                            $record->update(['is_active' => true]);
+
+                            Notification::make()
+                                ->title('Success')
+                                ->body("Monthly user successfully checked in.")
+                                ->success()
+                                ->send();
+
+                            return redirect()->to(DailySaleResource::getUrl('index'));
+                        })
+                        ->visible(function($record) {
+                            $user = auth()->user();
+            
+                            if($user->hasRole('Super Administrator')) {
+                                return true;
+                            }
+
+                            if($record->is_active) {
+                                return false;
+                            }
+            
+                            return CashLog::where('status', true)->where('user_id', $user->id)->exists();
                         }),
                 ])
                 ->icon('heroicon-o-ellipsis-horizontal')
