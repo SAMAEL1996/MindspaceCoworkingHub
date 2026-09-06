@@ -149,11 +149,11 @@ class Rate extends Component implements HasForms, HasInfolists
             foreach($rate['items'] as $item) {
                 if (array_key_exists('id', $item)) {
                     $rateModel = RateModel::find($item['id']);
-                    $rateModel->update([
+                    $rateModel?->update([
                         'name' => $item['name'],
-                        'consumable' => (int)$item['consumable'],
-                        'validity' => (int)$item['validity'],
-                        'price' => (int)$item['price'],
+                        'consumable' => array_key_exists('consumable', $item) ? (int) $item['consumable'] : null,
+                        'validity' => array_key_exists('validity', $item) ? (int) $item['validity'] : null,
+                        'price' => array_key_exists('price', $item) ? (int) $item['price'] : 0,
                     ]);
                 } else {
                     $newRate = RateModel::create([
