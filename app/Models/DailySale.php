@@ -191,91 +191,128 @@ class DailySale extends Model
 
     public function computeShowTime($removeDiscount = false)
     {
-        $rateQuery = \App\Models\Rate::where('type', 'Daily')->where('status', true);
+        $rateQuery = \App\Models\Rate::where('type', 'Daily')
+            ->where('status', true);
 
         $timeInCarbon = $this->time_in_carbon;
         $timeOutCarbon = Carbon::now();
 
-        $hours = $timeInCarbon->diffInHours($timeOutCarbon);
-
-        if($hours < round($hours)) {
-            $totalHours = round($hours);
-        } else {
-            $totalHours = round($hours) + 1;
-        }
+        // Round up partial hours.
+        $totalHours = (int) ceil(
+            $timeInCarbon->diffInMinutes($timeOutCarbon) / 60
+        );
 
         $amount = 0;
 
-        $hourlyRateClone = clone $rateQuery;
-        $hourlyRate = $hourlyRateClone->where('consumable', 1)->first();
+        /*
+        * Get all daily rates.
+        *
+        * Example:
+        * consumable = 1  => 85
+        * consumable = 5  => 350
+        * consumable = 8  => 450
+        * consumable = 24 => 600
+        */
+        $rates = $rateQuery
+            ->get()
+            ->keyBy('consumable');
 
-        if($totalHours < 4) {
-            $amount = $totalHours * (int)$hourlyRate->price;
+        $hourlyRate = (int) ($rates->get(1)?->price ?? 0);
 
-        } elseif($totalHours == 5 || $totalHours == 4) {
-            $cloneQuery = clone $rateQuery;
-            $flatRate = $cloneQuery->where('consumable', 5)->first();
-            $amount = (int)$flatRate->price;
-
-        } elseif($totalHours > 5 && $totalHours < 7) {
-            $cloneQuery = clone $rateQuery;
-            $flatRate = $cloneQuery->where('consumable', 5)->first();
-            $excess = $totalHours - 5;
-            $additional = $excess * (int)$hourlyRate->price;
-            $amount = (int)$flatRate->price + $additional;
-
-        } elseif($totalHours == 7 || $totalHours == 8) {
-            $cloneQuery = clone $rateQuery;
-            $flatRate = $cloneQuery->where('consumable', 8)->first();
-            $amount = (int)$flatRate->price;
-
-        } elseif($totalHours == 9) {
-            $cloneQuery = clone $rateQuery;
-            $flatRate = $cloneQuery->where('consumable', 8)->first();
-            $excess = $totalHours - 8;
-            $additional = $excess * (int)$hourlyRate->price;
-            $amount = (int)$flatRate->price + $additional;
-
-        } elseif($totalHours > 9 && $totalHours < 25) {
-            $flatRate = clone $rateQuery->where('consumable', 24)->first();
-            $amount = (int)$flatRate->price;
-            
+        if ($hourlyRate <= 0) {
+            $amount = 0;
         } else {
-            // more that 24 hours
-            $flatRate = clone $rateQuery->where('consumable', 24)->first();
-            $excess = $totalHours - 24;
-            $additional = $excess * (int)$hourlyRate->price;
-            $amount = (int)$flatRate->price + $additional;
+            /*
+            * Start with hourly pricing.
+            *
+            * Example:
+            * 4 hours = 4 * 85 = 340
+            */
+            $amount = $totalHours * $hourlyRate;
+
+            /*
+            * Check every available flat-rate pass.
+            *
+            * Example for 7 hours:
+            *
+            * Hourly only:
+            * 7 * 85 = 595
+            *
+            * 5-hour pass + 2 hourly:
+            * 350 + (2 * 85) = 520
+            *
+            * 8-hour pass:
+            * 450
+            *
+            * Cheapest = 450
+            */
+            foreach ($rates as $consumable => $rate) {
+                $consumable = (int) $consumable;
+                $ratePrice = (int) $rate->price;
+
+                // Skip the hourly rate itself.
+                if ($consumable <= 1) {
+                    continue;
+                }
+
+                if ($totalHours >= $consumable) {
+                    $excessHours = $totalHours - $consumable;
+
+                    $candidateAmount =
+                        $ratePrice + ($excessHours * $hourlyRate);
+
+                    $amount = min($amount, $candidateAmount);
+                }
+            }
+
+            /*
+            * Also check a pass that covers the required hours
+            * even when there are unused hours.
+            *
+            * Example:
+            * 7 hours can use the 8-hour pass for ₱450.
+            */
+            foreach ($rates as $consumable => $rate) {
+                $consumable = (int) $consumable;
+                $ratePrice = (int) $rate->price;
+
+                if ($consumable <= 1) {
+                    continue;
+                }
+
+                if ($consumable >= $totalHours) {
+                    $amount = min($amount, $ratePrice);
+                }
+            }
         }
 
-        if($this->is_flexi || $this->is_monthly) {
+        /*
+        * Flexi / Monthly
+        */
+        if ($this->is_flexi || $this->is_monthly) {
             return [
                 'total_hours_accumulated' => $totalHours,
                 'amount_to_paid' => $this->amount_paid
             ];
         }
 
-        if($removeDiscount) {
+        /*
+        * Return amount without discount.
+        */
+        if ($removeDiscount) {
             return [
                 'total_hours_accumulated' => $totalHours,
                 'amount_to_paid' => $amount
             ];
         }
 
-        // for night owl discount
-        // if($this->hasMeta('night-owl-discount')) {
-        //     $nightOwlDiscount = $this->getMetaValue('night-owl-discount');
-        //     if($totalHours > 5) {
-        //         $this->apply_discount = true;
-        //         $this->discount = $nightOwlDiscount;
-        //         $this->save();
-        //     }
-        // }
-
-        if($this->apply_discount) {
+        /*
+        * Apply discount.
+        */
+        if ($this->apply_discount) {
             $percent = $this->discount / 100;
-            $discount = (double)$amount * $percent;
-            $amount = (double)$amount - (double)$discount;
+            $discount = $amount * $percent;
+            $amount -= $discount;
         }
 
         return [
