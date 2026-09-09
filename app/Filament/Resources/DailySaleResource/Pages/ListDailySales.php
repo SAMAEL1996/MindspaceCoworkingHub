@@ -223,7 +223,7 @@ class ListDailySales extends ListRecords
                                     ->label('Type')
                                     ->options(function($get) {
                                         if($get('selected_option') == 'new_flexi') {
-                                            return \App\Models\Rate::where('type', 'Flexi')->get()->pluck('name', 'id');
+                                            return \App\Models\Rate::where('type', 'Flexi')->where('status', true)->get()->pluck('name', 'id');
                                         } else {
                                             return \App\Models\Rate::where('type', 'Monthly')->get()->pluck('name', 'id');
                                         }
@@ -644,7 +644,7 @@ class ListDailySales extends ListRecords
             //             ->schema([
             //                 FormComponents\Select::make('rate_id')
             //                     ->label('Type')
-            //                     ->options(\App\Models\Rate::where('type', 'Flexi')->get()->pluck('name', 'id'))
+            //                     ->options(\App\Models\Rate::where('type', 'Flexi')->where('status', true)->get()->pluck('name', 'id'))
             //                     ->preload()
             //                     ->live()
             //                     ->afterStateUpdated(function($state, $set) {

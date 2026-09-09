@@ -123,7 +123,8 @@ class Rate extends Component implements HasForms, HasInfolists
                                         FormComponents\TextInput::make('price')
                                             ->numeric()
                                             ->minValue(1)
-                                            ->required()
+                                            ->required(),
+                                        FormComponents\Toggle::make('status')
                                     ])
                                     ->grid(4)
                                     // ->addable(false)
@@ -154,6 +155,7 @@ class Rate extends Component implements HasForms, HasInfolists
                         'consumable' => array_key_exists('consumable', $item) ? (int) $item['consumable'] : null,
                         'validity' => array_key_exists('validity', $item) ? (int) $item['validity'] : null,
                         'price' => array_key_exists('price', $item) ? (int) $item['price'] : 0,
+                        'status' => $item['status'],
                     ]);
                 } else {
                     $newRate = RateModel::create([

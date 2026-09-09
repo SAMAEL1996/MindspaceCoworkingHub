@@ -481,7 +481,7 @@ class DailySaleResource extends Resource
                                 }),
                             FormComponents\Select::make('rate_id')
                                 ->label('Type')
-                                ->options(\App\Models\Rate::where('type', 'Flexi')->get()->pluck('name', 'id'))
+                                ->options(\App\Models\Rate::where('type', 'Flexi')->where('status', true)->get()->pluck('name', 'id'))
                                 ->preload()
                                 ->live()
                                 ->afterStateUpdated(function($state, $set) {
@@ -710,7 +710,7 @@ class DailySaleResource extends Resource
                                         ->label('Type')
                                         ->options(function($get) {
                                             if($get('pass_type') == 'flexi') {
-                                                return \App\Models\Rate::where('type', 'Flexi')->get()->pluck('name', 'id');
+                                                return \App\Models\Rate::where('type', 'Flexi')->where('status', true)->get()->pluck('name', 'id');
                                             } else {
                                                 return \App\Models\Rate::where('type', 'Monthly')->get()->pluck('name', 'id');
                                             }

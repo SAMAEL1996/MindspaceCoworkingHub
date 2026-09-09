@@ -69,7 +69,7 @@ class ListFlexiUsers extends ListRecords
                                 ->label('Package')
                                 ->options(function() {
                                     $options = ['all' => 'All', 'old' => 'Old Pass'];
-                                    $packages = Rate::where('type', 'Flexi')->get();
+                                    $packages = Rate::where('type', 'Flexi')->where('status', true)->get();
                                     foreach($packages as $package) {
                                         $options[$package->id] = $package->name;
                                     }
@@ -162,7 +162,7 @@ class ListFlexiUsers extends ListRecords
                                 ]),
                             FormComponents\Select::make('rate_id')
                                 ->label('Type')
-                                ->options(fn() => Rate::where('type', 'Flexi')->get()->pluck('name', 'id'))
+                                ->options(fn() => Rate::where('type', 'Flexi')->where('status', true)->get()->pluck('name', 'id'))
                                 ->preload()
                                 ->live()
                                 ->afterStateUpdated(function($state, $set) {
