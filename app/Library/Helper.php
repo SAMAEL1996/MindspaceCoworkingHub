@@ -63,7 +63,7 @@ class Helper
         return [
             [
                 'type' => 'Package 1',
-                'max_pax' => 8,
+                'max_pax' => 5,
                 'rates' => [
                     [
                         'label' => '3 Hours',
@@ -87,11 +87,11 @@ class Helper
                     ],
                 ],
                 'succeeding_hours' => 250,
-                'additional_person' => 300
+                'additional_person' => 200
             ],
             [
                 'type' => 'Package 2',
-                'max_pax' => 15,
+                'max_pax' => 10,
                 'rates' => [
                     [
                         'label' => '3 Hours',
@@ -126,7 +126,7 @@ class Helper
             return [
                 'id' => 1,
                 'type' => 'Package 1',
-                'max_pax' => 8,
+                'max_pax' => 5,
                 'rates' => [
                     [
                         'label' => '3 Hours',
@@ -150,7 +150,7 @@ class Helper
                     ],
                 ],
                 'succeeding_hours' => 250,
-                'additional_person' => 300
+                'additional_person' => 200
             ];
         }
         
@@ -158,7 +158,7 @@ class Helper
             return [
                 'id' => 2,
                 'type' => 'Package 2',
-                'max_pax' => 15,
+                'max_pax' => 10,
                 'rates' => [
                     [
                         'label' => '3 Hours',
