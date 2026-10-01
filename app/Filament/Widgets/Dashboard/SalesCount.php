@@ -57,8 +57,9 @@ class SalesCount extends BaseWidget
                                 ->whereYear('created_at', now()->year)
                                 ->get();
 
-        $conferencePass = Conference::whereMonth('created_at', now()->month)
-                                ->whereYear('created_at', now()->year)
+        $conferencePass = Conference::whereMonth('start_at', now()->month)
+                                ->whereYear('start_at', now()->year)
+                                ->where('status', 'finished')
                                 ->get();
 
         $total = $dailyPass->sum('amount_paid') + $flexiPass->sum('amount') + $monthlyPass->sum('amount') + $conferencePass->sum('payment');

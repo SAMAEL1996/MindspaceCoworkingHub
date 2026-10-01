@@ -334,12 +334,10 @@ class DailySale extends Model
             return 0;
         }
 
-        $now = Carbon::now();
-
         $firstRecord = $sales->first();
         $timeIn = Carbon::parse($firstRecord->time_in);
         
-        $days = round($timeIn->diffInDays($now)) + 1;
+        $days = round($timeIn->diffInDays(Carbon::now())) + 1;
 
         return round($sales->count() / (int)$days);
     }

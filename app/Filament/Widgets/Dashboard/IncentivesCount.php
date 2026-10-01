@@ -32,16 +32,16 @@ class IncentivesCount extends BaseWidget
                 ->description(new HtmlString('<b>TARGET</b>: 20 average daily users.')),
             Card::make(
                     'Add New Flexi Pass',
-                    FlexiUser::whereMonth('start_at', Carbon::now()->month)
-                                ->whereYear('start_at', Carbon::now()->year)
+                    FlexiUser::whereMonth('created_at', Carbon::now()->month)
+                                ->whereYear('created_at', Carbon::now()->year)
                                 ->count()
                 )
                 ->icon('heroicon-o-users')
                 ->description(new HtmlString('<b>TARGET</b>: 45 flexi pass.')),
             Card::make(
                     'Add New Monthly Pass',
-                    MonthlyUser::whereMonth('date_start', Carbon::now()->month)
-                                ->whereYear('date_start', Carbon::now()->year)
+                    MonthlyUser::whereMonth('created_at', Carbon::now()->month)
+                                ->whereYear('created_at', Carbon::now()->year)
                                 ->count()
                 )
                 ->icon('heroicon-o-user-circle')
