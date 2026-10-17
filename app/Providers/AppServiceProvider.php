@@ -63,10 +63,5 @@ class AppServiceProvider extends ServiceProvider
             );
 
         });
-
-        Filament::registerRenderHook(
-            'panels::body.end',
-            fn () => view('filament.location-script')
-        );
     }
 }

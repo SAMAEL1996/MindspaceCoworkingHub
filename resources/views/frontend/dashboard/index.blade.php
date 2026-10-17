@@ -460,7 +460,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card accordion-item shadow-lg">
+                        <div class="card accordion-item shadow-lg" hidden>
                             <div class="card-header" id="accordion-heading-3-4">
                                 <button class="collapsed" data-bs-toggle="collapse"
                                     data-bs-target="#accordion-collapse-3-4" aria-expanded="false"

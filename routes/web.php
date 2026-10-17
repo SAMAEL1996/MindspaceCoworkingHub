@@ -4,7 +4,6 @@ use App\Models\Card;
 use App\Models\CashLog;
 use App\Models\DailySale;
 use Illuminate\Support\Facades\Cache;
-use App\Models\UserLocation;
 use Illuminate\Support\Facades\Route;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
@@ -46,36 +45,6 @@ Route::get('monthly', [TimeTrackController::class, 'monthly'])->name('time-track
 
 Route::get('/book-conference', \App\Filament\Pages\BookConference::class)->name('book-conference.index');
 Route::get('/book-conference/success', \App\Filament\Pages\SuccessBooking::class)->name('book-conference.success');
-
-Route::get('user-locations', function (Request $request) {
-    // Define your expected hash
-    $expectedHash = '1429-b1c5-f1d6-3dee-da79-d091-cc3e-ce96-c176-a0aa';
-
-    // Check if the hash matches
-    if (request('hash') !== $expectedHash) {
-        abort(403, 'Unauthorized access.');
-    }
-
-    $filter = request('filter');
-    $users = UserLocation::with('user')->latest()->get();
-
-    return view('user-locations', compact('users'));
-});
-Route::post('/save-location', function (Request $request) {
-    if (!auth()->check()) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
-
-    UserLocation::create([
-        'user_id' => auth()->id(),
-        'lat' => $request->lat,
-        'long' => $request->long,
-        'city' => $request->city,
-        'country' => $request->country,
-    ]);
-
-    return response()->json(['success' => true]);
-})->middleware('auth');
 
 // Route::get('/external/rfid-scan', function(Request $request) {
 //     $uidResult = $request->input('UIDresult');

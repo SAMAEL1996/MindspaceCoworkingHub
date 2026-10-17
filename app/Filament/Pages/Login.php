@@ -2,10 +2,8 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\UserLocation;
 use Filament\Pages\Page;
 use Filament\Pages\Auth\Login as BaseLogin;
-use Stevebauman\Location\Facades\Location;
 
 class Login extends BaseLogin
 {
@@ -26,19 +24,6 @@ class Login extends BaseLogin
     public function authenticate(): ?\Filament\Http\Responses\Auth\Contracts\LoginResponse
     {
         $response = parent::authenticate();
-
-        if (auth()->check() && env('APP_ENV') != 'local') {
-            $ip = request()->ip();
-            $location = Location::get($ip);
-
-            UserLocation::create([
-                'user_id' => auth()->user()->id,
-                'country' => $location?->countryName,
-                'city' => $location?->cityName,
-                'lat' => $location?->latitude,
-                'long' => $location?->longitude
-            ]);
-        }
 
         return $response;
     }

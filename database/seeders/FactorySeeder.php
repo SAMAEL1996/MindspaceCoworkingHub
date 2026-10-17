@@ -28,7 +28,6 @@ use App\Models\SaleReport;
 use App\Models\Setting;
 use App\Models\Staff;
 use App\Models\User;
-use App\Models\UserLocation;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -107,15 +106,6 @@ class FactorySeeder extends Seeder
         $allStaff = $staffMembers
             ->concat($profileStaff)
             ->values();
-
-        UserLocation::factory()
-            ->count($allUsers->count())
-            ->state(new Sequence(
-                ...$allUsers->values()->map(fn (User $user): array => [
-                    'user_id' => $user->id,
-                ])->all()
-            ))
-            ->create();
 
         $roles->values()->each(function (Role $role, int $index) use ($allUsers): void {
             $user = $allUsers->get($index);
