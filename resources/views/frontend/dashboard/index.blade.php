@@ -437,8 +437,8 @@
                                     <div class="row mb-3 gx-md-6 gy-6 isotope">
                                         <div class="project item col-md-12 col-xl-6 drinks events">
                                             <figure class="overlay overlay-1 rounded"><a
-                                                    href="{{ asset('img/rates/daily_pass.jpg') }}" data-glightbox
-                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/daily_pass.jpg') }}"
+                                                    href="{{ asset('img/rates/new_daily_pass.jpg') }}" data-glightbox
+                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/new_daily_pass.jpg') }}"
                                                         alt="" /></a>
                                                 <figcaption>
                                                     <h5 class="from-top mb-0">Daily Pass</h5>
@@ -448,8 +448,8 @@
                                         <!-- /.project -->
                                         <div class="project item col-md-12 col-xl-6 events">
                                             <figure class="overlay overlay-1 rounded"><a
-                                                    href="{{ asset('img/rates/longterm_pass.jpg') }}" data-glightbox
-                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/longterm_pass.jpg') }}"
+                                                    href="{{ asset('img/rates/new_longterm_pass.jpg') }}" data-glightbox
+                                                    data-gallery="shots-group"> <img src="{{ asset('img/rates/new_longterm_pass.jpg') }}"
                                                         alt="" /></a>
                                                 <figcaption>
                                                     <h5 class="from-top mb-0">Longterm Pass</h5>
