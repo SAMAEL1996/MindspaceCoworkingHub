@@ -19,6 +19,7 @@ class Attendance extends Model
     protected $appends = [
         'check_in_carbon',
         'check_out_carbon',
+        'day_of_week',
     ];
 
     public function staff()
@@ -34,5 +35,10 @@ class Attendance extends Model
     public function getCheckOutCarbonAttribute()
     {
         return Carbon::parse($this->check_out);
+    }
+
+    public function getDayOfWeekAttribute()
+    {
+        return Carbon::parse($this->created_at)->format('D');
     }
 }

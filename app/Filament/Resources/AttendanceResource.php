@@ -86,6 +86,8 @@ class AttendanceResource extends Resource
                         return $record->check_out ? $record->check_out_carbon->format(config('app.date_format')) : null;
                     })
                     ->placeholder('On-going Shift'),
+                TableColumns\TextColumn::make('day_of_week')
+                    ->label('Day'),
                 TableColumns\TextColumn::make('created_at')
                     ->label('Total Time')
                     ->formatStateUsing(function($record) {
@@ -183,6 +185,8 @@ class AttendanceResource extends Resource
                                     ->formatStateUsing(function($record) {
                                         return $record->check_out_carbon->format(config('app.date_time_format'));
                                     }),
+                                Column::make('day_of_week')
+                                    ->heading('Day'),
                                 Column::make('created_at')
                                     ->heading('Total Time')
                                     ->formatStateUsing(function($record) {
