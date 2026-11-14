@@ -58,7 +58,9 @@ class MonthlyUserResource extends Resource
                     ->label('Contact'),
                 TableColumns\TextColumn::make('date_start')
                     ->label('Date Start')
-                    ->date(),
+                    ->formatStateUsing(function($record) {
+                        return $record->date_start_carbon->format(config('app.date_format'));
+                    }),
                 TableColumns\TextColumn::make('date_finish')
                     ->label('Expiry')
                     ->formatStateUsing(function($record) {
@@ -73,11 +75,8 @@ class MonthlyUserResource extends Resource
                     ->formatStateUsing(function($state) {
                         return $state ? 'Yes' : 'No';
                     }),
-                TableColumns\TextColumn::make('date_finish')
+                TableColumns\TextColumn::make('expired_in')
                     ->label('Expired In')
-                    ->formatStateUsing(function($state, $record) {
-                        return \Carbon\Carbon::parse($record->date_finish)->addDay()->diffForHumans();
-                    })
                     ->sortable()
             ])
             ->filters([

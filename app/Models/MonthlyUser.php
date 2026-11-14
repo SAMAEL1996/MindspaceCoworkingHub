@@ -69,6 +69,7 @@ class MonthlyUser extends Model
     protected $appends = [
         'date_start_carbon',
         'date_finish_carbon',
+        'expired_in',
     ];
 
     public function rate()
@@ -89,6 +90,11 @@ class MonthlyUser extends Model
     public function getDateFinishCarbonAttribute()
     {
         return Carbon::parse($this->date_finish)->addDay();
+    }
+
+    public function getExpiredInAttribute()
+    {
+        return Carbon::parse($this->date_finish)->addDay()->diffForHumans();
     }
 
     public function sendWelcomeMessage()
