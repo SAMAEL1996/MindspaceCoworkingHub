@@ -59,10 +59,10 @@ class MonthlyUserResource extends Resource
                 TableColumns\TextColumn::make('date_start')
                     ->label('Date Start')
                     ->date(),
-                TableColumns\TextColumn::make('created_at')
+                TableColumns\TextColumn::make('date_finish')
                     ->label('Expiry')
                     ->formatStateUsing(function($record) {
-                        return \Carbon\Carbon::parse($record->date_finish)->format(config('app.date_format'));
+                        return $record->date_finish_carbon->format(config('app.date_format'));
                     }),
                 TableColumns\TextColumn::make('is_active')
                     ->label('Active')
